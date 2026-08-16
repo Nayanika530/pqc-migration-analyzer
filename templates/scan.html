@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Scanner - PQC Migration Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Crypto Code Scanner</h1>
+    <p><a href="/">Back to Manual Lookup</a></p>
+
+    <form method="POST">
+        <label>Paste your code below:</label><br>
+        <textarea name="code_text" rows="15" cols="80">{{ code_text }}</textarea><br><br>
+        <button type="submit">Scan Code</button>
+    </form>
+
+    {% if results is not none %}
+        {% if results|length == 0 %}
+            <p>No known cryptographic algorithms detected.</p>
+        {% else %}
+            <h2>Findings ({{ results|length }})</h2>
+            {% for r in results %}
+                <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                    <p><strong>Line {{ r.line_number }}:</strong> <code>{{ r.matched_text }}</code></p>
+
+                    {% if r.report.error %}
+                        <p style="color:orange;">{{ r.report.error }}</p>
+                    {% else %}
+                        <p><strong>Algorithm:</strong> {{ r.report.algorithm }} ({{ r.report.key_size }}-bit)</p>
+                        <p><strong>Verdict:</strong> {{ r.report.verdict }}</p>
+                        <p><strong>Recommended Replacement:</strong> {{ r.report.recommended_replacement }}</p>
+                    {% endif %}
+
+                    {% if r.suggested_fix %}
+                        <p><strong>Suggested Fix:</strong></p>
+                        <pre style="background:#f4f4f4; padding:10px; overflow-x:auto;">{{ r.suggested_fix }}</pre>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+</body>
+</html>

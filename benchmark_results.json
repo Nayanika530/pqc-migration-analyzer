@@ -1,0 +1,54 @@
+{
+  "RSA-2048": {
+    "keygen": {
+      "algorithm": "RSA",
+      "key_size": 2048,
+      "avg_keygen_time_ms": 645.808,
+      "rounds": 20
+    },
+    "operation": {
+      "algorithm": "RSA",
+      "key_size": 2048,
+      "operation": "encrypt+decrypt",
+      "avg_time_ms": 3.0184,
+      "rounds": 20
+    }
+  },
+  "ML-KEM-768": {
+    "keygen": {
+      "algorithm": "ML-KEM-768",
+      "avg_keygen_time_ms": 0.362,
+      "rounds": 20
+    },
+    "operation": {
+      "algorithm": "ML-KEM-768",
+      "operation": "full key exchange (keygen+encap+decap)",
+      "avg_time_ms": 0.578,
+      "rounds": 20
+    }
+  },
+  "AES-256": {
+    "keygen": {
+      "avg_keygen_time_ms": 0.0,
+      "note": "Symmetric key generation is effectively instant (random bytes)"
+    },
+    "operation": {
+      "algorithm": "AES-256",
+      "operation": "encrypt+decrypt",
+      "avg_time_ms": 0.0192,
+      "rounds": 20
+    }
+  },
+  "3DES": {
+    "keygen": {
+      "avg_keygen_time_ms": 0.0,
+      "note": "Symmetric key generation is effectively instant (random bytes)"
+    },
+    "operation": {
+      "algorithm": "3DES",
+      "operation": "encrypt+decrypt",
+      "avg_time_ms": 0.0547,
+      "rounds": 20
+    }
+  }
+}

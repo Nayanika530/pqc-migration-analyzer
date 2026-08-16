@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PQC Migration Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>PQC Migration Analyzer</h1>
+    <form method="POST">
+        <label>Algorithm:</label>
+        <select name="algorithm">
+            {% for algo in algorithms %}
+                <option value="{{ algo }}">{{ algo }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        <label>Key Size (bits):</label>
+        <input type="number" name="key_size" required>
+        <br><br>
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if error %}
+        <p style="color:red;">Error: {{ error }}</p>
+    {% endif %}
+
+    {% if report %}
+        <h2>Report</h2>
+        <p><strong>Algorithm:</strong> {{ report.algorithm }} ({{ report.key_size }}-bit)</p>
+        <p><strong>Verdict:</strong> {{ report.verdict }}</p>
+        <p><strong>Type:</strong> {{ report.type }}</p>
+        <p><strong>Quantum Vulnerable:</strong> {{ report.quantum_vulnerable }}</p>
+        <p><strong>Reason:</strong> {{ report.reason }}</p>
+        <p><strong>Classically Secure Today:</strong> {{ report.classically_secure_today }}</p>
+        <p><strong>Key Size Note:</strong> {{ report.key_size_note }}</p>
+        <p><strong>Recommended Replacement:</strong> {{ report.recommended_replacement }}</p>
+        <p><strong>Replacement Type:</strong> {{ report.replacement_type }}</p>
+    {% endif %}
+</body>
+</html>

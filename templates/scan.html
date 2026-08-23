@@ -5,39 +5,92 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Crypto Code Scanner</h1>
-    <p><a href="/">Back to Manual Lookup</a></p>
+    <div class="container">
+        <h1>Crypto Code Scanner</h1>
+        <p><a href="{{ url_for('analyze') }}">← Back to Console</a></p>
 
-    <form method="POST">
-        <label>Paste your code below:</label><br>
-        <textarea name="code_text" rows="15" cols="80">{{ code_text }}</textarea><br><br>
-        <button type="submit">Scan Code</button>
-    </form>
+        <form method="POST" enctype="multipart/form-data">
+            <label>Upload a code file:</label><br>
+            <input type="file" name="code_file" accept=".py,.js,.java,.txt">
+            <br><br>
 
-    {% if results is not none %}
-        {% if results|length == 0 %}
-            <p>No known cryptographic algorithms detected.</p>
-        {% else %}
-            <h2>Findings ({{ results|length }})</h2>
-            {% for r in results %}
-                <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                    <p><strong>Line {{ r.line_number }}:</strong> <code>{{ r.matched_text }}</code></p>
+            <label>...or paste your code below:</label><br>
+            <textarea name="code_text" rows="15" cols="80">{{ code_text }}</textarea><br><br>
 
-                    {% if r.report.error %}
-                        <p style="color:orange;">{{ r.report.error }}</p>
-                    {% else %}
-                        <p><strong>Algorithm:</strong> {{ r.report.algorithm }} ({{ r.report.key_size }}-bit)</p>
-                        <p><strong>Verdict:</strong> {{ r.report.verdict }}</p>
-                        <p><strong>Recommended Replacement:</strong> {{ r.report.recommended_replacement }}</p>
-                    {% endif %}
+            <button type="submit">Scan Code</button>
+        </form>
 
-                    {% if r.suggested_fix %}
-                        <p><strong>Suggested Fix:</strong></p>
-                        <pre style="background:#f4f4f4; padding:10px; overflow-x:auto;">{{ r.suggested_fix }}</pre>
-                    {% endif %}
-                </div>
-            {% endfor %}
+        {% if results is not none %}
+            {% if results|length == 0 %}
+                <p>No known cryptographic algorithms detected.</p>
+            {% else %}
+                <h2>Findings ({{ results|length }})</h2>
+                <a href="{{ url_for('download_cbom') }}" download><button type="button">Download CBOM (JSON)</button></a>
+                <a href="{{ url_for('download_roadmap') }}" download><button type="button">Download Migration Report (Markdown)</button></a>
+                <br><br>
+
+                {% if agility and agility.score is not none %}
+                    <div class="card">
+                        <h2>Cryptographic Agility Score</h2>
+                        <p><strong>Score:</strong> {{ agility.score }}/100 — {{ agility.grade }}</p>
+                        <p>{{ agility.explanation }}</p>
+                    </div>
+                {% endif %}
+
+                {% if forecast %}
+                    <div class="card">
+                        <h2>5-Year Risk Forecast</h2>
+                        <p style="color:var(--text-muted); font-size:0.85rem;">{{ forecast.note }}</p>
+                        <div style="display:flex; align-items:flex-end; gap:1rem; height:150px; margin-top:1rem;">
+                            {% for point in forecast.forecast %}
+                                <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+                                    <div style="width:100%; background:var(--accent); border-radius:4px 4px 0 0; height:{{ point.risk_score }}%;"></div>
+                                    <p style="font-size:0.75rem; margin-top:0.3rem;">{{ point.year }}</p>
+                                    <p style="font-size:0.75rem; color:var(--text-muted);">{{ point.risk_score }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if roadmap and roadmap.total_phases > 0 %}
+                    <div class="card">
+                        <h2>Migration Roadmap</h2>
+                        {% for phase in roadmap.phases %}
+                            <div style="margin-bottom:1rem; padding-left:1rem; border-left:3px solid var(--accent);">
+                                <p><strong>Phase {{ phase.phase }}: {{ phase.title }}</strong> ({{ phase.urgency }})</p>
+                                <p style="color:var(--text-muted); font-size:0.9rem;">{{ phase.reason }}</p>
+                                <ul>
+                                    {% for item in phase.affected %}
+                                        <li>Line {{ item.line }}: {{ item.algorithm }} ({{ item.key_size }}-bit) — {{ item.verdict }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <h2>Detailed Findings</h2>
+                {% for r in results %}
+                    <div class="card">
+                        <p><strong>Line {{ r.line_number }}:</strong> <code>{{ r.matched_text }}</code></p>
+
+                        {% if r.report.error %}
+                            <p style="color:orange;">{{ r.report.error }}</p>
+                        {% else %}
+                            <p><strong>Algorithm:</strong> {{ r.report.algorithm }} ({{ r.report.key_size }}-bit)</p>
+                            <p><strong>Verdict:</strong> {{ r.report.verdict }}</p>
+                            <p><strong>Recommended Replacement:</strong> {{ r.report.recommended_replacement }}</p>
+                        {% endif %}
+
+                        {% if r.suggested_fix %}
+                            <p><strong>Suggested Fix:</strong></p>
+                            <pre>{{ r.suggested_fix }}</pre>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
         {% endif %}
-    {% endif %}
+    </div>
 </body>
 </html>

@@ -170,6 +170,116 @@ def generate_report(name: str, key_size: int) -> dict:
         "benchmark": benchmark_info
     }
 
+def calculate_harvest_risk(algorithm: str, key_size: int, years_secret_needed: int) -> dict:
+    """
+    Calculate 'harvest now, decrypt later' risk: how urgent is migration
+    based on how long this data needs to stay confidential.
+    """
+    report = generate_report(algorithm, key_size)
+    if "error" in report:
+        return report
+
+    if not report["quantum_vulnerable"]:
+        return {
+            "algorithm": report["algorithm"],
+            "years_secret_needed": years_secret_needed,
+            "harvest_risk": "NOT APPLICABLE",
+            "explanation": f"{report['algorithm']} is not quantum-vulnerable, so harvest-now-decrypt-later does not apply."
+        }
+
+    # Rough, clearly-labeled estimate window for when quantum computers might
+    # realistically threaten current RSA/ECC-class encryption -- based on general
+    # industry expectations (NOT a scientific prediction), roughly 10-20 years out.
+    estimated_years_until_quantum_threat = 15
+
+    years_of_exposure = years_secret_needed - estimated_years_until_quantum_threat
+
+    if years_of_exposure <= 0:
+        risk_level = "LOW"
+        explanation = (
+            f"Data protected by {report['algorithm']} needs to stay secret for {years_secret_needed} years. "
+            f"That's within the window before quantum computers are expected to threaten this algorithm, "
+            f"so exposure risk is currently low -- but migration should still happen eventually."
+        )
+    elif years_of_exposure <= 10:
+        risk_level = "MEDIUM"
+        explanation = (
+            f"Data protected by {report['algorithm']} needs to stay secret for {years_secret_needed} years, "
+            f"which extends {years_of_exposure} years past the estimated quantum threat window. "
+            f"Migration should be planned soon."
+        )
+    else:
+        risk_level = "HIGH"
+        explanation = (
+            f"Data protected by {report['algorithm']} needs to stay secret for {years_secret_needed} years, "
+            f"which extends {years_of_exposure} years past the estimated quantum threat window. "
+            f"This data is at serious risk of being harvested now and decrypted later. Migrate urgently."
+        )
+
+    return {
+        "algorithm": report["algorithm"],
+        "years_secret_needed": years_secret_needed,
+        "estimated_years_until_quantum_threat": estimated_years_until_quantum_threat,
+        "harvest_risk": risk_level,
+        "explanation": explanation
+    }
+
+import ollama
+
+def get_ai_explanation(report: dict) -> str:
+    """
+    Ask the local Ollama model to explain a vulnerability report
+    in plain, beginner-friendly language.
+    """
+    if "error" in report:
+        return "No explanation available -- this algorithm wasn't found in the database."
+
+    prompt = f"""You are a friendly cybersecurity assistant. Explain this cryptography
+vulnerability report in simple, plain English for someone with zero security background.
+Keep it under 100 words. Do not use bullet points, just a short conversational paragraph.
+
+Algorithm: {report['algorithm']} ({report['key_size']}-bit)
+Verdict: {report['verdict']}
+Reason: {report['reason']}
+Recommended replacement: {report['recommended_replacement']}
+"""
+
+    try:
+        response = ollama.chat(
+            model="mistral",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response["message"]["content"]
+    except Exception as e:
+        return f"AI explanation unavailable right now ({str(e)}). Make sure Ollama is running."
+
+def chat_with_assistant(user_message: str) -> str:
+    """
+    General-purpose chat assistant that knows about this tool
+    and can guide users on how to use it or answer crypto questions.
+    """
+    system_context = """You are a helpful assistant embedded in the PQC Migration Analyzer website.
+This tool helps users:
+- Manually check if a cryptographic algorithm (RSA, ECC, AES, DSA, Diffie-Hellman, 3DES) and key size is vulnerable to quantum computers
+- Scan real source code to automatically detect vulnerable cryptography
+- Calculate harvest-now-decrypt-later risk based on how long data needs to stay secret
+- Generate a cryptographic agility score and migration roadmap for scanned code
+- Export findings as a CBOM (Cryptographic Bill of Materials) or Markdown report
+
+Guide users to the right page: Manual Lookup is at /manual, Code Scanner is at /scan.
+Keep answers short, friendly, and beginner-appropriate. Under 80 words unless asked for detail."""
+
+    try:
+        response = ollama.chat(
+            model="mistral",
+            messages=[
+                {"role": "system", "content": system_context},
+                {"role": "user", "content": user_message}
+            ]
+        )
+        return response["message"]["content"]
+    except Exception as e:
+        return f"Sorry, the assistant is unavailable right now. Make sure Ollama is running. ({str(e)})"
 
 if __name__ == "__main__":
     test_cases = [("RSA", 1024), ("RSA", 2048), ("AES", 256), ("3DES", 168)]

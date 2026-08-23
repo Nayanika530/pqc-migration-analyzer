@@ -1,0 +1,243 @@
+/* static/home.css - Home page specific styling */
+
+section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+/* Scroll reveal: sections start slightly lower and invisible, animate in via JS adding .visible */
+.fade-section {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- Hero --- */
+.hero-title {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    max-width: 600px;
+}
+
+/* --- About --- */
+.about-section h2 {
+    font-size: 2.2rem;
+    max-width: 700px;
+    margin-bottom: 1.5rem;
+}
+
+.about-section p {
+    max-width: 650px;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+}
+
+/* --- Threats --- */
+.threats-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.threat-cards {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.threat-card {
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 2rem;
+    width: 280px;
+    text-align: left;
+}
+
+.threat-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.4rem;
+}
+
+.threat-tag {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+}
+
+.threat-card p:last-child {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.critical-border { border: 1px solid var(--critical); }
+.critical-border .threat-tag { color: var(--critical); }
+
+.warning-border { border: 1px solid var(--deprecated); }
+.warning-border .threat-tag { color: var(--deprecated); }
+
+.safe-border { border: 1px solid var(--ok); }
+.safe-border .threat-tag { color: var(--ok); }
+
+/* --- CTA --- */
+.cta-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+}
+
+.cta-button {
+    background: var(--accent);
+    color: white;
+    text-decoration: none;
+    padding: 1rem 2.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    opacity: 0.9;
+}
+
+/* --- Stats --- */
+.stats-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.stats-grid {
+    display: flex;
+    gap: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.stat-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 220px;
+}
+
+.stat-number {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* --- Chat widget --- */
+#chat-widget {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 999;
+}
+
+#chat-toggle {
+    width: 56px;
+    height: 56px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+#chat-box {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 320px;
+    height: 420px;
+    background: var(--surface);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+}
+
+#chat-box.open {
+    display: flex;
+}
+
+#chat-header {
+    background: var(--accent);
+    padding: 0.8rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+#chat-messages {
+    flex: 1;
+    padding: 0.8rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.chat-msg {
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    max-width: 85%;
+    line-height: 1.4;
+}
+
+.chat-msg.user {
+    background: var(--accent);
+    align-self: flex-end;
+}
+
+.chat-msg.bot, .chat-msg.bot-loading {
+    background: #1a2333;
+    align-self: flex-start;
+}
+
+#chat-input-row {
+    display: flex;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+#chat-input {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0.7rem;
+}
+
+#chat-send {
+    border-radius: 0;
+    padding: 0.7rem 1rem;
+}

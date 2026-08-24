@@ -2,4 +2,5 @@ venv/
 __pycache__/
 liboqs/
 *.pyc
-.vscode/.env
+.vscode/
+.env

@@ -3,3 +3,4 @@ __pycache__/
 liboqs/
 *.pyc
 .vscode/
+.env

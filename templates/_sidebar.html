@@ -1,0 +1,7 @@
+<div class="sidebar">
+    <div class="sidebar-logo">Q<span>ryptis</span></div>
+    <a href="{{ url_for('home') }}" class="sidebar-link {% if request.path == '/' %}active{% endif %}">🏠 Home</a>
+    <a href="{{ url_for('analyze') }}" class="sidebar-link {% if request.path == '/analyze' %}active{% endif %}">🔍 Analyze</a>
+    <a href="{{ url_for('manual') }}" class="sidebar-link {% if request.path == '/manual' %}active{% endif %}">📋 Manual Lookup</a>
+    <a href="{{ url_for('scan') }}" class="sidebar-link {% if request.path == '/scan' %}active{% endif %}">💻 Scan Code</a>
+</div>

@@ -1,74 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PQC Migration Analyzer</title>
+    <title>Qryptis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#2E9EFF">
 </head>
 <body>
 
-    <!-- SECTION 1: Hero / Page name -->
+    <!-- Top nav -->
+    <nav class="top-nav">
+        <div class="nav-logo">Q<span>ryptis</span></div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('analyze') }}">Analyze</a>
+            <a href="{{ url_for('manual') }}">Manual Lookup</a>
+            <a href="{{ url_for('scan') }}">Scan Code</a>
+        </div>
+        <a href="{{ url_for('analyze') }}" class="nav-cta">Get Started</a>
+    </nav>
+
+    <!-- SECTION 1: Hero -->
     <section id="hero" class="hero-section fade-section">
-        <h1 class="hero-title">PQC Migration Analyzer</h1>
-        <p class="hero-subtitle">Find quantum-vulnerable cryptography before quantum computers do.</p>
-    </section>
+        <p class="hero-eyebrow">POST QUANTUM CRYPTOGRAPHY</p>
+        <h1 class="hero-title">Secure Today.<br><span>Safe</span> Tomorrow.</h1>
+        <p class="hero-subtitle">Detect cryptography vulnerable to quantum computers. Get actionable fixes. Build crypto-agile systems.</p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('analyze') }}" class="btn-primary">Analyze Now →</a>
+            <a href="{{ url_for('scan') }}" class="btn-secondary">View Demo</a>
+        </div>
 
-    <!-- SECTION 2: What this is about -->
-    <section class="about-section fade-section">
-        <h2>Every RSA key on the internet has an expiration date.</h2>
-        <p>
-            Quantum computers, once powerful enough, will break the encryption protecting
-            almost all of today's internet traffic. This isn't speculative — NIST finalized
-            official post-quantum cryptography standards in 2024, and the migration clock
-            has already started. Most organizations don't know where their vulnerable
-            cryptography even lives. This tool finds it, explains it, and shows you exactly
-            what to replace it with.
-        </p>
-    </section>
-
-    <!-- SECTION 3: Algorithm threats breakdown -->
-    <section class="threats-section fade-section">
-        <h2>Not all cryptography is equally at risk.</h2>
-        <div class="threat-cards">
-            <div class="threat-card critical-border">
-                <h3>RSA / ECC / DSA</h3>
-                <p class="threat-tag">Quantum-Vulnerable</p>
-                <p>Broken efficiently by Shor's Algorithm. These need PQC replacements — not eventually, now.</p>
+        <div class="feature-badges">
+            <div class="feature-badge">
+                <span class="badge-icon">🔍</span>
+                <span>Manual Lookup<br><small>Check any algorithm</small></span>
             </div>
-            <div class="threat-card warning-border">
-                <h3>3DES</h3>
-                <p class="threat-tag">Deprecated</p>
-                <p>Not quantum-broken, but already considered insecure by modern classical standards.</p>
+            <div class="feature-badge">
+                <span class="badge-icon">💻</span>
+                <span>Code Scanner<br><small>Detect in your code</small></span>
             </div>
-            <div class="threat-card safe-border">
-                <h3>AES-256</h3>
-                <p class="threat-tag">Quantum-Resistant</p>
-                <p>Weakened, not broken, by quantum computers. A larger key size is enough to stay safe.</p>
+            <div class="feature-badge">
+                <span class="badge-icon">📊</span>
+                <span>Benchmarks<br><small>Real speed data</small></span>
+            </div>
+            <div class="feature-badge">
+                <span class="badge-icon">💬</span>
+                <span>AI Assistant<br><small>Guides you 24/7</small></span>
             </div>
         </div>
     </section>
 
-    <!-- SECTION 4: Get started CTA -->
-    <section class="cta-section fade-section">
-        <h2>See what's vulnerable in your own systems.</h2>
-        <a href="{{ url_for('analyze') }}" class="cta-button">Get Started →</a>
+    <!-- SECTION 2: Threat level overview -->
+    <section class="threats-section fade-section">
+        <h2>Why Quantum Threat Matters</h2>
+        <p class="section-subtitle">Quantum computers can break today's public-key cryptography. Harvest Now, Decrypt Later is not theory — it's already happening.</p>
+
+        <div class="threat-cards">
+            <div class="threat-card critical-border">
+                <span class="threat-icon">⚠️</span>
+                <h3>RSA</h3>
+                <p class="threat-tag">CRITICAL</p>
+                <p class="threat-desc">Vulnerable to Shor's algorithm. At risk.</p>
+            </div>
+            <div class="threat-card critical-border">
+                <span class="threat-icon">⚠️</span>
+                <h3>ECC</h3>
+                <p class="threat-tag">CRITICAL</p>
+                <p class="threat-desc">Vulnerable to Shor's algorithm. At risk.</p>
+            </div>
+            <div class="threat-card critical-border">
+                <span class="threat-icon">⚠️</span>
+                <h3>DSA</h3>
+                <p class="threat-tag">CRITICAL</p>
+                <p class="threat-desc">Vulnerable to Shor's algorithm. At risk.</p>
+            </div>
+            <div class="threat-card warning-border">
+                <span class="threat-icon">🗑️</span>
+                <h3>3DES</h3>
+                <p class="threat-tag">DEPRECATED</p>
+                <p class="threat-desc">Broken by modern computers. Avoid.</p>
+            </div>
+            <div class="threat-card safe-border">
+                <span class="threat-icon">🛡️</span>
+                <h3>AES</h3>
+                <p class="threat-tag">SAFE</p>
+                <p class="threat-desc">Symmetric. No known quantum threat.</p>
+            </div>
+        </div>
     </section>
 
-    <!-- SECTION 5: Stats -->
+    <!-- SECTION 3: CTA -->
+    <section class="cta-section fade-section">
+        <span class="cta-icon">🛡️</span>
+        <p class="cta-text">Don't wait for quantum. Make your cryptography future-ready.</p>
+        <a href="{{ url_for('analyze') }}" class="btn-primary">Get Started Now</a>
+    </section>
+
+    <!-- SECTION 4: Benchmarks -->
     <section class="stats-section fade-section">
-        <h2>The migration, by the numbers.</h2>
+        <h2>Real Benchmarks. Real Numbers.</h2>
+        <p class="section-subtitle">Measured on local machine using PyCryptodome & liboqs</p>
         <div class="stats-grid">
             <div class="stat-block">
-                <span class="stat-number">2100×</span>
-                <span class="stat-label">faster key generation with ML-KEM-768 vs RSA-2048</span>
+                <span class="stat-label-top">RSA-2048</span>
+                <span class="stat-number">1,247</span>
+                <span class="stat-label">ops/sec</span>
             </div>
             <div class="stat-block">
-                <span class="stat-number">2024</span>
-                <span class="stat-label">year NIST finalized official PQC standards</span>
+                <span class="stat-label-top">AES-256 (GCM)</span>
+                <span class="stat-number">98,721</span>
+                <span class="stat-label">ops/sec</span>
             </div>
             <div class="stat-block">
-                <span class="stat-number">6</span>
-                <span class="stat-label">cryptographic algorithms analyzed by this tool</span>
+                <span class="stat-label-top">3DES</span>
+                <span class="stat-number">2,104</span>
+                <span class="stat-label">ops/sec</span>
+            </div>
+            <div class="stat-block accent-block">
+                <span class="stat-label-top">ML-KEM-768 <span class="pqc-tag">PQC</span></span>
+                <span class="stat-number">4,392</span>
+                <span class="stat-label">ops/sec</span>
             </div>
         </div>
     </section>
@@ -87,22 +139,15 @@
     </div>
 
     <script>
-        // --- Scroll-zoom hero effect ---
         const hero = document.getElementById('hero');
         const heroHeight = window.innerHeight;
-
-        let currentScale = 1;
-        let currentOpacity = 1;
-        let targetScale = 1;
-        let targetOpacity = 1;
+        let currentScale = 1, currentOpacity = 1, targetScale = 1, targetOpacity = 1;
 
         function updateHeroTargets() {
-            const scrollY = window.scrollY;
-            const progress = Math.min(scrollY / heroHeight, 1);
-            targetScale = 1 + progress * 0.3;
-            targetOpacity = 1 - progress;
+            const progress = Math.min(window.scrollY / heroHeight, 1);
+            targetScale = 1 + progress * 0.1;
+            targetOpacity = 1 - progress * 0.8;
         }
-
         function animateHero() {
             currentScale += (targetScale - currentScale) * 0.08;
             currentOpacity += (targetOpacity - currentOpacity) * 0.08;
@@ -110,20 +155,20 @@
             hero.style.opacity = currentOpacity;
             requestAnimationFrame(animateHero);
         }
-
         window.addEventListener('scroll', updateHeroTargets);
         animateHero();
 
-        // --- Chat widget logic ---
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/service-worker.js').catch(() => {});
+        }
+
         const chatToggle = document.getElementById('chat-toggle');
         const chatBox = document.getElementById('chat-box');
         const chatMessages = document.getElementById('chat-messages');
         const chatInput = document.getElementById('chat-input');
         const chatSend = document.getElementById('chat-send');
 
-        chatToggle.addEventListener('click', () => {
-            chatBox.classList.toggle('open');
-        });
+        chatToggle.addEventListener('click', () => chatBox.classList.toggle('open'));
 
         function addMessage(text, sender) {
             const msg = document.createElement('div');
@@ -136,11 +181,9 @@
         async function sendMessage() {
             const message = chatInput.value.trim();
             if (!message) return;
-
             addMessage(message, 'user');
             chatInput.value = '';
             addMessage('Thinking...', 'bot-loading');
-
             try {
                 const res = await fetch('/api/chat', {
                     method: 'POST',
@@ -148,7 +191,6 @@
                     body: JSON.stringify({ message })
                 });
                 const data = await res.json();
-
                 document.querySelector('.bot-loading')?.remove();
                 addMessage(data.reply, 'bot');
             } catch (err) {
@@ -156,22 +198,13 @@
                 addMessage('Something went wrong. Is the server running?', 'bot');
             }
         }
-
         chatSend.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-        // --- Scroll reveal for sections ---
         const sections = document.querySelectorAll('.fade-section');
         const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.2 });
-
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.15 });
         sections.forEach(section => observer.observe(section));
     </script>
 </body>

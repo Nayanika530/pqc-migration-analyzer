@@ -1,41 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Console - PQC Migration Analyzer</title>
+    <title>Qryptis - Analyze</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='analyze.css') }}">
 </head>
 <body>
+    <div class="app-shell">
+        {% include "_sidebar.html" %}
 
-    <section class="console-hero fade-section">
-        <h1>Choose your analysis method</h1>
-        <p>Manually check a single algorithm, or scan real code to find every vulnerability at once.</p>
-    </section>
+        <div class="main-content">
+            <h1>Analyze</h1>
+            <p style="color:var(--text-muted); margin-bottom:2rem;">Choose how you want to analyze your cryptography.</p>
 
-    <section class="option-section fade-section">
-        <div class="option-cards">
-            <a href="{{ url_for('manual') }}" class="option-card">
-                <h2>Manual Lookup</h2>
-                <p>Pick an algorithm and key size to check its quantum risk and get a full report.</p>
-                <span class="option-arrow">→</span>
-            </a>
+            <div class="option-cards">
+                <a href="{{ url_for('manual') }}" class="option-card">
+                    <h2>Manual Lookup</h2>
+                    <p>Check any algorithm + key size to see its quantum & classical risk and get PQC recommendations.</p>
+                    <span class="option-arrow">→</span>
+                </a>
 
-            <a href="{{ url_for('scan') }}" class="option-card">
-                <h2>Scan Code</h2>
-                <p>Paste real source code and automatically detect vulnerable cryptography, line by line.</p>
-                <span class="option-arrow">→</span>
-            </a>
+                <a href="{{ url_for('scan') }}" class="option-card">
+                    <h2>Scan Code</h2>
+                    <p>Scan your code to detect cryptographic usage and get a full security report.</p>
+                    <span class="option-arrow">→</span>
+                </a>
+            </div>
         </div>
-    </section>
-
-    <script>
-        const sections = document.querySelectorAll('.fade-section');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('visible');
-            });
-        }, { threshold: 0.2 });
-        sections.forEach(section => observer.observe(section));
-    </script>
+    </div>
 </body>
 </html>

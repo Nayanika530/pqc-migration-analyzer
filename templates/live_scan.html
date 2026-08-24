@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Qryptis - Live Website Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-logo">Q<span>ryptis</span></div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('live_scan') }}">Live Scan</a>
+            <a href="{{ url_for('analyze') }}">Analyze</a>
+        </div>
+        <a href="{{ url_for('analyze') }}" class="nav-cta">Get Started</a>
+    </nav>
+
+    <section style="padding: 4rem 3rem; max-width: 700px;">
+        <h1 style="font-size:2.2rem; margin-bottom:0.5rem;">Live Website Scanner</h1>
+        <p class="section-subtitle" style="text-align:left; margin-bottom:2rem;">
+            Enter any website domain to inspect its real, live TLS encryption right now.
+        </p>
+
+        <form method="POST" style="display:flex; gap:0.8rem;">
+            <input type="text" name="domain" placeholder="e.g. google.com" required
+                   style="flex:1; background:var(--surface); color:var(--text); border:1px solid rgba(255,255,255,0.15); border-radius:6px; padding:0.8rem;">
+            <button type="submit" class="btn-primary" style="border:none; cursor:pointer;">Scan Live Site</button>
+        </form>
+
+        {% if result %}
+            {% if result.connection_successful %}
+                <div class="db-card db-safe" style="margin-top:2rem;">
+                    <h2>{{ result.domain }}</h2>
+                    <p class="db-type">TLS Version: {{ result.tls_version }}</p>
+                    <p style="margin:1rem 0;"><strong>Cipher Suite:</strong> {{ result.cipher_suite }}</p>
+                    <p><strong>Certificate Issuer:</strong> {{ result.certificate_issuer }}</p>
+                    <p><strong>Certificate Subject:</strong> {{ result.certificate_subject }}</p>
+                    <p><strong>Expires:</strong> {{ result.cert_expires }}</p>
+                </div>
+
+                {% if result.reports %}
+                    <h2 style="margin-top:2rem; margin-bottom:1rem;">Detected Algorithms</h2>
+                    {% for report in result.reports %}
+                        <div class="card">
+                            <p><strong>{{ report.algorithm }}</strong> ({{ report.key_size }}-bit)</p>
+                            <p><strong>Verdict:</strong> {{ report.verdict }}</p>
+                            <p><strong>Recommended Replacement:</strong> {{ report.recommended_replacement }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% else %}
+                <div class="card" style="margin-top:2rem; border-color:var(--critical);">
+                    <p style="color:var(--critical);">{{ result.error }}</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </section>
+</body>
+</html>

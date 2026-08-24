@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, jsonify, session, Response
 from crypto_analyzer import (
     generate_report, ALGORITHM_DB, calculate_harvest_risk,
-    get_ai_explanation, chat_with_assistant
+    get_ai_explanation, chat_with_assistant, scan_live_website
 )
 from scanner import (
     scan_and_report, generate_cbom, calculate_agility_score,
@@ -21,6 +21,18 @@ def home():
 @app.route("/analyze")
 def analyze():
     return render_template("analyze.html")
+
+
+@app.route("/live-scan", methods=["GET", "POST"])
+def live_scan():
+    result = None
+
+    if request.method == "POST":
+        domain = request.form.get("domain", "")
+        if domain.strip():
+            result = scan_live_website(domain)
+
+    return render_template("live_scan.html", result=result)
 
 
 @app.route("/manual", methods=["GET", "POST"])
@@ -134,4 +146,4 @@ def api_chat():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)

@@ -2,6 +2,8 @@
 # Core logic: maps classical algorithms to quantum vulnerability + PQC replacement
 
 import json
+import ssl
+import socket
 
 
 def load_benchmarks() -> dict:
@@ -280,6 +282,62 @@ Keep answers short, friendly, and beginner-appropriate. Under 80 words unless as
         return response["message"]["content"]
     except Exception as e:
         return f"Sorry, the assistant is unavailable right now. Make sure Ollama is running. ({str(e)})"
+
+def scan_live_website(domain: str) -> dict:
+    """
+    Connect to a real website and inspect its actual TLS certificate
+    and cipher suite in use, right now, over the live internet.
+    """
+    domain = domain.strip().replace("https://", "").replace("http://", "").split("/")[0]
+
+    try:
+        context = ssl.create_default_context()
+        with socket.create_connection((domain, 443), timeout=5) as sock:
+            with context.wrap_socket(sock, server_hostname=domain) as ssock:
+                cert = ssock.getpeercert()
+                cipher_name, tls_version, secret_bits = ssock.cipher()
+
+                issuer = dict(x[0] for x in cert.get("issuer", []))
+                subject = dict(x[0] for x in cert.get("subject", []))
+
+                # Try to match the cipher suite name against algorithms we know about
+                detected_algorithms = []
+                cipher_upper = cipher_name.upper()
+                if "RSA" in cipher_upper:
+                    detected_algorithms.append("RSA")
+                if "ECDSA" in cipher_upper or "ECDHE" in cipher_upper:
+                    detected_algorithms.append("ECC")
+                if "AES" in cipher_upper:
+                    detected_algorithms.append("AES")
+
+                reports = []
+                for algo in detected_algorithms:
+                    if algo == "AES":
+                        report = generate_report("AES", secret_bits)
+                    else:
+                        report = generate_report(algo, secret_bits)
+                    if "error" not in report:
+                        reports.append(report)
+
+                return {
+                    "domain": domain,
+                    "connection_successful": True,
+                    "tls_version": tls_version,
+                    "cipher_suite": cipher_name,
+                    "key_bits": secret_bits,
+                    "certificate_issuer": issuer.get("organizationName", "Unknown"),
+                    "certificate_subject": subject.get("commonName", domain),
+                    "cert_expires": cert.get("notAfter", "Unknown"),
+                    "detected_algorithms": detected_algorithms,
+                    "reports": reports
+                }
+
+    except socket.timeout:
+        return {"connection_successful": False, "error": f"Connection to {domain} timed out."}
+    except socket.gaierror:
+        return {"connection_successful": False, "error": f"Could not resolve domain: {domain}. Check the spelling."}
+    except Exception as e:
+        return {"connection_successful": False, "error": f"Could not connect to {domain}: {str(e)}"}
 
 if __name__ == "__main__":
     test_cases = [("RSA", 1024), ("RSA", 2048), ("AES", 256), ("3DES", 168)]

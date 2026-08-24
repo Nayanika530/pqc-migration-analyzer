@@ -7,7 +7,8 @@
     --surface: #131B29;
     --text: #E8ECF4;
     --text-muted: #6C7A94;
-    --accent: #7B61FF;
+    --accent: #2E9EFF;
+    --accent-glow: #4FC3F7;
 
     --critical: #FF5470;
     --deprecated: #FF9F43;
@@ -87,4 +88,56 @@ button {
 
 button:hover {
     opacity: 0.9;
+}
+
+/* --- Sidebar layout (matches Qryptis dashboard design) --- */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    padding: 1.5rem 1rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.sidebar-logo {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    padding: 0 0.5rem;
+}
+
+.sidebar-logo span { color: var(--accent); }
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 0.8rem;
+    border-radius: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+    background: rgba(46,158,255,0.1);
+    color: var(--accent);
+}
+
+.main-content {
+    flex: 1;
+    padding: 2.5rem 3rem;
+    max-width: 1100px;
 }

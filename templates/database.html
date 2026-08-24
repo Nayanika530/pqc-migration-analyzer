@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Qryptis - Algorithm Database</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+    <nav class="top-nav">
+        <div class="nav-logo">Q<span>ryptis</span></div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('database') }}">Database</a>
+            <a href="{{ url_for('analyze') }}">Analyze</a>
+        </div>
+        <a href="{{ url_for('analyze') }}" class="nav-cta">Get Started</a>
+    </nav>
+
+    <section style="padding: 4rem 3rem;">
+        <h1 style="font-size:2.2rem; margin-bottom:0.5rem;">Algorithm Database</h1>
+        <p class="section-subtitle" style="margin-bottom:2.5rem; text-align:left;">
+            Every cryptographic algorithm this tool evaluates, and why.
+        </p>
+
+        <div class="db-grid">
+            {% for name, data in algorithm_db.items() %}
+                <div class="db-card {% if data.deprecated %}db-deprecated{% elif data.quantum_vulnerable %}db-critical{% else %}db-safe{% endif %}">
+                    <div class="db-card-header">
+                        <h2>{{ name }}</h2>
+                        {% if data.deprecated %}
+                            <span class="db-tag db-tag-deprecated">DEPRECATED</span>
+                        {% elif data.quantum_vulnerable %}
+                            <span class="db-tag db-tag-critical">QUANTUM-VULNERABLE</span>
+                        {% else %}
+                            <span class="db-tag db-tag-safe">SAFE</span>
+                        {% endif %}
+                    </div>
+                    <p class="db-type">{{ data.type }}</p>
+                    <p class="db-reason">{{ data.reason }}</p>
+                    <div class="db-replacement">
+                        <span class="db-replacement-label">Recommended replacement:</span>
+                        <span class="db-replacement-value">{{ data.pqc_replacement }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</body>
+</html>

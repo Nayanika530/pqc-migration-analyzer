@@ -36,8 +36,16 @@ MIN_SECURE_KEY_SIZE = {
     "MD5": 256,  # MD5 is 128-bit digest; minimum secure hash digest today is 256-bit (e.g. SHA-256)
     "HQC": 128,
     "ML-KEM": 512,
+    "ML-KEM-512": 512,
+    "ML-KEM-768": 768,
+    "ML-KEM-1024": 1024,
     "ML-DSA": 44,
-    "SLH-DSA": 128
+    "ML-DSA-44": 44,
+    "ML-DSA-65": 65,
+    "ML-DSA-87": 87,
+    "SLH-DSA": 128,
+    "SLH-DSA-128S": 128,
+    "SLH-DSA-128F": 128
 }
 
 
@@ -249,6 +257,26 @@ ALGORITHM_DB = {
         "hybrid_recommendation": "ECDSA + SLH-DSA-128 for high-assurance long-term code signing",
         "deprecated": False,
         "is_pqc_native": True
+    },
+    "ML-KEM-768": {
+        "type": "asymmetric encryption / key encapsulation (module lattice)",
+        "quantum_vulnerable": False,
+        "reason": "ML-KEM-768 (NIST FIPS 203) is the primary finalized NIST standard at Security Category 3 (AES-192 equivalent).",
+        "pqc_replacement": "ML-KEM-768 (Native NIST FIPS 203 Standard)",
+        "replacement_type": "Module-Lattice KEM (FIPS 203)",
+        "hybrid_recommendation": "X25519 + ML-KEM-768 for defense-in-depth transition",
+        "deprecated": False,
+        "is_pqc_native": True
+    },
+    "ML-DSA-65": {
+        "type": "digital signature (module lattice)",
+        "quantum_vulnerable": False,
+        "reason": "ML-DSA-65 (NIST FIPS 204) is the primary finalized NIST standard at Security Category 3 for general digital signatures.",
+        "pqc_replacement": "ML-DSA-65 (Native NIST FIPS 204 Standard)",
+        "replacement_type": "Module-Lattice Digital Signature (FIPS 204)",
+        "hybrid_recommendation": "ECDSA + ML-DSA-65 for backward-compatible verification",
+        "deprecated": False,
+        "is_pqc_native": True
     }
 }
 
@@ -256,9 +284,16 @@ ALGORITHM_DB = {
 def analyze_algorithm(name: str) -> dict:
     """Look up an algorithm and return its quantum vulnerability info."""
     key = name.strip().upper()
-    if key not in ALGORITHM_DB:
-        return {"error": f"'{name}' not found in database. Supported algorithms: {', '.join(ALGORITHM_DB.keys())}."}
-    return ALGORITHM_DB[key]
+    if key in ALGORITHM_DB:
+        return ALGORITHM_DB[key]
+    
+    # Prefix fallback (e.g. ML-KEM-512 -> ML-KEM, ECDSA P-256 -> ECC)
+    for db_key in ALGORITHM_DB:
+        if key.startswith(db_key) or db_key.startswith(key):
+            return ALGORITHM_DB[db_key]
+            
+    return {"error": f"'{name}' not found in database. Supported algorithms: {', '.join(ALGORITHM_DB.keys())}."}
+
 
 
 def generate_report(name: str, key_size: int) -> dict:

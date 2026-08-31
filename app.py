@@ -11,10 +11,12 @@ from scanner import (
     generate_migration_roadmap, export_roadmap_as_markdown, generate_risk_forecast
 )
 from inventory import GLOBAL_INVENTORY, parse_certificate_content
-from dependency_graph import get_dependency_graph, get_all_dependency_graphs
+from dependency_graph import get_dependency_graph, get_all_dependency_graphs, build_codebase_dependency_graph
 from migration_simulator import MigrationSimulator
 from nist_benchmarks import get_all_benchmark_metrics, get_algorithm_metrics, NIST_ALGORITHM_METRICS
 from master_migration_engine import MasterMigrationEngine
+from evaluation import run_evaluation, StaticAnalysisEvaluator
+from benchmark import run_full_statistical_benchmark, get_system_telemetry
 import json
 
 load_dotenv()
@@ -326,6 +328,31 @@ def api_migration_plan():
     })
 
 
+@app.route("/evaluation")
+def evaluation():
+    metrics = run_evaluation()
+    return render_template("evaluation.html", metrics=metrics)
+
+
+@app.route("/api/evaluate")
+def api_evaluate():
+    metrics = run_evaluation()
+    return jsonify({
+        "status": "success",
+        "evaluation": metrics
+    })
+
+
+@app.route("/api/benchmark/live")
+def api_benchmark_live():
+    rounds = int(request.args.get("rounds", 20))
+    report = run_full_statistical_benchmark(rounds=rounds)
+    return jsonify({
+        "status": "success",
+        "benchmark": report
+    })
+
+
 @app.route("/live-scan", methods=["GET", "POST"])
 def live_scan():
     result = None
@@ -461,6 +488,11 @@ def scan():
             forecast = generate_risk_forecast(results)
             session["last_agility"] = agility
             session["last_roadmap"] = roadmap
+
+            # Dynamically update unified inventory so it is the single source of truth
+            if results:
+                GLOBAL_INVENTORY.clear()
+                GLOBAL_INVENTORY.add_code_findings(results, target_name=filename)
 
             # Compute severity and verdict counts for dashboard & findings
             counts = {

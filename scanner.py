@@ -1,11 +1,12 @@
 # scanner.py
-# Scans source code text to detect cryptographic algorithm usage
+# Scans source code text to detect cryptographic algorithm usage using AST parsing
 # and suggests secure replacement code
 
 import re
 from crypto_analyzer import generate_report
+from ast_scanner import scan_python_code_ast
 
-# Each pattern: (regex to search for, algorithm name, typical key size to assume if not specified)
+# Fallback regex patterns for non-Python or syntax-invalid source code
 DETECTION_PATTERNS = [
     (r"RSA\.generate\(\s*(\d+)", "RSA", 2048),
     (r"DES3\.new\(", "3DES", 168),
@@ -45,6 +46,14 @@ FIX_SNIPPETS = {
         "import hashlib\n"
         "digest = hashlib.sha256(data).hexdigest()"
     ),
+    "ECC": (
+        "# Option A: Direct NIST PQC Digital Signature (ML-DSA-65):\n"
+        "import oqs\n"
+        "with oqs.Signature('ML-DSA-65') as sig:\n"
+        "    public_key = sig.generate_keypair()\n"
+        "    signature = sig.sign(message)\n\n"
+        "# Option B: Stateful Hash-Based Signature (SLH-DSA-128s / FIPS 205)"
+    ),
 }
 
 
@@ -59,6 +68,7 @@ AFFECTED_COMPONENTS = {
     "DIFFIE-HELLMAN": ["TLS Key Exchange", "VPN Tunnel Negotiation", "Session Forward Secrecy"]
 }
 
+
 # Migration effort / complexity assessment
 MIGRATION_DIFFICULTY = {
     "RSA": "MEDIUM",
@@ -71,10 +81,15 @@ MIGRATION_DIFFICULTY = {
 }
 
 
-def scan_code(code_text: str) -> list:
-    """Scan a block of code text for known crypto patterns and return findings."""
-    findings = []
+def scan_code(code_text: str, file_path: str = "source.py") -> list:
+    """Scan code for cryptographic usage using Python AST analysis, with pattern fallback."""
+    # 1. Attempt AST analysis first (Structural static analysis)
+    ast_findings = scan_python_code_ast(code_text, file_path=file_path)
+    if ast_findings:
+        return ast_findings
 
+    # 2. Fallback to regex pattern matching if AST did not find matches or on syntax error
+    findings = []
     for pattern, algo_name, default_key_size in DETECTION_PATTERNS:
         matches = re.finditer(pattern, code_text)
         for match in matches:
@@ -90,8 +105,17 @@ def scan_code(code_text: str) -> list:
 
             findings.append({
                 "algorithm": algo_name,
+                "full_name": f"{algo_name}-{key_size}",
                 "key_size": key_size,
+                "file": file_path,
                 "line_number": line_number,
+                "usage": "Cryptographic Operation",
+                "detection_method": "Pattern",
+                "confidence": "Medium",
+                "ast_node": "Regex Match",
+                "enclosing_function": "global",
+                "enclosing_class": "None",
+                "code_line": match.group(0),
                 "matched_text": match.group(0)
             })
 
@@ -99,8 +123,8 @@ def scan_code(code_text: str) -> list:
 
 
 def scan_and_report(code_text: str, file_path: str = "pasted_code.py") -> list:
-    """Scan code and attach a full vulnerability report, metadata, and code snippet to each finding."""
-    findings = scan_code(code_text)
+    """Scan code and attach a full vulnerability report, AST metadata, and code snippet to each finding."""
+    findings = scan_code(code_text, file_path=file_path)
     results = []
     lines = code_text.splitlines()
 
@@ -153,24 +177,33 @@ def scan_and_report(code_text: str, file_path: str = "pasted_code.py") -> list:
             classical_status = f"🟢 Currently acceptable ({key_size}-bit)"
 
         # Determine usage description
-        usage = report.get("type", "Cryptographic operation").capitalize()
-        if "asymmetric" in usage.lower() or "kem" in usage.lower():
-            if algo == "DSA":
-                usage = "Digital signature"
-            elif algo in ["RSA", "ECC"]:
-                usage = "Digital signature / Key exchange"
-            elif algo == "DIFFIE-HELLMAN":
-                usage = "Key exchange"
-        elif "symmetric" in usage.lower():
-            usage = "Symmetric encryption"
-        elif "hash" in usage.lower():
-            usage = "Cryptographic hash / integrity digest"
+        usage = finding.get("usage")
+        if not usage or usage == "Cryptographic Operation":
+            usage = report.get("type", "Cryptographic operation").capitalize()
+            if "asymmetric" in usage.lower() or "kem" in usage.lower():
+                if algo == "DSA":
+                    usage = "Digital signature"
+                elif algo in ["RSA", "ECC"]:
+                    usage = "Digital signature / Key exchange"
+                elif algo == "DIFFIE-HELLMAN":
+                    usage = "Key exchange"
+            elif "symmetric" in usage.lower():
+                usage = "Symmetric encryption"
+            elif "hash" in usage.lower():
+                usage = "Cryptographic hash / integrity digest"
 
         results.append({
+            "algorithm": algo,
+            "key_size": key_size,
             "file_path": file_path,
             "line_number": line_num,
             "location": f"{file_path}:{line_num}",
-            "matched_text": finding["matched_text"],
+            "detection_method": finding.get("detection_method", "AST"),
+            "confidence": finding.get("confidence", "High"),
+            "enclosing_function": finding.get("enclosing_function", "global"),
+            "enclosing_class": finding.get("enclosing_class", "None"),
+            "ast_node": finding.get("ast_node", "AST: Call"),
+            "matched_text": finding.get("matched_text", finding.get("code_line", "")),
             "report": report,
             "suggested_fix": suggested_fix,
             "code_snippet": code_snippet,

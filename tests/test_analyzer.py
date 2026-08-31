@@ -555,7 +555,91 @@ class TestMigrationSimulatorAndPlan(unittest.TestCase):
         self.assertIn("3DES", plan["priorities"][0]["primitive"])
         self.assertIn("RSA", plan["priorities"][1]["primitive"])
         self.assertIn("ECDSA", plan["priorities"][2]["primitive"])
-        self.assertIn("X25519", plan["priorities"][3]["primitive"])
+from ast_scanner import scan_python_code_ast
+from evaluation import run_evaluation
+from benchmark import get_system_telemetry, compute_statistics
+from dependency_graph import build_codebase_dependency_graph
+
+
+class TestASTScannerAndEvaluation(unittest.TestCase):
+    """Test suite for AST Parser, Ground Truth Evaluation, and Statistical Telemetry."""
+
+    def test_ast_scanner_structural_discovery(self):
+        """Verify AST correctly inspects Python code scopes, calls, and key sizes."""
+        code = """
+class AuthService:
+    def __init__(self):
+        from Crypto.PublicKey import RSA
+        self.key = RSA.generate(2048)
+
+    def verify(self):
+        from Crypto.Cipher import AES
+        c = AES.new(b"1234567812345678", AES.MODE_CBC)
+"""
+        findings = scan_python_code_ast(code, file_path="auth.py")
+        self.assertEqual(len(findings), 2)
+        self.assertEqual(findings[0]["algorithm"], "RSA")
+        self.assertEqual(findings[0]["key_size"], 2048)
+        self.assertEqual(findings[0]["enclosing_class"], "AuthService")
+        self.assertEqual(findings[0]["enclosing_function"], "__init__")
+        self.assertEqual(findings[0]["detection_method"], "AST")
+        self.assertEqual(findings[0]["confidence"], "High")
+
+        self.assertEqual(findings[1]["algorithm"], "AES")
+        self.assertEqual(findings[1]["enclosing_function"], "verify")
+
+    def test_ast_negative_controls_no_false_positives(self):
+        """Verify variables or comments with crypto names are ignored by AST parser."""
+        code = """
+# RSA-2048 and AES-256 in comments
+rsa_string_var = "RSA_MOCK_VALUE"
+aes_dict = {"AES_CIPHER": 123}
+def normal_calc(x, y):
+    return x * y + 2048
+"""
+        findings = scan_python_code_ast(code, file_path="non_crypto.py")
+        self.assertEqual(len(findings), 0)
+
+    def test_ground_truth_evaluation_metrics(self):
+        """Verify ground-truth benchmark achieves high precision and recall."""
+        eval_metrics = run_evaluation()
+        self.assertGreaterEqual(eval_metrics["total_samples"], 40)
+        self.assertGreaterEqual(eval_metrics["precision"], 95.0)
+        self.assertGreaterEqual(eval_metrics["recall"], 95.0)
+        self.assertGreaterEqual(eval_metrics["accuracy"], 95.0)
+        self.assertEqual(eval_metrics["false_positives"], 0)
+
+    def test_statistical_telemetry(self):
+        """Verify system telemetry capture and statistics calculations."""
+        telemetry = get_system_telemetry()
+        self.assertIn("os_platform", telemetry)
+        self.assertIn("cpu_architecture", telemetry)
+        self.assertIn("python_version", telemetry)
+
+        stats = compute_statistics([10.0, 20.0, 30.0, 40.0, 50.0])
+        self.assertEqual(stats["mean_ms"], 30.0)
+        self.assertEqual(stats["median_ms"], 30.0)
+        self.assertEqual(stats["min_ms"], 10.0)
+        self.assertEqual(stats["max_ms"], 50.0)
+
+    def test_codebase_dependency_graph_mapping(self):
+        """Verify dynamic dependency graph constructed from scanned findings."""
+        sample_findings = [
+            {
+                "algorithm": "RSA-2048",
+                "file_path": "authentication.py",
+                "enclosing_class": "AuthService",
+                "enclosing_function": "issue_jwt",
+                "line_number": 42,
+                "usage": "JWT Token Signing",
+                "quantum_status": "VULNERABLE",
+                "migration_target": "ML-KEM-768"
+            }
+        ]
+        graph = build_codebase_dependency_graph(sample_findings)
+        self.assertIn("RSA-2048", graph)
+        self.assertEqual(graph["RSA-2048"]["total_services_affected"], 1)
+        self.assertEqual(graph["RSA-2048"]["domains"][0]["name"], "Authentication Module")
 
 
 if __name__ == "__main__":

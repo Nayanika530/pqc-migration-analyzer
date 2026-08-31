@@ -334,3 +334,80 @@ Replacing {algo} affects {total} services.
 """
 
     return ascii_tree.strip()
+
+
+def build_codebase_dependency_graph(scan_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Constructs a cryptographic dependency representation from discovered assets in the analyzed codebase.
+    Maps: file -> function/class -> cryptographic call -> application component.
+    """
+    if not scan_findings:
+        return get_dependency_graph("RSA-2048")
+
+    algo_map: Dict[str, Dict[str, Any]] = {}
+
+    for f in scan_findings:
+        algo = f.get("algorithm", "UNKNOWN")
+        file_path = f.get("file_path", f.get("file", "unknown_file.py"))
+        func_name = f.get("enclosing_function", "global")
+        class_name = f.get("enclosing_class", "None")
+        line_num = f.get("line_number", 1)
+        usage = f.get("usage", "Cryptographic operation")
+
+        if algo not in algo_map:
+            algo_map[algo] = {
+                "algorithm": algo,
+                "base_algorithm": algo.split("-")[0],
+                "quantum_vulnerable": f.get("quantum_status", "").find("VULNERABLE") != -1,
+                "migration_target": f.get("migration_target", "ML-KEM-768"),
+                "files": set(),
+                "components": {},
+                "total_calls": 0
+            }
+
+        algo_map[algo]["files"].add(file_path)
+        algo_map[algo]["total_calls"] += 1
+
+        comp_name = file_path.split("/")[-1].split("\\")[-1].replace(".py", "").title() + " Module"
+        if comp_name not in algo_map[algo]["components"]:
+            algo_map[algo]["components"][comp_name] = {
+                "name": comp_name,
+                "file": file_path,
+                "services": []
+            }
+
+        service_entry = f"{class_name}::{func_name}() [Line {line_num}] — {usage}"
+        algo_map[algo]["components"][comp_name]["services"].append({
+            "name": f"{class_name}.{func_name}",
+            "impact": f"Invokes {algo} at {file_path}:{line_num} ({usage})"
+        })
+
+    # Format into domains structure
+    graphs = {}
+    for algo, data in algo_map.items():
+        domains = []
+        for cname, cdata in data["components"].items():
+            domains.append({
+                "name": cname,
+                "role": f"Source Module: {cdata['file']}",
+                "usage": f"Cryptographic API calls ({len(cdata['services'])})",
+                "protocol": "Internal Python Application",
+                "services_count": len(cdata["services"]),
+                "services": cdata["services"]
+            })
+
+        total_svcs = sum(d["services_count"] for d in domains)
+        graphs[algo] = {
+            "algorithm": algo,
+            "base_algorithm": data["base_algorithm"],
+            "quantum_vulnerable": data["quantum_vulnerable"],
+            "migration_target": data["migration_target"],
+            "domains_count": len(domains),
+            "total_services_affected": total_svcs,
+            "domains": domains,
+            "complexity": "MEDIUM" if total_svcs < 5 else "HIGH",
+            "mitigation_strategy": f"Refactor {algo} cryptographic calls across {len(domains)} scanned modules to NIST PQC {data['migration_target']}."
+        }
+
+    return graphs
+

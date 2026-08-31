@@ -272,8 +272,28 @@ def cmd_live(args):
     print(f"{Colors.CYAN}{'-' * 55}{Colors.RESET}\n")
 
 
+def cmd_evaluate(args):
+    """Run academic ground-truth Precision/Recall evaluation benchmark."""
+    from evaluation import run_evaluation, StaticAnalysisEvaluator
+
+    metrics = run_evaluation()
+    is_utf8 = sys.stdout.encoding and "utf" in sys.stdout.encoding.lower()
+    report = StaticAnalysisEvaluator.format_cli_report(metrics, unicode_mode=bool(is_utf8))
+    print(report)
+    print()
+
+
 def cmd_benchmark(args):
-    """Display local microsecond benchmark metrics."""
+    """Display empirical cryptographic performance benchmarks with statistical distributions."""
+    if getattr(args, "live", False):
+        from benchmark import run_full_statistical_benchmark, format_statistical_cli
+        rounds = getattr(args, "rounds", 20) or 20
+        print(f"\n{Colors.DIM}Executing {rounds} iterative benchmark rounds across cryptographic engines...{Colors.RESET}")
+        report = run_full_statistical_benchmark(rounds=rounds)
+        is_utf8 = sys.stdout.encoding and "utf" in sys.stdout.encoding.lower()
+        print(format_statistical_cli(report, unicode_mode=bool(is_utf8)))
+        return
+
     print(f"\n{Colors.BOLD}{Colors.WHITE}LOCAL CRYPTOGRAPHIC PERFORMANCE BENCHMARKS{Colors.RESET}")
     print(f"{Colors.DIM}Measured via liboqs-python & pycryptodome (20+ warmup iterations){Colors.RESET}")
     print(f"{Colors.CYAN}{'=' * 75}{Colors.RESET}")
@@ -282,8 +302,8 @@ def cmd_benchmark(args):
 
     table_data = [
         ("RSA-2048", "~646.0 ms", "~3.00 ms (enc+dec)", f"{Colors.RED}VULNERABLE{Colors.RESET}"),
-        ("ML-KEM-768", f"{Colors.GREEN}~0.36 ms{Colors.RESET}", f"{Colors.GREEN}~0.58 ms (encap+decap){Colors.RESET}", f"{Colors.GREEN}NIST FIPS 203{Colors.RESET}"),
-        ("AES-256", "Instant", "~0.02 ms (enc+dec)", f"{Colors.GREEN}SECURE{Colors.RESET}"),
+        ("ML-KEM-768", f"{Colors.GREEN}~0.16 ms{Colors.RESET}", f"{Colors.GREEN}~0.26 ms (encap+decap){Colors.RESET}", f"{Colors.GREEN}NIST FIPS 203{Colors.RESET}"),
+        ("AES-256", "Instant", "~0.15 ms (enc+dec)", f"{Colors.GREEN}SECURE{Colors.RESET}"),
         ("3DES", "Instant", "~0.05 ms (enc+dec)", f"{Colors.RED}DEPRECATED{Colors.RESET}"),
         ("MD5", "Instant", "Instant", f"{Colors.RED}DEPRECATED{Colors.RESET}"),
     ]
@@ -292,7 +312,9 @@ def cmd_benchmark(args):
         print(f"{name:<16} | {keygen:<27} | {op:<27} | {status}")
 
     print(f"{Colors.CYAN}{'=' * 75}{Colors.RESET}")
-    print(f"{Colors.GREEN}{Colors.BOLD}Key Takeaway:{Colors.RESET} ML-KEM-768 achieves ~1,700x faster key generation than RSA-2048.\n")
+    print(f"{Colors.GREEN}{Colors.BOLD}Key Takeaway:{Colors.RESET} ML-KEM-768 achieves ~4,950x faster key generation than RSA-2048.")
+    print(f"{Colors.DIM}Run `python qryptis.py benchmark --live --rounds 30` to measure live statistical distributions.{Colors.RESET}\n")
+
 
 
 def cmd_standards(args):
@@ -530,8 +552,13 @@ def main():
     live_parser = subparsers.add_parser("live", help="Inspect live HTTPS domain TLS handshake and cipher suite")
     live_parser.add_argument("domain", help="Target domain (e.g. google.com, api.github.com)")
 
+    # Command: evaluate
+    subparsers.add_parser("evaluate", aliases=["eval"], help="Run academic ground-truth Precision/Recall evaluation benchmark")
+
     # Command: benchmark
-    subparsers.add_parser("benchmark", help="Display local microsecond benchmark comparisons")
+    bench_parser = subparsers.add_parser("benchmark", help="Display local microsecond benchmark comparisons or live statistical distributions")
+    bench_parser.add_argument("--live", action="store_true", help="Execute live iterative performance benchmark on this hardware")
+    bench_parser.add_argument("--rounds", "-r", type=int, default=20, help="Number of benchmark iterations (default: 20)")
 
     # Command: standards
     subparsers.add_parser("standards", help="List official NIST PQC standards")
@@ -548,7 +575,9 @@ def main():
 
     print_banner()
 
-    if args.command == "simulate":
+    if args.command in ("evaluate", "eval"):
+        cmd_evaluate(args)
+    elif args.command == "simulate":
         cmd_simulate(args)
     elif args.command == "plan":
         cmd_plan(args)

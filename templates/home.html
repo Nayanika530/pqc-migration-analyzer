@@ -3,566 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qryptis — Post-Quantum Cryptography Migration Analyzer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <title>Qryptis — Organize & Migrate Your Cryptographic Assets</title>
+    <meta name="description" content="Tired of losing track of legacy cryptography across repositories and microservices? Qryptis gives you one clean space to scan, analyze, organize, and migrate to NIST post-quantum standards.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/save_design.css') }}">
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <meta name="theme-color" content="#0E0F12">
+    <meta name="theme-color" content="#000000">
 </head>
 <body>
 
+    <!-- Dot-Matrix Grid Canvas Pattern -->
+    <div class="sd-grid-pattern"></div>
+
     <!-- ============================================================
-         FLOATING NAVBAR (ImpactFrames Style)
+         1. FLOATING PILL NAVBAR
          ============================================================ -->
-    <header class="nav-bar-box">
-        <div class="nav-bar-wrapper">
-            <a href="{{ url_for('home') }}" class="nav-logo">
-                <svg viewBox="0 0 28 28" width="24" height="24" fill="none">
-                    <path d="M14 2L4 8v8c0 5.2 3.6 10 10 11.2 6.4-1.2 10-6 10-11.2V8L14 2z" fill="#2E9EFF" opacity="0.2" stroke="#2E9EFF" stroke-width="1.8"/>
-                    <text x="14" y="18" text-anchor="middle" fill="#2E9EFF" font-family="'Unbounded', sans-serif" font-size="12" font-weight="700">Q</text>
-                </svg>
-                <span>Qryptis</span>
-            </a>
+    <header class="sd-navbar-wrap">
+        <div class="sd-navbar">
+            <div class="sd-nav-left">
+                <a href="{{ url_for('home') }}" class="sd-logo">
+                    <div class="sd-logo-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                            <path d="M12 2L3 7v6c0 5 3.5 9.5 9 10.5 5.5-1 9-5.5 9-10.5V7L12 2z" stroke="#38BDF8" stroke-width="2" fill="rgba(56,189,248,0.2)"/>
+                            <text x="12" y="16" text-anchor="middle" fill="#38BDF8" font-family="'Space Grotesk',sans-serif" font-size="10" font-weight="700">Q</text>
+                        </svg>
+                    </div>
+                    <span>Qryptis</span>
+                </a>
 
-            <nav class="nav-links">
-                <a href="#hero" class="nav-link active">Home</a>
-                <a href="{{ url_for('analyze') }}" class="nav-link">Console</a>
-                <a href="#about" class="nav-link">Threat Lab</a>
-                <a href="#services" class="nav-link">Capabilities</a>
-                <a href="#benchmarks" class="nav-link">Benchmarks</a>
-                <a href="#faq" class="nav-link">FAQ</a>
+                <nav class="sd-nav-links">
+                    <a href="{{ url_for('analyze') }}" class="sd-nav-link">Explore</a>
+                    <a href="{{ url_for('scan') }}" class="sd-nav-link">Scanner</a>
+                    <a href="#discoveries" class="sd-nav-link">Inventory</a>
+                    <a href="#pricing" class="sd-nav-link">Membership</a>
+                    
+                    <div class="sd-nav-dropdown">
+                        <span class="sd-nav-link">
+                            Tools <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </span>
+                        <div class="sd-dropdown-menu">
+                            <a href="{{ url_for('scan') }}" class="sd-dropdown-item">Code Scanner</a>
+                            <a href="{{ url_for('manual') }}" class="sd-dropdown-item">Algorithm Lookup</a>
+                            <a href="{{ url_for('live_scan') }}" class="sd-dropdown-item">Live TLS Probe</a>
+                            <a href="{{ url_for('database') }}" class="sd-dropdown-item">Algorithm Database</a>
+                            <a href="{{ url_for('health') }}" class="sd-dropdown-item">System Health</a>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="sd-nav-right">
+                <a href="{{ url_for('scan') }}" class="sd-btn-nav-dark">Scan Code</a>
                 {% if session.user %}
-                <div class="user-nav-chip">
-                    <a href="{{ url_for('analyze') }}" class="user-nav-pill">
-                        <span class="user-avatar-dot"></span>
-                        <span class="user-nav-name">{{ session.user.name or session.user.username }}</span>
-                    </a>
-                    <a href="{{ url_for('logout') }}" class="nav-link nav-signout" title="Sign Out">Sign Out</a>
-                </div>
+                <a href="{{ url_for('analyze') }}" class="sd-btn-nav-white">{{ session.user.name or session.user.username }} &rarr;</a>
                 {% else %}
-                <a href="{{ url_for('login', next=request.path) }}" class="nav-link">Sign In</a>
+                <a href="{{ url_for('login', next=request.path) }}" class="sd-btn-nav-white">Log In</a>
                 {% endif %}
-            </nav>
-
-            <a href="{{ url_for('analyze') }}" class="header-button">
-                <span>Launch Console &nbsp;&rarr;</span>
-            </a>
+            </div>
         </div>
     </header>
 
     <!-- ============================================================
-         SECTION 1: HERO SECTION
+         2. HERO SECTION
          ============================================================ -->
-    <section id="hero" class="hero">
-        <div class="hero-container">
-            <div class="chips">Post-Quantum Cryptography</div>
+    <section class="sd-hero-section">
+        <div class="sd-hero-headline">
+            Build your post-quantum<br>defense base.
+        </div>
 
-            <h1 class="hero-title">
-                Frame your cryptography.<br>
-                <span class="gradient-text">Drive your results.</span>
-            </h1>
+        <div class="sd-hero-card-wrap">
+            <div class="sd-hero-iridescent-canvas"></div>
+            <div class="sd-hero-card-content">
+                <a href="#canvas" class="sd-scroll-tag">
+                    <span>Keep scrolling</span>
+                    <span class="sd-arrow-down">&darr;</span>
+                </a>
+            </div>
+        </div>
+    </section>
 
-            <p class="hero-subtitle">
-                Detect classical vulnerabilities in RSA, ECC, and legacy cipher suites. Automate NIST-standard PQC migrations, calculate harvest risk, and build quantum-agile systems.
+    <!-- ============================================================
+         3. SCATTERED CARDS CANVAS ("Time to change that.")
+         ============================================================ -->
+    <section id="canvas" class="sd-canvas-section">
+        <h2 class="sd-canvas-title">Time to change that.</h2>
+
+        <div class="sd-scatter-stage">
+            <!-- Center Workspace Target Frame -->
+            <div class="sd-center-workspace">
+                <div class="sd-ws-title">Your Cryptographic Workspace</div>
+                <div class="sd-ws-sub">0 legacy vulnerabilities remaining</div>
+            </div>
+
+            <!-- Card 1: RSA Vulnerable Signature -->
+            <div class="sd-float-card sd-card-1">
+                <div style="height: 110px; background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%); padding: 0.8rem; display: flex; flex-direction: column; justify-content: space-between;">
+                    <span style="font-family: var(--sd-font-mono); font-size: 0.65rem; color: #FDA4AF; text-transform: uppercase;">AST Finding</span>
+                    <span style="font-family: var(--sd-font-heading); font-size: 1.1rem; font-weight: 700; color: #FFFFFF;">RSA-2048</span>
+                </div>
+                <div class="sd-card-badge-row">
+                    <span class="mono" style="color: #93C5FD;">token_signer.py</span>
+                    <span style="color: #FF5470; font-weight: 700;">VULN</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Code Editor Snippet -->
+            <div class="sd-float-card sd-card-2">
+                <div class="sd-card-code">
+                    <span style="color: #64748B;">// auth_service.py</span><br>
+                    <span style="color: #F43F5E;">import</span> oqs<br>
+                    <span style="color: #F43F5E;">with</span> oqs.KEM(<span style="color: #A3E635;">'ML-KEM-768'</span>):<br>
+                    &nbsp;&nbsp;pub_key = kem.gen()<br>
+                    &nbsp;&nbsp;<span style="color: #38BDF8;">return</span> pub_key
+                </div>
+            </div>
+
+            <!-- Card 3: 3DES Sweet32 Deprecation -->
+            <div class="sd-float-card sd-card-3">
+                <div style="padding: 0.9rem 1.1rem;">
+                    <div style="font-family: var(--sd-font-mono); font-size: 0.72rem; color: #FF9F43; margin-bottom: 0.3rem;">// legacy_gateway.py</div>
+                    <div style="font-family: var(--sd-font-heading); font-size: 1rem; font-weight: 700; color: #FFFFFF; margin-bottom: 0.4rem;">3DES-168 Block Cipher</div>
+                    <div style="font-size: 0.78rem; color: var(--sd-text-muted);">Sweet32 collision flaw. Migrate to AES-256-GCM immediately.</div>
+                </div>
+            </div>
+
+            <!-- Card 4: Project Details / Stack Card -->
+            <div class="sd-float-card sd-card-4">
+                <div style="padding: 1rem 1.2rem; font-family: var(--sd-font-mono); font-size: 0.76rem; line-height: 1.6;">
+                    <div style="font-weight: 700; color: #FFFFFF; margin-bottom: 0.4rem;">Security Target:</div>
+                    <div style="color: var(--sd-text-dim);">Client: Payment Auth</div>
+                    <div style="color: var(--sd-text-dim);">Standards: NIST FIPS 203</div>
+                    <div style="color: var(--sd-text-dim);">Stack: Python, liboqs</div>
+                    <div style="color: #A3E635; margin-top: 0.3rem;">Status: PQC Verified</div>
+                </div>
+            </div>
+
+            <!-- Card 5: To-Do Migration Checklist -->
+            <div class="sd-float-card sd-card-5">
+                <div style="padding: 1rem 1.2rem; font-family: var(--sd-font-mono); font-size: 0.76rem; line-height: 1.7;">
+                    <div style="font-weight: 700; color: #FFFFFF; margin-bottom: 0.3rem;">Migration Tasks:</div>
+                    <div style="color: #A3E635;">[✓] Deprecate 3DES</div>
+                    <div style="color: #A3E635;">[✓] Upgrade RSA to ML-KEM</div>
+                    <div style="color: #94A3B8;">[ ] Export CBOM JSON</div>
+                    <div style="color: #94A3B8;">[ ] Verify CI/CD pipeline</div>
+                </div>
+            </div>
+
+            <!-- Card 6: Standalone CLI Terminal Card -->
+            <div class="sd-float-card sd-card-6">
+                <div class="sd-card-code" style="background: #060709;">
+                    <span style="color: #38BDF8;">$ python qryptis.py scan</span><br>
+                    <span style="color: #94A3B8;">Target: ./src/auth</span><br>
+                    <span style="color: #FF5470;">CRITICAL: 2</span> &bull; <span style="color: #A3E635;">SAFE: 4</span><br>
+                    <span style="color: #A3E635;">[+] CBOM exported: cbom.json</span>
+                </div>
+            </div>
+
+            <!-- Card 7: PQC Signature Token -->
+            <div class="sd-float-card sd-card-7">
+                <div style="height: 100px; background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); padding: 0.8rem; display: flex; flex-direction: column; justify-content: space-between;">
+                    <span style="font-family: var(--sd-font-mono); font-size: 0.65rem; color: #6EE7B7; text-transform: uppercase;">NIST FIPS 204</span>
+                    <span style="font-family: var(--sd-font-heading); font-size: 1.1rem; font-weight: 700; color: #FFFFFF;">ML-DSA-65</span>
+                </div>
+                <div class="sd-card-badge-row">
+                    <span class="mono" style="color: #A3E635;">Quantum Secure</span>
+                    <span style="color: #94A3B8;">FIPS Ready</span>
+                </div>
+            </div>
+
+            <!-- Card 8: HNDL Confidentiality Horizon -->
+            <div class="sd-float-card sd-card-8">
+                <div style="padding: 0.9rem 1.1rem; font-family: var(--sd-font-mono); font-size: 0.76rem;">
+                    <div style="color: #FDA4AF; font-weight: 700; margin-bottom: 0.2rem;">HNDL Exposure Risk</div>
+                    <div style="color: var(--sd-text-secondary); font-size: 0.82rem; margin-bottom: 0.3rem;">10-Year Secrecy Horizon</div>
+                    <div style="color: var(--sd-text-dim); font-size: 0.72rem;">Adversaries harvesting traffic today will decrypt with CRQC.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         4. INSPIRATION & DISCOVERIES SECTION ("Thousands of discoveries")
+         ============================================================ -->
+    <section id="discoveries" class="sd-discoveries-section">
+        <div class="sd-disco-left">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem;">
+                <span class="mono" style="font-size: 0.82rem; color: var(--sd-text-muted);">The cryptographic inventory library</span>
+                <span class="mono" style="font-size: 0.74rem; color: var(--sd-text-dim);">Live AST Catalog</span>
+            </div>
+
+            <div class="sd-disco-grid-preview">
+                <div class="sd-disco-thumb">
+                    <span class="sd-disco-algo">RSA-2048</span>
+                    <span class="sd-disco-tag tag-crit">CRITICAL</span>
+                    <span class="mono" style="font-size: 0.68rem; color: var(--sd-text-dim);">Asymmetric KEM</span>
+                </div>
+
+                <div class="sd-disco-thumb">
+                    <span class="sd-disco-algo">ECC-256</span>
+                    <span class="sd-disco-tag tag-crit">CRITICAL</span>
+                    <span class="mono" style="font-size: 0.68rem; color: var(--sd-text-dim);">ECDSA Signature</span>
+                </div>
+
+                <div class="sd-disco-thumb">
+                    <span class="sd-disco-algo">ML-KEM-768</span>
+                    <span class="sd-disco-tag tag-safe">PQC SAFE</span>
+                    <span class="mono" style="font-size: 0.68rem; color: var(--sd-text-dim);">NIST FIPS 203</span>
+                </div>
+
+                <div class="sd-disco-thumb">
+                    <span class="sd-disco-algo">3DES-168</span>
+                    <span class="sd-disco-tag tag-dep">DEPRECATED</span>
+                    <span class="mono" style="font-size: 0.68rem; color: var(--sd-text-dim);">Legacy Block</span>
+                </div>
+
+                <div class="sd-disco-thumb">
+                    <span class="sd-disco-algo">AES-256</span>
+                    <span class="sd-disco-tag tag-safe">SECURE</span>
+                    <span class="mono" style="font-size: 0.68rem; color: var(--sd-text-dim);">Symmetric GCM</span>
+                </div>
+
+                <div class="sd-disco-thumb">
+                    <span class="sd-disco-algo">ML-DSA-65</span>
+                    <span class="sd-disco-tag tag-safe">PQC SAFE</span>
+                    <span class="mono" style="font-size: 0.68rem; color: var(--sd-text-dim);">NIST FIPS 204</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sd-disco-right">
+            <h2>Thousands of discoveries</h2>
+            <p>
+                Ciphers. Key exchanges. Digital signatures. TLS handshakes. CBOM inventories. NIST PQC compliance.
             </p>
+            <p>
+                The kind of hardcoded legacy cryptography buried beneath algorithms, scattered across microservices, and lost in endless source files.
+            </p>
+            <p>
+                Think modern static security analysis — but fresh, curated, and built exclusively for post-quantum cryptographic discovery.
+            </p>
+            <a href="{{ url_for('scan') }}" class="sd-btn-explore">
+                <span>Explore elements</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    </section>
 
-            <div class="hero-actions">
-                <a href="{{ url_for('analyze') }}" class="btn-impact">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-                    <span>Analyze Console</span>
-                </a>
-                <a href="{{ url_for('scan') }}" class="btn-impact-outline">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                    <span>Scan Code</span>
-                </a>
-                <a href="{{ url_for('manual') }}" class="btn-impact-outline">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
-                    <span>Manual Lookup</span>
-                </a>
+    <!-- ============================================================
+         5. NATURAL SEARCH COMMAND PALETTE ("SEARCH ⌘K")
+         ============================================================ -->
+    <section class="sd-search-section">
+        <div class="sd-search-label">SEARCH &#8984;K</div>
+
+        <div class="sd-search-bar">
+            <svg class="sd-search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="sd-search-input" value="quantum vulnerable signatures in payment-service" readonly>
+        </div>
+
+        <div class="sd-search-desc">
+            Natural Search finds your cryptographic assets by meaning — not just keywords.
+        </div>
+        <div class="sd-search-sub">
+            Type how you remember it, in plain English.
+        </div>
+    </section>
+
+    <!-- ============================================================
+         6. DEEP ANALYSIS RESULT BREAKDOWN (Tech Stack Inspector Look)
+         ============================================================ -->
+    <section class="sd-analysis-section">
+        <div class="sd-analysis-tag">
+            <span class="sd-pink-dot"></span>
+            <span>Analysis result</span>
+        </div>
+
+        <div class="sd-analysis-window">
+            <div class="sd-aw-header">
+                <div class="sd-aw-title">
+                    <span style="color: #A3E635;">●</span>
+                    <span>payment-service.crypto</span>
+                </div>
+                <a href="{{ url_for('scan') }}" class="sd-btn-nav-dark" style="font-size: 0.76rem; padding: 0.35rem 0.8rem;">Save to CBOM</a>
+            </div>
+
+            <div class="sd-aw-body">
+                <div class="sd-aw-preview-card">
+                    <div style="font-family: var(--sd-font-heading); font-size: 1.8rem; font-weight: 800; color: #FFFFFF; line-height: 1.1; margin-bottom: 0.4rem;">
+                        Payment<br><span style="color: #E11487;">Vault</span>
+                    </div>
+                    <span class="mono" style="font-size: 0.72rem; color: var(--sd-text-dim);">Core Transaction Microservice</span>
+                </div>
+
+                <div class="sd-aw-specs-grid">
+                    <div class="sd-aw-spec-row">
+                        <span class="sd-aw-spec-lbl">Framework</span>
+                        <span class="sd-aw-spec-val">Python / Flask</span>
+                    </div>
+                    <div class="sd-aw-spec-row">
+                        <span class="sd-aw-spec-lbl">Algorithm</span>
+                        <span class="sd-aw-spec-val">RSA-2048 &rarr; <span style="color: #A3E635;">ML-KEM-768</span></span>
+                    </div>
+                    <div class="sd-aw-spec-row">
+                        <span class="sd-aw-spec-lbl">NIST Status</span>
+                        <span class="sd-aw-spec-val" style="color: #38BDF8;">FIPS 203 Compliant</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sd-aw-logs">
+                <div class="sd-log-title">DETECTION LOG</div>
+                <div class="sd-log-line">&gt; <span>Detected</span> RSA-2048 via Crypto.PublicKey.RSA at line 184</div>
+                <div class="sd-log-line">&gt; <span>Detected</span> 3DES in /payment/gateway.py at line 26</div>
+                <div class="sd-log-line">&gt; <span>Automated Fix</span> Generated NIST ML-KEM-768 drop-in remediation snippet</div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================
-         SECTION 2: ABOUT / WHY QUANTUM MATTERS
+         7. BENTO PRICING GRID ("Everything you need to build your library.")
          ============================================================ -->
-    <section id="about" class="section">
-        <div class="section-container">
-            <div class="section-header">
-                <div class="chips">Why Quantum Threat Matters</div>
-                <h2 class="section-title">At Qryptis, we turn quantum uncertainty into actionable security</h2>
-                <p class="section-desc">
-                    Quantum computers will break today’s public-key cryptography with Shor’s algorithm. Harvest Now, Decrypt Later (HNDL) attacks are already intercepting encrypted traffic today to decrypt tomorrow.
-                </p>
+    <section id="pricing" class="sd-pricing-section">
+        <div class="sd-pricing-header">
+            <span class="mono" style="font-size: 0.8rem; color: var(--sd-text-dim); text-transform: uppercase;">Pricing & Plans</span>
+            <h2>Everything you need to build your quantum defense.</h2>
+        </div>
+
+        <div class="sd-pricing-grid">
+            <!-- Basic Tier -->
+            <div class="sd-price-card">
+                <div class="sd-price-amount">$0<span class="sd-price-period">/free</span></div>
+                <a href="{{ url_for('scan') }}" class="sd-btn-price-basic">Get Basic</a>
+
+                <ul class="sd-price-features">
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Natural Search</strong> across your workspace</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Smart Capture</strong> & AST Regex Scanner</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Unlimited saves</strong> &bull; algorithms, findings, snippets</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Full access</strong> to Algorithm Database</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>CBOM JSON export</strong></span></li>
+                </ul>
             </div>
 
-            <!-- Value Props (ImpactFrames Style) -->
-            <div class="values-grid">
-                <div class="value-card">
-                    <div class="value-title-box">
-                        <div class="value-title">Speed & structure:</div>
-                        <div class="value-gradient-line"></div>
-                    </div>
-                    <div class="value-text">
-                        Instant static code analysis across Python, JavaScript, Java, and C/C++ repositories without interrupting your CI/CD pipeline.
-                    </div>
-                </div>
+            <!-- Pro Tier (Featured) -->
+            <div class="sd-price-card sd-price-featured">
+                <div class="sd-price-amount">$10<span class="sd-price-period">/mo</span></div>
+                <a href="{{ url_for('analyze') }}" class="sd-btn-price-featured">Start 3-day free trial</a>
+                <div class="sd-price-trial-note">Free for 3 days, then $10/mo &bull; cancel anytime</div>
 
-                <div class="value-card">
-                    <div class="value-title-box">
-                        <div class="value-title">Client-first agility:</div>
-                        <div class="value-gradient-line"></div>
-                    </div>
-                    <div class="value-text">
-                        Calculate exact Cryptographic Agility Scores (0-100) and quantify multi-year risk forecasts to plan prioritized migrations.
-                    </div>
-                </div>
-
-                <div class="value-card">
-                    <div class="value-title-box">
-                        <div class="value-title">Results-driven PQC:</div>
-                        <div class="value-gradient-line"></div>
-                    </div>
-                    <div class="value-text">
-                        Direct drop-in replacements for ML-KEM-768, ML-DSA, and SLH-DSA with side-by-side syntax-highlighted code recommendations.
-                    </div>
-                </div>
+                <ul class="sd-price-features">
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Everything in Basic</strong></span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Full access to Standalone CLI</strong> (qryptis.py)</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>CI/CD DevSecOps gatekeeping</strong> (--fail-on CRITICAL)</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Phased Migration Roadmap</strong> (Markdown)</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Live TLS 1.3 & Cipher Suite Probe</strong></span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Local AI Assistant</strong> (Ollama / Mistral)</span></li>
+                </ul>
             </div>
 
-            <!-- Algorithm Threat Status Grid -->
-            <div class="threat-grid">
-                <div class="threat-card">
-                    <div class="threat-icon-wrap threat-icon--critical">⚠️</div>
-                    <div class="threat-name">RSA</div>
-                    <span class="threat-status-badge threat-badge--critical">CRITICAL</span>
-                    <p class="threat-desc">Broken by Shor's algorithm. Immediate migration to ML-KEM required.</p>
-                </div>
+            <!-- Team Tier -->
+            <div class="sd-price-card">
+                <div class="sd-price-amount">$25<span class="sd-price-period">/seat/mo</span></div>
+                <a href="{{ url_for('analyze') }}" class="sd-btn-price-basic">Get team membership</a>
 
-                <div class="threat-card">
-                    <div class="threat-icon-wrap threat-icon--critical">⚠️</div>
-                    <div class="threat-name">ECC</div>
-                    <span class="threat-status-badge threat-badge--critical">CRITICAL</span>
-                    <p class="threat-desc">Elliptic curves (ECDSA, ECDH) are completely vulnerable to quantum computing.</p>
-                </div>
-
-                <div class="threat-card">
-                    <div class="threat-icon-wrap threat-icon--critical">⚠️</div>
-                    <div class="threat-name">DSA</div>
-                    <span class="threat-status-badge threat-badge--critical">CRITICAL</span>
-                    <p class="threat-desc">Classical discrete-log signatures fail against quantum solvers.</p>
-                </div>
-
-                <div class="threat-card">
-                    <div class="threat-icon-wrap threat-icon--deprecated">🗑️</div>
-                    <div class="threat-name">3DES</div>
-                    <span class="threat-status-badge threat-badge--deprecated">DEPRECATED</span>
-                    <p class="threat-desc">Broken by classical cryptanalysis and sweet32 attacks. Avoid.</p>
-                </div>
-
-                <div class="threat-card">
-                    <div class="threat-icon-wrap threat-icon--safe">🛡️</div>
-                    <div class="threat-name">AES-256</div>
-                    <span class="threat-status-badge threat-badge--safe">SAFE</span>
-                    <p class="threat-desc">Symmetric encryption with 256-bit keys resists Grover's quantum search.</p>
-                </div>
+                <ul class="sd-price-features">
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Everything in Pro</strong>, for each security engineer</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Per-seat pricing</strong> &bull; pay for active engineers only</span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>50 GB workspace memory</strong></span></li>
+                    <li class="sd-price-feature-item"><span class="sd-feat-bullet">✦</span> <span><strong>Buy more storage</strong> for the whole team</span></li>
+                </ul>
             </div>
         </div>
     </section>
 
     <!-- ============================================================
-         SECTION 3: CAPABILITIES / SERVICES (ImpactFrames Blocks)
+         8. FAQ ACCORDION ("Answers")
          ============================================================ -->
-    <section id="services" class="section" style="background: var(--bg-darker);">
-        <div class="section-container">
-            <div class="section-header center">
-                <div class="chips">Capabilities</div>
-                <h2 class="section-title">Crafting Quantum Security for Your Stack</h2>
-                <p class="section-desc">Innovative analysis tools built for engineers, security architects, and devops teams.</p>
-            </div>
-
-            <div class="services-container">
-                <!-- Service Block 1: Code Scanner -->
-                <div class="service-block">
-                    <div class="service-content">
-                        <div class="service-tag">Core Engine</div>
-                        <h3 class="service-title">Code Scanner</h3>
-                        <p class="service-desc">
-                            Upload your code or paste snippets to instantly detect cryptographic algorithms, assess quantum exposure, and generate actionable CBOM (Cryptography Bill of Materials) JSON reports.
-                        </p>
-                        <a href="{{ url_for('scan') }}" class="service-link">
-                            <span>Scan Your Code</span>
-                            <span class="arrow">&rarr;</span>
-                        </a>
-                    </div>
-                    <div class="service-media">
-                        <div style="padding: 2.5rem; text-align: left; width: 100%;">
-                            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: #FF708F; margin-bottom: 0.5rem;">$ qryptis scan --target ./src</div>
-                            <div style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-muted); line-height: 1.6;">
-                                [!] Found RSA-2048 at line 12 (CRITICAL)<br>
-                                [!] Found 3DES at line 27 (DEPRECATED)<br>
-                                [✓] Recommended: ML-KEM-768<br>
-                                [✓] CBOM generated: cbom.json
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Service Block 2: Manual Lookup -->
-                <div class="service-block reverse">
-                    <div class="service-content">
-                        <div class="service-tag">Targeted Analysis</div>
-                        <h3 class="service-title">Manual Algorithm Lookup</h3>
-                        <p class="service-desc">
-                            Check any algorithm and key size. Evaluate classical security, quantum vulnerability timelines, and calculate Harvest-Now-Decrypt-Later confidentiality risks with AI guidance.
-                        </p>
-                        <a href="{{ url_for('manual') }}" class="service-link">
-                            <span>Lookup Algorithm</span>
-                            <span class="arrow">&rarr;</span>
-                        </a>
-                    </div>
-                    <div class="service-media">
-                        <div style="padding: 2.5rem; text-align: left; width: 100%;">
-                            <div style="display: flex; gap: 0.6rem; margin-bottom: 1rem;">
-                                <span class="threat-status-badge threat-badge--critical">RSA-2048</span>
-                                <span class="threat-status-badge threat-badge--safe">ML-KEM-768</span>
-                            </div>
-                            <p style="font-size: 0.82rem; color: var(--text-muted);">
-                                Quantum Vulnerability: <strong>True</strong><br>
-                                Replacement: <strong>ML-KEM-768 (NIST Standard)</strong><br>
-                                Migration Urgency: <strong>Immediate</strong>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Service Block 3: Live Scan -->
-                <div class="service-block">
-                    <div class="service-content">
-                        <div class="service-tag">TLS / SSL Inspector</div>
-                        <h3 class="service-title">Live Website Scanner</h3>
-                        <p class="service-desc">
-                            Analyze external endpoints and live websites to inspect public key infrastructure, cipher suites, TLS handshakes, and hybrid PQC key exchange readiness.
-                        </p>
-                        <a href="{{ url_for('live_scan') }}" class="service-link">
-                            <span>Test Live Website</span>
-                            <span class="arrow">&rarr;</span>
-                        </a>
-                    </div>
-                    <div class="service-media">
-                        <div style="padding: 2.5rem; text-align: left; width: 100%;">
-                            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); margin-bottom: 0.5rem;">https://your-domain.com:443</div>
-                            <div style="font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-muted); line-height: 1.6;">
-                                TLS 1.3 / X25519 (Classical Only)<br>
-                                Hybrid PQC (X25519Kyber768): <strong style="color: var(--status-at-risk);">Not Supported</strong><br>
-                                Recommended Action: Enable Post-Quantum KEM
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <section class="sd-faq-section">
+        <div class="sd-faq-left">
+            <h2>Answers</h2>
         </div>
-    </section>
 
-    <!-- ============================================================
-         SECTION 4: REAL BENCHMARKS & STATS
-         ============================================================ -->
-    <section id="benchmarks" class="section">
-        <div class="section-container">
-            <div class="section-header center">
-                <div class="chips">Real Benchmarks</div>
-                <h2 class="section-title">Real Benchmarks. Real Numbers.</h2>
-                <p class="section-desc">Measured on local hardware using PyCryptodome & liboqs quantum-safe libraries.</p>
+        <div class="sd-faq-accordion">
+            <div class="sd-faq-row active">
+                <div class="sd-faq-q">
+                    <span>Who is this platform for?</span>
+                    <span class="sd-faq-plus">+</span>
+                </div>
+                <div class="sd-faq-a">
+                    Qryptis is engineered for security engineers, software architects, cryptographers, and DevSecOps teams responsible for discovering legacy cryptography and ensuring compliance with NIST post-quantum migration mandates.
+                </div>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-top-label">RSA-2048</div>
-                    <div class="stat-num">1,247</div>
-                    <div class="stat-unit">ops / sec</div>
+            <div class="sd-faq-row">
+                <div class="sd-faq-q">
+                    <span>What exactly is Qryptis?</span>
+                    <span class="sd-faq-plus">+</span>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-top-label">AES-256 (GCM)</div>
-                    <div class="stat-num">98,721</div>
-                    <div class="stat-unit">ops / sec</div>
+                <div class="sd-faq-a">
+                    Qryptis is an automated static security scanner and migration platform that detects vulnerable classical algorithms (RSA, ECC, 3DES, MD5), calculates Cryptographic Agility Scores, models Harvest Now Decrypt Later (HNDL) exposure, and generates NIST PQC compliant CBOMs.
                 </div>
+            </div>
 
-                <div class="stat-card">
-                    <div class="stat-top-label">3DES</div>
-                    <div class="stat-num">2,104</div>
-                    <div class="stat-unit">ops / sec</div>
+            <div class="sd-faq-row">
+                <div class="sd-faq-q">
+                    <span>What can I save and scan here?</span>
+                    <span class="sd-faq-plus">+</span>
                 </div>
+                <div class="sd-faq-a">
+                    You can scan full source code repositories, individual code files (.py, .js, .java, .c, etc.), manual algorithm and key size parameters, and live external HTTPS endpoints for TLS handshake validation.
+                </div>
+            </div>
 
-                <div class="stat-card" style="border-color: var(--border-accent); box-shadow: 0 0 24px rgba(46,158,255,0.12);">
-                    <div class="stat-top-label">
-                        <span>ML-KEM-768</span>
-                        <span class="stat-pqc-pill">PQC</span>
-                    </div>
-                    <div class="stat-num" style="color: var(--accent);">4,392</div>
-                    <div class="stat-unit">ops / sec (Quantum Safe)</div>
+            <div class="sd-faq-row">
+                <div class="sd-faq-q">
+                    <span>What does "analyzing a codebase" mean?</span>
+                    <span class="sd-faq-plus">+</span>
+                </div>
+                <div class="sd-faq-a">
+                    Our scanner parses your code to locate every cryptographic library initialization, evaluates whether the algorithm and key length will withstand Shor's and Grover's quantum algorithms, and attaches drop-in NIST PQC replacement code.
+                </div>
+            </div>
+
+            <div class="sd-faq-row">
+                <div class="sd-faq-q">
+                    <span>Wait, there's a built-in CLI and CBOM export?</span>
+                    <span class="sd-faq-plus">+</span>
+                </div>
+                <div class="sd-faq-a">
+                    Yes! Real security engineers can run <code>python qryptis.py scan ./src --export cbom.json</code> directly in their terminal and enforce CI/CD build gates using <code>--fail-on CRITICAL</code>.
+                </div>
+            </div>
+
+            <div class="sd-faq-row">
+                <div class="sd-faq-q">
+                    <span>What are NIST FIPS 203 (ML-KEM) and FIPS 204 (ML-DSA)?</span>
+                    <span class="sd-faq-plus">+</span>
+                </div>
+                <div class="sd-faq-a">
+                    In August 2024, NIST released finalized post-quantum standards: ML-KEM (FIPS 203) for key encapsulation and ML-DSA (FIPS 204) for digital signatures. Qryptis recommends these standardized lattice-based algorithms.
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================
-         SECTION 5: FAQ ACCORDION
+         9. GRAND BOTTOM CTA & FOOTER
          ============================================================ -->
-    <section id="faq" class="section" style="background: var(--bg-darker);">
-        <div class="section-container">
-            <div class="section-header center">
-                <div class="chips">FAQ</div>
-                <h2 class="section-title">Frequently Asked Questions</h2>
-                <p class="section-desc">Everything you need to know about post-quantum cryptography and migration.</p>
-            </div>
-
-            <div class="faq-list">
-                <div class="faq-item active">
-                    <div class="faq-question">
-                        <span>What is the quantum threat to modern cryptography?</span>
-                        <div class="faq-icon">&darr;</div>
-                    </div>
-                    <div class="faq-answer">
-                        Quantum computers utilizing Shor’s algorithm can solve integer factorization and discrete logarithms in polynomial time, completely compromising public-key cryptography such as RSA, ECC, Diffie-Hellman, and DSA.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>What is Harvest Now, Decrypt Later (HNDL)?</span>
-                        <div class="faq-icon">&darr;</div>
-                    </div>
-                    <div class="faq-answer">
-                        Adversaries and state actors are actively recording encrypted network traffic today. Once sufficiently capable quantum computers emerge, they will decrypt this stored historical data. Any data with long-term confidentiality requirements is at risk right now.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Which algorithms are standardized by NIST?</span>
-                        <div class="faq-icon">&darr;</div>
-                    </div>
-                    <div class="faq-answer">
-                        NIST finalized standards in 2024: <strong>ML-KEM (FIPS 203)</strong> for key encapsulation, <strong>ML-DSA (FIPS 204)</strong> for digital signatures, and <strong>SLH-DSA (FIPS 205)</strong> for stateless hash-based signatures. Qryptis recommends these standards.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>How does Qryptis calculate the Cryptographic Agility Score?</span>
-                        <div class="faq-icon">&darr;</div>
-                    </div>
-                    <div class="faq-answer">
-                        The score evaluates your code based on finding counts, prevalence of hardcoded deprecated ciphers, key size sufficiency, algorithm modularity, and readiness for drop-in PQC replacement libraries.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <span>Can I export a Cryptography Bill of Materials (CBOM)?</span>
-                        <div class="faq-icon">&darr;</div>
-                    </div>
-                    <div class="faq-answer">
-                        Yes. After running a code scan, you can download a standardized CycloneDX-compatible CBOM JSON file detailing all cryptographic assets, keys, and quantum vulnerability states.
-                    </div>
-                </div>
-            </div>
-        </div>
+    <section class="sd-bottom-cta-section">
+        <h2 class="sd-bottom-title">Your cryptographic security<br>has a home now.</h2>
+        <p class="sd-bottom-sub">Tired of losing track of legacy crypto across repositories? Start with Qryptis today.</p>
+        <a href="{{ url_for('scan') }}" class="sd-btn-grand">
+            <span>Start Scanning Now — Free & Open Source</span>
+            <span>&rarr;</span>
+        </a>
     </section>
 
-    <!-- ============================================================
-         SECTION 6: CONTACT & LEAD FORM
-         ============================================================ -->
-    <section id="contact" class="section">
-        <div class="section-container">
-            <div class="chips">Get in Touch</div>
-            <div class="leadform-wrapper">
-                <div class="lead-info">
-                    <div>
-                        <h2 class="section-title" style="font-size: 2rem;">Drop Us a Line</h2>
-                        <p class="section-desc" style="font-size: 0.95rem;">
-                            Have questions about quantum readiness or enterprise scanning? Reach out directly.
-                        </p>
-                        <a href="mailto:security@qryptis.dev" class="lead-mail">security@qryptis.dev</a>
-                    </div>
-
-                    <div>
-                        <div class="social-links">
-                            <a href="https://github.com" target="_blank" class="social-pill">GitHub</a>
-                            <a href="https://telegram.org" target="_blank" class="social-pill">Telegram</a>
-                            <a href="https://linkedin.com" target="_blank" class="social-pill">LinkedIn</a>
-                        </div>
-                        <p style="font-size: 0.75rem; color: var(--text-dim);">Qryptis Security Engine &copy; 2026</p>
-                    </div>
-                </div>
-
-                <form class="impact-form" onsubmit="event.preventDefault(); alert('Thank you! Our security team will connect with you.');">
-                    <div>
-                        <label class="form-label">What do you need to secure?</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-pill">
-                                <input type="checkbox" name="scope" checked>
-                                <span>Codebase / Repositories</span>
-                            </label>
-                            <label class="checkbox-pill">
-                                <input type="checkbox" name="scope">
-                                <span>TLS & Network Infrastructure</span>
-                            </label>
-                            <label class="checkbox-pill">
-                                <input type="checkbox" name="scope">
-                                <span>Hardware & IoT</span>
-                            </label>
-                            <label class="checkbox-pill">
-                                <input type="checkbox" name="scope">
-                                <span>Compliance & CBOM</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-grid-2">
-                        <div>
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-field" placeholder="Alice Smith" required>
-                        </div>
-                        <div>
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-field" placeholder="alice@company.com" required>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="form-label">Project Details (Optional)</label>
-                        <textarea class="form-field" rows="3" placeholder="Tell us about your systems, languages, or timeline..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-impact" style="width: 100%; margin-top: 0.5rem;">
-                        <span>Submit Request</span>
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================
-         FOOTER
-         ============================================================ -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-top">
-                <div class="nav-logo">
-                    <svg viewBox="0 0 28 28" width="22" height="22" fill="none">
-                        <path d="M14 2L4 8v8c0 5.2 3.6 10 10 11.2 6.4-1.2 10-6 10-11.2V8L14 2z" fill="#2E9EFF" opacity="0.2" stroke="#2E9EFF" stroke-width="1.8"/>
-                        <text x="14" y="18" text-anchor="middle" fill="#2E9EFF" font-family="'Unbounded', sans-serif" font-size="12" font-weight="700">Q</text>
-                    </svg>
-                    <span>Qryptis</span>
-                </div>
-
-                <div class="footer-links">
-                    <a href="{{ url_for('home') }}" class="footer-link">Home</a>
-                    <a href="{{ url_for('analyze') }}" class="footer-link">Analyze Console</a>
-                    <a href="{{ url_for('scan') }}" class="footer-link">Code Scanner</a>
-                    <a href="{{ url_for('manual') }}" class="footer-link">Manual Lookup</a>
-                    <a href="{{ url_for('live_scan') }}" class="footer-link">Live SSL Scan</a>
-                    {% if session.user %}
-                    <a href="{{ url_for('logout') }}" class="footer-link">Sign Out</a>
-                    {% else %}
-                    <a href="{{ url_for('login', next=request.path) }}" class="footer-link">Security Login</a>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <span>&copy; 2026 Qryptis. Open-source Post-Quantum Cryptography Migration Analyzer.</span>
-                <a href="#hero" style="color: var(--text-muted); font-size: 0.8rem;">Back to Top &uarr;</a>
-            </div>
+    <footer class="sd-footer">
+        <div>&copy; 2026 Qryptis. Open-source Post-Quantum Cryptography Migration Analyzer.</div>
+        <div class="sd-footer-links">
+            <a href="{{ url_for('home') }}" class="sd-footer-link">Home</a>
+            <a href="{{ url_for('analyze') }}" class="sd-footer-link">Explore</a>
+            <a href="{{ url_for('scan') }}" class="sd-footer-link">Scanner</a>
+            <a href="{{ url_for('manual') }}" class="sd-footer-link">Lookup</a>
+            <a href="{{ url_for('database') }}" class="sd-footer-link">Database</a>
+            <a href="{{ url_for('live_scan') }}" class="sd-footer-link">Live TLS</a>
         </div>
     </footer>
 
-    <!-- ============================================================
-         FLOATING AI ASSISTANT CHATBOT
-         ============================================================ -->
-    <div id="chat-widget">
-        <button id="chat-toggle" aria-label="Open Qryptis AI Chat">💬</button>
-        <div id="chat-box">
-            <div id="chat-header">
-                <span>Qryptis AI Assistant</span>
-                <button id="chat-close" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1rem;">✕</button>
-            </div>
-            <div id="chat-messages">
-                <div class="chat-msg bot">
-                    Hi! I'm Qryptis AI. Ask me anything about post-quantum algorithms, Shor's algorithm, or migrating to ML-KEM & ML-DSA.
-                </div>
-            </div>
-            <div id="chat-input-row">
-                <input type="text" id="chat-input" placeholder="Ask anything about PQC...">
-                <button id="chat-send">Send</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
+    <!-- Interactive FAQ Accordion Script -->
     <script>
-        // FAQ Accordion Toggle
-        document.querySelectorAll('.faq-question').forEach(function(q) {
-            q.addEventListener('click', function() {
-                var item = this.parentElement;
-                var isActive = item.classList.contains('active');
-                document.querySelectorAll('.faq-item').forEach(function(el) { el.classList.remove('active'); });
-                if (!isActive) item.classList.add('active');
-            });
-        });
-
-        // Chat Widget
-        var chatToggle = document.getElementById('chat-toggle');
-        var chatClose = document.getElementById('chat-close');
-        var chatBox = document.getElementById('chat-box');
-        var chatMessages = document.getElementById('chat-messages');
-        var chatInput = document.getElementById('chat-input');
-        var chatSend = document.getElementById('chat-send');
-
-        if (chatToggle && chatBox) {
-            chatToggle.addEventListener('click', function() { chatBox.classList.toggle('open'); });
-            if (chatClose) chatClose.addEventListener('click', function() { chatBox.classList.remove('open'); });
-        }
-
-        function addMessage(text, sender) {
-            var msg = document.createElement('div');
-            msg.className = 'chat-msg ' + sender;
-            msg.innerHTML = text.replace(/\n/g, '<br>');
-            chatMessages.appendChild(msg);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        async function sendChat() {
-            var message = chatInput.value.trim();
-            if (!message) return;
-            addMessage(message, 'user');
-            chatInput.value = '';
-
-            var loading = document.createElement('div');
-            loading.className = 'chat-msg bot-loading';
-            loading.textContent = 'Thinking...';
-            chatMessages.appendChild(loading);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                var res = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
-                });
-                var data = await res.json();
-                loading.remove();
-                addMessage(data.reply || 'No response', 'bot');
-            } catch (err) {
-                loading.remove();
-                addMessage('Could not connect to AI assistant.', 'bot');
+    document.querySelectorAll('.sd-faq-row').forEach(function(row) {
+        row.addEventListener('click', function() {
+            var isActive = this.classList.contains('active');
+            document.querySelectorAll('.sd-faq-row').forEach(function(r) { r.classList.remove('active'); });
+            if (!isActive) {
+                this.classList.add('active');
             }
-        }
-
-        if (chatSend) chatSend.addEventListener('click', sendChat);
-        if (chatInput) chatInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') sendChat(); });
+        });
+    });
     </script>
 </body>
 </html>

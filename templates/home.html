@@ -36,8 +36,8 @@
 
                 <nav class="sd-nav-links">
                     <a href="{{ url_for('analyze') }}" class="sd-nav-link">Explore</a>
+                    <a href="{{ url_for('inventory') }}" class="sd-nav-link">Inventory</a>
                     <a href="{{ url_for('scan') }}" class="sd-nav-link">Scanner</a>
-                    <a href="#discoveries" class="sd-nav-link">Inventory</a>
                     <a href="#pricing" class="sd-nav-link">Membership</a>
                     
                     <div class="sd-nav-dropdown">
@@ -45,6 +45,7 @@
                             Tools <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                         </span>
                         <div class="sd-dropdown-menu">
+                            <a href="{{ url_for('inventory') }}" class="sd-dropdown-item">Crypto Inventory</a>
                             <a href="{{ url_for('scan') }}" class="sd-dropdown-item">Code Scanner</a>
                             <a href="{{ url_for('manual') }}" class="sd-dropdown-item">Algorithm Lookup</a>
                             <a href="{{ url_for('live_scan') }}" class="sd-dropdown-item">Live TLS Probe</a>

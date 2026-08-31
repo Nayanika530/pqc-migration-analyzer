@@ -10,6 +10,8 @@ from scanner import (
     scan_and_report, generate_cbom, calculate_agility_score,
     generate_migration_roadmap, export_roadmap_as_markdown, generate_risk_forecast
 )
+from inventory import GLOBAL_INVENTORY, parse_certificate_content
+import json
 
 load_dotenv()
 
@@ -134,6 +136,114 @@ def api_standards():
         "nist_pqc_standards": NIST_STANDARDS_DB,
         "recommendation": "NIST explicitly recommends organizations begin applying standardized PQC algorithms (FIPS 203, 204, 205) and preparing for Round 4 alternatives (HQC) now."
     })
+
+
+@app.route("/inventory", methods=["GET", "POST"])
+def inventory():
+    msg = None
+    if request.method == "POST":
+        action = request.form.get("action")
+        if action == "load_sample":
+            GLOBAL_INVENTORY.load_sample_inventory()
+            msg = "Loaded canonical 47-asset enterprise sample."
+        elif action == "clear":
+            GLOBAL_INVENTORY.clear()
+            msg = "Inventory cleared."
+        elif action == "add_website":
+            domain = request.form.get("domain", "").strip()
+            if domain:
+                res = scan_live_website(domain)
+                if not res.get("error"):
+                    GLOBAL_INVENTORY.add_live_scan(res, target_name=domain)
+                    msg = f"Ingested live TLS findings from {domain}."
+                else:
+                    msg = f"Error scanning domain: {res.get('error')}"
+        elif action == "add_code":
+            code_text = request.form.get("code", "")
+            target_name = request.form.get("target_name", "Codebase").strip() or "Codebase"
+            if code_text.strip():
+                scan_res = scan_and_report(code_text)
+                GLOBAL_INVENTORY.add_code_findings(scan_res["results"], target_name=target_name)
+                msg = f"Ingested {len(scan_res['results'])} findings from {target_name}."
+        elif action == "add_cert":
+            cert_text = request.form.get("cert_text", "")
+            filename = request.form.get("filename", "server.pem").strip() or "server.pem"
+            if cert_text.strip():
+                GLOBAL_INVENTORY.add_certificate(cert_text, filename=filename)
+                msg = f"Ingested certificate findings from {filename}."
+
+    summary = GLOBAL_INVENTORY.get_summary()
+    assets = [a.to_dict() for a in GLOBAL_INVENTORY.assets]
+    return render_template("inventory.html", summary=summary, assets=assets, message=msg)
+
+
+@app.route("/api/inventory", methods=["GET"])
+def api_inventory():
+    summary = GLOBAL_INVENTORY.get_summary()
+    return jsonify({
+        "status": "success",
+        "inventory": summary,
+        "assets": [a.to_dict() for a in GLOBAL_INVENTORY.assets]
+    })
+
+
+@app.route("/api/inventory/load-sample", methods=["POST"])
+def api_inventory_sample():
+    GLOBAL_INVENTORY.load_sample_inventory()
+    return jsonify({"status": "success", "message": "Sample 47-asset inventory loaded", "summary": GLOBAL_INVENTORY.get_summary()})
+
+
+@app.route("/api/inventory/clear", methods=["POST"])
+def api_inventory_clear():
+    GLOBAL_INVENTORY.clear()
+    return jsonify({"status": "success", "message": "Inventory cleared", "summary": GLOBAL_INVENTORY.get_summary()})
+
+
+@app.route("/api/inventory/add-code", methods=["POST"])
+def api_inventory_add_code():
+    data = request.get_json(silent=True) or {}
+    code_text = data.get("code", "") or request.form.get("code", "")
+    target = data.get("target_name", "Codebase") or request.form.get("target_name", "Codebase")
+    if not code_text.strip():
+        return jsonify({"error": "Empty code payload"}), 400
+    scan_res = scan_and_report(code_text)
+    GLOBAL_INVENTORY.add_code_findings(scan_res["results"], target_name=target)
+    return jsonify({"status": "success", "added": len(scan_res["results"]), "summary": GLOBAL_INVENTORY.get_summary()})
+
+
+@app.route("/api/inventory/add-network", methods=["POST"])
+def api_inventory_add_network():
+    data = request.get_json(silent=True) or {}
+    domain = data.get("domain", "") or request.form.get("domain", "")
+    if not domain.strip():
+        return jsonify({"error": "Domain required"}), 400
+    res = scan_live_website(domain)
+    if res.get("error"):
+        return jsonify({"error": res["error"]}), 400
+    GLOBAL_INVENTORY.add_live_scan(res, target_name=domain)
+    return jsonify({"status": "success", "domain": domain, "summary": GLOBAL_INVENTORY.get_summary()})
+
+
+@app.route("/api/inventory/add-cert", methods=["POST"])
+def api_inventory_add_cert():
+    data = request.get_json(silent=True) or {}
+    cert_text = data.get("cert_text", "") or request.form.get("cert_text", "")
+    filename = data.get("filename", "server.pem") or request.form.get("filename", "server.pem")
+    if not cert_text.strip():
+        return jsonify({"error": "Certificate text required"}), 400
+    GLOBAL_INVENTORY.add_certificate(cert_text, filename=filename)
+    return jsonify({"status": "success", "filename": filename, "summary": GLOBAL_INVENTORY.get_summary()})
+
+
+@app.route("/api/inventory/export/cbom", methods=["GET"])
+def api_inventory_export_cbom():
+    cbom_data = GLOBAL_INVENTORY.export_cbom()
+    json_bytes = json.dumps(cbom_data, indent=2).encode("utf-8")
+    return Response(
+        json_bytes,
+        mimetype="application/json",
+        headers={"Content-Disposition": "attachment; filename=enterprise_cbom.json"}
+    )
 
 
 @app.route("/live-scan", methods=["GET", "POST"])

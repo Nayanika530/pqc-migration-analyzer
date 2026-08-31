@@ -286,6 +286,69 @@ class TestFlaskWebRoutes(unittest.TestCase):
         self.assertIn("FIPS 204", standards)
         self.assertIn("FIPS 205", standards)
 
+    def test_inventory_routes_and_api(self):
+        """Verify /inventory HTML and REST API endpoints."""
+        # 1. HTML View
+        res_html = self.client.get("/inventory")
+        self.assertEqual(res_html.status_code, 200)
+        self.assertIn(b"Cryptographic Asset Inventory", res_html.data)
+
+        # 2. JSON API
+        res_api = self.client.get("/api/inventory")
+        self.assertEqual(res_api.status_code, 200)
+        data = res_api.get_json()
+        self.assertEqual(data["status"], "success")
+        self.assertIn("inventory", data)
+        self.assertEqual(data["inventory"]["total_assets"], 47)
+        self.assertEqual(data["inventory"]["quantum_vulnerable"], 32)
+        self.assertEqual(data["inventory"]["deprecated"], 3)
+        self.assertEqual(data["inventory"]["pqc_ready"], 0)
+
+        # 3. Load sample
+        res_sample = self.client.post("/api/inventory/load-sample")
+        self.assertEqual(res_sample.status_code, 200)
+        self.assertEqual(res_sample.get_json()["summary"]["total_assets"], 47)
+
+
+from inventory import CryptoInventory, parse_certificate_content
+
+class TestCryptoAssetInventory(unittest.TestCase):
+    """Test suite for Unified Crypto Asset Inventory."""
+
+    def test_canonical_47_asset_sample(self):
+        """Verify the canonical enterprise inventory produces exact target metrics."""
+        inv = CryptoInventory()
+        inv.load_sample_inventory()
+        summary = inv.get_summary()
+
+        # 47 Cryptographic Assets
+        self.assertEqual(summary["total_assets"], 47)
+
+        # Algorithm Breakdown
+        bd = summary["algorithm_breakdown"]
+        self.assertEqual(bd["RSA-2048"], 12)
+        self.assertEqual(bd["ECDSA P-256"], 9)
+        self.assertEqual(bd["X25519"], 8)
+        self.assertEqual(bd["AES-256"], 7)
+        self.assertEqual(bd["AES-128"], 5)
+        self.assertEqual(bd["3DES"], 3)
+        self.assertEqual(bd["DH-2048"], 3)
+
+        # Posture Status
+        self.assertEqual(summary["quantum_vulnerable"], 32)
+        self.assertEqual(summary["deprecated"], 3)
+        self.assertEqual(summary["pqc_ready"], 0)
+        self.assertEqual(summary["classically_secure"], 12)
+
+    def test_certificate_parser(self):
+        """Verify PEM certificate parser extracts RSA / ECC public keys."""
+        from Crypto.PublicKey import RSA
+        sample_pem = RSA.generate(2048).export_key("PEM").decode("utf-8")
+        findings = parse_certificate_content(sample_pem, "server.pem")
+        self.assertGreaterEqual(len(findings), 1)
+        self.assertIn("RSA-2048", findings[0]["algorithm"])
+        self.assertTrue(findings[0]["quantum_vulnerable"])
+
 
 import subprocess
 
@@ -354,6 +417,24 @@ class TestQryptisCLI(unittest.TestCase):
         self.assertIn("FIPS 204", result.stdout)
         self.assertIn("FIPS 205", result.stdout)
         self.assertIn("HQC", result.stdout)
+
+    def test_cli_subprocess_inventory(self):
+        """Verify CLI inventory command."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "inventory"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("CRYPTO INVENTORY", result.stdout)
+        self.assertIn("47 Cryptographic Assets", result.stdout)
+        self.assertIn("RSA-2048", result.stdout)
+        self.assertIn("ECDSA P-256", result.stdout)
+        self.assertIn("Quantum Vulnerable: 32", result.stdout)
+        self.assertIn("Deprecated:         3", result.stdout)
+        self.assertIn("PQC Ready:          0", result.stdout)
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ With NIST finalizing the official Post-Quantum Cryptography standards (**FIPS 20
 
 ## 2. Key Technical Innovations & Achievements
 
+- **Unified Cryptographic Asset Inventory Engine:** Built the single pane of glass aggregating cryptographic findings across codebases (`backend.zip`), live network/TLS endpoints (`example.com`), and X.509 PEM certificates (`server.pem`). Features automated statistical breakdowns (e.g. 47 enterprise assets: 32 quantum vulnerable, 3 deprecated, 0 PQC ready) and unified CycloneDX CBOM exports.
 - **Versioned NIST PQC Standards Layer (FIPS 203, 204, 205 + Round 4 HQC):** Live ecosystem tracking covering finalized NIST standards (FIPS 203 ML-KEM, FIPS 204 ML-DSA, FIPS 205 SLH-DSA), Round 4 non-lattice selection (HQC — Hamming Quasi-Cyclic), and draft standards (FIPS 206 FN-DSA), exposing both REST API (`/api/standards`) and CLI (`qryptis.py standards`).
 - **Automated Cryptographic Discovery & CLI Tool:** Custom static code scanner and standalone CLI tool (`python qryptis.py scan ./src --export cbom.json`) detecting cryptographic primitives (RSA, ECC, AES, 3DES, MD5, DSA) across repositories and single files with CI/CD build-fail options.
 - **Cryptographic Agility Score (0–100):** Developed an objective scoring algorithm that evaluates algorithm obsolescence, key lengths, and cipher monoculture risk to grade codebases from A (Agile) to F (Rigid).
@@ -36,14 +37,14 @@ With NIST finalizing the official Post-Quantum Cryptography standards (**FIPS 20
 | **Backend & Core Engine** | Python 3.10+, Flask 3.1, `pycryptodome`, `liboqs-python` | Rapid execution, robust cryptographic library support, and direct NIST PQC C-library bindings. |
 | **CLI & Automation** | Python `argparse`, `colorama`, subprocess | Zero-cost, terminal-first DevSecOps pipeline integration with JSON/MD export and exit code enforcement. |
 | **Frontend & Visualization** | Vanilla CSS, Modern Glassmorphism, Three.js 3D Motion | High-performance, zero-bloat interface with dark theme and dynamic particle visuals. |
-| **Testing & Quality** | Python `unittest`, `unittest.mock` | 29 comprehensive unit and integration tests verifying all edge cases, network probes, standards endpoints, CLI commands, and scoring models. |
+| **Testing & Quality** | Python `unittest`, `unittest.mock` | 33 comprehensive unit and integration tests verifying all edge cases, network probes, certificate parsing, inventory metrics, CLI commands, and scoring models. |
 | **Packaging & Client** | Standalone CLI, Progressive Web App (PWA), REST API | Offline support, mobile responsiveness, and easy integration into CI/CD pipelines. |
 
 ---
 
 ## 4. Honest Project Status & Roadmap
 
-- **Completed Core:** Static Scanner, CBOM Builder, Agility Scorer, Roadmap Generator, Live SSL Inspector, Local AI Assistant, Benchmark Suite, Algorithm Knowledge Base.
+- **Completed Core:** Crypto Asset Inventory Engine, Static Scanner, CBOM Builder, Agility Scorer, Roadmap Generator, Live SSL Inspector, Local AI Assistant, Benchmark Suite, Algorithm Knowledge Base.
 - **In Active Development (Phase 2):** Companion **Flutter Mobile App** for on-the-go security auditing.
 - **Future Horizons:** AST-based multi-language parsers for C/C++, Java, and Go, plus native CycloneDX 1.6 CBOM schema validation.
 

@@ -319,6 +319,59 @@ def cmd_standards(args):
     print(f"\n{Colors.GREEN}{Colors.BOLD}NIST Recommendation:{Colors.RESET} NIST explicitly recommends organizations begin applying finalized standards (FIPS 203, 204, 205) and preparing for code-based alternatives (HQC) now.\n")
 
 
+def cmd_inventory(args):
+    """Manage and display the unified enterprise Cryptographic Asset Inventory."""
+    from inventory import GLOBAL_INVENTORY
+
+    # Optional modifications via CLI flags
+    if getattr(args, "sample", False) or not GLOBAL_INVENTORY.assets:
+        GLOBAL_INVENTORY.load_sample_inventory()
+
+    if getattr(args, "add_code", None):
+        target = args.add_code
+        if os.path.exists(target):
+            scan_res = scan_directory(target)
+            GLOBAL_INVENTORY.add_code_findings(scan_res["results"], target_name=os.path.basename(target))
+            print(f"{Colors.GREEN}[✓] Ingested {len(scan_res['results'])} code findings from {target}{Colors.RESET}")
+
+    if getattr(args, "add_live", None):
+        domain = args.add_live
+        live_res = scan_live_website(domain)
+        if not live_res.get("error"):
+            GLOBAL_INVENTORY.add_live_scan(live_res, target_name=domain)
+            print(f"{Colors.GREEN}[✓] Ingested live TLS findings from {domain}{Colors.RESET}")
+
+    if getattr(args, "add_cert", None):
+        cert_path = args.add_cert
+        if os.path.exists(cert_path):
+            with open(cert_path, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read()
+            GLOBAL_INVENTORY.add_certificate(content, filename=os.path.basename(cert_path))
+            print(f"{Colors.GREEN}[✓] Ingested certificate findings from {cert_path}{Colors.RESET}")
+
+    summary = GLOBAL_INVENTORY.get_summary()
+
+    # Formatted output matching exact user specification
+    print(f"\n{Colors.BOLD}{Colors.WHITE}CRYPTO INVENTORY{Colors.RESET}")
+    print(f"{Colors.CYAN}{summary['total_assets']} Cryptographic Assets{Colors.RESET}\n")
+    print(f"{Colors.DIM}{'─' * 30}{Colors.RESET}")
+
+    for algo_name, count in summary["algorithm_breakdown"].items():
+        print(f"{Colors.WHITE}{algo_name:<20}{Colors.RESET} {Colors.BOLD}{count:>3}{Colors.RESET}")
+
+    print(f"{Colors.DIM}{'─' * 30}{Colors.RESET}\n")
+    print(f"{Colors.BOLD}Quantum Vulnerable:{Colors.RESET} {Colors.RED if summary['quantum_vulnerable'] > 0 else Colors.GREEN}{summary['quantum_vulnerable']}{Colors.RESET}\n")
+    print(f"{Colors.BOLD}Deprecated:{Colors.RESET}         {Colors.RED if summary['deprecated'] > 0 else Colors.GREEN}{summary['deprecated']}{Colors.RESET}\n")
+    print(f"{Colors.BOLD}PQC Ready:{Colors.RESET}          {Colors.GREEN if summary['pqc_ready'] > 0 else Colors.YELLOW}{summary['pqc_ready']}{Colors.RESET}\n")
+
+    if getattr(args, "export", None):
+        export_path = args.export
+        cbom_data = GLOBAL_INVENTORY.export_cbom()
+        with open(export_path, "w", encoding="utf-8") as out:
+            json.dump(cbom_data, out, indent=2)
+        print(f"{Colors.GREEN}[✓] Enterprise CBOM exported to {export_path}{Colors.RESET}\n")
+
+
 def cmd_db(args):
     """List all supported algorithms in knowledge base."""
     print(f"\n{Colors.BOLD}{Colors.WHITE}CRYPTOGRAPHIC ALGORITHM DATABASE{Colors.RESET}")
@@ -342,9 +395,17 @@ def cmd_db(args):
 def main():
     parser = argparse.ArgumentParser(
         description="Qryptis — Post-Quantum Cryptography Migration Analyzer & Code Scanner (CLI)",
-        epilog="Examples:\n  python qryptis.py scan ./src --export cbom.json\n  python qryptis.py check RSA 2048\n  python qryptis.py live google.com\n"
+        epilog="Examples:\n  python qryptis.py inventory\n  python qryptis.py scan ./src --export cbom.json\n  python qryptis.py check RSA 2048\n  python qryptis.py live google.com\n"
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
+
+    # Command: inventory
+    inv_parser = subparsers.add_parser("inventory", help="Display or manage the unified Cryptographic Asset Inventory")
+    inv_parser.add_argument("--sample", action="store_true", help="Load canonical 47-asset enterprise sample")
+    inv_parser.add_argument("--add-code", help="Scan codebase and add to inventory")
+    inv_parser.add_argument("--add-live", help="Scan live HTTPS endpoint and add to inventory")
+    inv_parser.add_argument("--add-cert", help="Parse certificate/PEM file and add to inventory")
+    inv_parser.add_argument("--export", "-e", help="Export unified inventory as CycloneDX CBOM JSON")
 
     # Command: scan
     scan_parser = subparsers.add_parser("scan", help="Scan source files or repository for cryptographic usage")
@@ -354,7 +415,7 @@ def main():
 
     # Command: check
     check_parser = subparsers.add_parser("check", help="Evaluate a single algorithm and key size")
-    check_parser.add_argument("algorithm", help="Algorithm name (e.g. RSA, ECC, AES, 3DES, MD5, DSA)")
+    check_parser.add_argument("algorithm", help="Algorithm name (e.g. RSA, ECC, AES, 3DES, MD5, DSA, HQC)")
     check_parser.add_argument("key_size", type=int, help="Key size in bits (e.g. 2048, 256, 128)")
     check_parser.add_argument("--years", "-y", type=int, default=None, help="Confidentiality horizon in years (for HNDL assessment)")
 
@@ -380,7 +441,9 @@ def main():
 
     print_banner()
 
-    if args.command == "scan":
+    if args.command == "inventory":
+        cmd_inventory(args)
+    elif args.command == "scan":
         cmd_scan(args)
     elif args.command == "check":
         cmd_check(args)

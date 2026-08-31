@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Asset Inventory — Qryptis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='analyze.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scan.css') }}">
+    <style>
+        .inv-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .inv-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* 4-Card Executive Posture Stats */
+        .inv-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .inv-stat-card {
+            background: rgba(14, 20, 32, 0.75);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.4rem;
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        .inv-stat-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .inv-stat-val {
+            font-family: var(--font-mono);
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+        .inv-stat-sub {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* Algorithm Breakdown Summary Box */
+        .inv-breakdown-box {
+            background: rgba(10, 14, 22, 0.85);
+            border: 1px solid rgba(46, 158, 255, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .inv-breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+        .inv-breakdown-item {
+            background: rgba(18, 24, 38, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-md);
+            padding: 0.9rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .inv-breakdown-name {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+        .inv-breakdown-count {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Ingestion Hub Tabs */
+        .ingest-box {
+            background: rgba(14, 20, 32, 0.75);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2.2rem;
+        }
+        .ingest-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .ingest-tab {
+            padding: 0.45rem 1rem;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ingest-tab.active, .ingest-tab:hover {
+            background: rgba(46, 158, 255, 0.15);
+            color: #FFFFFF;
+        }
+        .ingest-pane {
+            display: none;
+        }
+        .ingest-pane.active {
+            display: block;
+        }
+
+        /* Full Inventory Catalog Table */
+        .catalog-table-wrap {
+            background: rgba(10, 14, 22, 0.85);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+        .catalog-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.84rem;
+        }
+        .catalog-table th {
+            background: rgba(18, 24, 38, 0.9);
+            padding: 0.9rem 1.1rem;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .catalog-table td {
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+        .catalog-table tr:hover td {
+            background: rgba(46, 158, 255, 0.04);
+        }
+        .badge-source {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        {% include "_sidebar.html" %}
+
+        <main class="main-content">
+            <div class="analyze-page" style="max-width: 1280px;">
+                <div class="chips">Unified Security Posture</div>
+
+                {% if message %}
+                <div style="background: rgba(46, 158, 255, 0.15); border: 1px solid var(--accent); padding: 0.8rem 1.2rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.88rem; color: #FFFFFF;">
+                    {{ message }}
+                </div>
+                {% endif %}
+
+                <!-- Hero & Action Header -->
+                <div class="inv-hero">
+                    <div>
+                        <h1 style="font-size: 2rem; margin-bottom: 0.3rem;">Cryptographic Asset Inventory</h1>
+                        <p style="color: var(--text-muted); font-size: 0.92rem;">
+                            Single pane of glass unifying discovered cryptographic primitives across websites, code repositories, and X.509 certificates.
+                        </p>
+                    </div>
+                    <div class="inv-controls">
+                        <form method="POST" style="display: inline;">
+                            <input type="hidden" name="action" value="load_sample">
+                            <button type="submit" class="btn-impact-outline" style="font-size: 0.82rem; padding: 0.5rem 1rem;">
+                                <span>⚡ Load Enterprise Sample (47 Assets)</span>
+                            </button>
+                        </form>
+                        <a href="{{ url_for('api_inventory_export_cbom') }}" class="btn-impact" style="font-size: 0.82rem; padding: 0.5rem 1.1rem;">
+                            <span>📥 Export CBOM JSON</span>
+                        </a>
+                        <form method="POST" style="display: inline;" onsubmit="return confirm('Clear all assets from current inventory?');">
+                            <input type="hidden" name="action" value="clear">
+                            <button type="submit" class="btn-impact-outline" style="font-size: 0.82rem; padding: 0.5rem 0.9rem; color: #FF708F; border-color: rgba(255,112,143,0.3);">
+                                <span>Clear</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 4 Executive Security Posture Cards -->
+                <div class="inv-stat-grid">
+                    <div class="inv-stat-card" style="border-color: rgba(46,158,255,0.3);">
+                        <div>
+                            <div class="inv-stat-label">Total Assets</div>
+                            <div class="inv-stat-val" style="color: #FFFFFF;">{{ summary.total_assets }}</div>
+                        </div>
+                        <div class="inv-stat-sub">Across {{ summary.source_breakdown.Codebase }} Code, {{ summary.source_breakdown.Website }} TLS, {{ summary.source_breakdown.Certificate }} Certs</div>
+                    </div>
+
+                    <div class="inv-stat-card" style="border-color: rgba(255,84,112,0.3);">
+                        <div>
+                            <div class="inv-stat-label">Quantum Vulnerable</div>
+                            <div class="inv-stat-val" style="color: #FF5470;">{{ summary.quantum_vulnerable }}</div>
+                        </div>
+                        <div class="inv-stat-sub">Broken by Shor's algorithm (RSA, ECC, DH)</div>
+                    </div>
+
+                    <div class="inv-stat-card" style="border-color: rgba(255,159,67,0.3);">
+                        <div>
+                            <div class="inv-stat-label">Deprecated Primitives</div>
+                            <div class="inv-stat-val" style="color: #FF9F43;">{{ summary.deprecated }}</div>
+                        </div>
+                        <div class="inv-stat-sub">Classically weak / Sweet32 collision flaws</div>
+                    </div>
+
+                    <div class="inv-stat-card" style="border-color: rgba(163,230,53,0.3);">
+                        <div>
+                            <div class="inv-stat-label">PQC Ready</div>
+                            <div class="inv-stat-val" style="color: #A3E635;">{{ summary.pqc_ready }}</div>
+                        </div>
+                        <div class="inv-stat-sub">NIST FIPS 203 / 204 Standard Compliant</div>
+                    </div>
+                </div>
+
+                <!-- Algorithm Breakdown Summary -->
+                <section class="inv-breakdown-box">
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                        <div>
+                            <h3 style="font-size: 1.1rem; color: #FFFFFF; font-family: var(--font-heading);">CRYPTO INVENTORY SUMMARY</h3>
+                            <span class="mono" style="font-size: 0.78rem; color: var(--text-muted);">{{ summary.total_assets }} Total Cryptographic Assets Discovered</span>
+                        </div>
+                        <div class="mono" style="font-size: 0.8rem; color: var(--accent);">
+                            Agility Score: <strong>{{ summary.agility_score }}/100 (Grade {{ summary.agility_grade }})</strong>
+                        </div>
+                    </div>
+
+                    <div class="inv-breakdown-grid">
+                        {% for algo_name, count in summary.algorithm_breakdown.items() %}
+                        <div class="inv-breakdown-item">
+                            <span class="inv-breakdown-name">{{ algo_name }}</span>
+                            <span class="inv-breakdown-count">{{ count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- Multi-Source Ingestion Hub -->
+                <section class="ingest-box">
+                    <h3 style="font-size: 1.05rem; color: #FFFFFF; font-family: var(--font-heading); margin-bottom: 0.4rem;">Ingest New Cryptographic Assets</h3>
+                    <p style="color: var(--text-muted); font-size: 0.84rem; margin-bottom: 1rem;">Connect live endpoints, source code repositories, or raw X.509 certificates to expand this inventory.</p>
+
+                    <div class="ingest-tabs">
+                        <button type="button" class="ingest-tab active" onclick="switchTab('tab-web')">🌐 Live Website / TLS</button>
+                        <button type="button" class="ingest-tab" onclick="switchTab('tab-code')">📁 Code Snippet / Repo</button>
+                        <button type="button" class="ingest-tab" onclick="switchTab('tab-cert')">📜 X.509 Certificate / PEM</button>
+                    </div>
+
+                    <!-- Tab 1: Live Website -->
+                    <div id="tab-web" class="ingest-pane active">
+                        <form method="POST" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                            <input type="hidden" name="action" value="add_website">
+                            <input type="text" name="domain" class="form-field" style="flex: 1; min-width: 250px;" placeholder="e.g. example.com or api.enterprise.org" required>
+                            <button type="submit" class="btn-impact">
+                                <span>Scan & Ingest TLS &rarr;</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: Codebase -->
+                    <div id="tab-code" class="ingest-pane">
+                        <form method="POST">
+                            <input type="hidden" name="action" value="add_code">
+                            <input type="text" name="target_name" class="form-field" style="margin-bottom: 0.6rem;" placeholder="Target Name (e.g. payment-service.zip or auth_service.py)">
+                            <textarea name="code" class="form-field" rows="4" style="font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 0.6rem;" placeholder="Paste Python, JS, or C code containing cryptographic calls..." required></textarea>
+                            <button type="submit" class="btn-impact">
+                                <span>Scan Code & Add to Inventory &rarr;</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 3: Certificate -->
+                    <div id="tab-cert" class="ingest-pane">
+                        <form method="POST">
+                            <input type="hidden" name="action" value="add_cert">
+                            <input type="text" name="filename" class="form-field" style="margin-bottom: 0.6rem;" placeholder="Certificate Name (e.g. server.pem or tls_leaf.crt)">
+                            <textarea name="cert_text" class="form-field" rows="4" style="font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 0.6rem;" placeholder="Paste PEM Certificate or Public Key (-----BEGIN CERTIFICATE----- ...)" required></textarea>
+                            <button type="submit" class="btn-impact">
+                                <span>Parse Certificate & Ingest &rarr;</span>
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Full Asset Catalog Table -->
+                <section class="catalog-table-wrap">
+                    <div style="padding: 1.1rem 1.4rem; background: rgba(14, 20, 32, 0.9); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem;">
+                        <span class="mono" style="font-size: 0.9rem; font-weight: 700; color: #FFFFFF;">COMPLETE ASSET CATALOG ({{ assets|length }})</span>
+                        <input type="text" id="assetSearch" class="db-search-input" style="min-width: 240px; padding: 0.45rem 1rem; font-size: 0.8rem;" placeholder="Filter assets by name, target, usage...">
+                    </div>
+
+                    <table class="catalog-table" id="assetTable">
+                        <thead>
+                            <tr>
+                                <th>Asset Primitive</th>
+                                <th>Source & Target</th>
+                                <th>Cryptographic Usage</th>
+                                <th>Quantum Status</th>
+                                <th>PQC Remediation Target</th>
+                                <th>Location / Finding</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asset in assets %}
+                            <tr class="asset-row" data-search="{{ asset.name|lower }} {{ asset.source_target|lower }} {{ asset.usage|lower }} {{ asset.source_type|lower }}">
+                                <td>
+                                    <strong style="color: #FFFFFF; font-family: var(--font-mono);">{{ asset.name }}</strong>
+                                    <div style="font-size: 0.72rem; color: var(--text-dim);">{{ asset.algorithm }} &bull; {{ asset.key_size }}-bit</div>
+                                </td>
+                                <td>
+                                    <span class="badge-source">{{ asset.source_type }}</span>
+                                    <div style="font-size: 0.78rem; color: #93C5FD; margin-top: 0.2rem;" class="mono">{{ asset.source_target }}</div>
+                                </td>
+                                <td>{{ asset.usage }}</td>
+                                <td>
+                                    {% if asset.deprecated %}
+                                        <span class="badge badge-deprecated">DEPRECATED</span>
+                                    {% elif asset.quantum_vulnerable %}
+                                        <span class="badge badge-critical">VULNERABLE</span>
+                                    {% elif asset.is_pqc_ready %}
+                                        <span class="badge badge-safe">PQC READY</span>
+                                    {% else %}
+                                        <span class="badge badge-safe">SECURE</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span style="color: #A3E635; font-family: var(--font-mono); font-weight: 600;">{{ asset.recommended_pqc }}</span>
+                                </td>
+                                <td style="font-size: 0.76rem; color: var(--text-dim);" class="mono">
+                                    {{ asset.location }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.ingest-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.ingest-pane').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        const searchInput = document.getElementById('assetSearch');
+        const rows = document.querySelectorAll('.asset-row');
+
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase().trim();
+            rows.forEach(r => {
+                const text = r.getAttribute('data-search') + ' ' + r.innerText.toLowerCase();
+                r.style.display = (!q || text.includes(q)) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

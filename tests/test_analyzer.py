@@ -206,10 +206,17 @@ class TestFlaskWebRoutes(unittest.TestCase):
 
     def test_routes_status_codes(self):
         """Verify all major HTML pages return 200 OK."""
-        routes = ["/login", "/analyze", "/manual", "/scan", "/live-scan", "/database", "/qryptis"]
+        routes = ["/login", "/analyze", "/manual", "/scan", "/live-scan", "/database", "/qryptis", "/health"]
         for route in routes:
             response = self.client.get(route)
             self.assertEqual(response.status_code, 200, f"Route {route} failed with status {response.status_code}")
+
+    def test_health_check(self):
+        """Verify /health endpoint returns JSON status ok."""
+        response = self.client.get("/health")
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertEqual(data["status"], "ok")
 
     @unittest.mock.patch("app.get_ai_explanation", return_value="AI Explanation: RSA is vulnerable to Shor's algorithm.")
     def test_manual_post_valid(self, mock_ai):

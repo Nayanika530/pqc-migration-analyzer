@@ -27,6 +27,12 @@ QRYPTIS_SLIDES = [
 ]
 
 
+@app.route("/health")
+@app.route("/ping")
+def health():
+    return jsonify({"status": "ok", "service": "qryptis-pqc-analyzer", "message": "heartbeat"}), 200
+
+
 @app.route("/qryptis")
 def qryptis():
     return render_template("qryptis/base.html", slides=QRYPTIS_SLIDES)

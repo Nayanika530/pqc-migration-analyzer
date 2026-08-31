@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algorithm Database — Qryptis</title>
+    <title>Algorithm Database & NIST PQC Tracker — Qryptis</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,6 +35,119 @@
             border-color: var(--accent);
             box-shadow: 0 0 16px rgba(46, 158, 255, 0.2);
         }
+
+        /* NIST Standards Tracker Board */
+        .standards-board {
+            background: rgba(10, 14, 22, 0.85);
+            border: 1px solid rgba(46, 158, 255, 0.25);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2.2rem;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .standards-board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #38BDF8, #A3E635, #E11487);
+        }
+        .standards-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .standards-title {
+            font-family: var(--font-heading);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .standards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .standard-card {
+            background: rgba(18, 22, 32, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .standard-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        .std-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+        }
+        .std-code {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+        .std-status {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+        }
+        .status-final { background: rgba(163, 230, 53, 0.18); color: #A3E635; }
+        .status-selected { background: rgba(225, 20, 135, 0.2); color: #F43F5E; }
+        .status-draft { background: rgba(56, 189, 248, 0.2); color: #38BDF8; }
+        .status-eval { background: rgba(255, 159, 67, 0.2); color: #FF9F43; }
+
+        .std-algo {
+            font-family: var(--font-title);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.2rem;
+        }
+        .std-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            margin-bottom: 0.6rem;
+        }
+        .std-footer {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 0.5rem;
+        }
+
+        .nist-callout {
+            background: rgba(46, 158, 255, 0.08);
+            border-left: 3px solid var(--accent);
+            padding: 0.75rem 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.82rem;
+            color: #D1E8FF;
+            line-height: 1.5;
+        }
+
         .filter-pills {
             display: flex;
             gap: 0.5rem;
@@ -171,34 +284,75 @@
                     <div>
                         <h1 style="font-size: 2rem; margin-bottom: 0.3rem;">Cryptographic Algorithm Database</h1>
                         <p style="color: var(--text-muted); font-size: 0.9rem;">
-                            Reference directory of evaluated classical algorithms, quantum vulnerabilities, and NIST PQC migration targets.
+                            Live ecosystem tracking: evaluated classical algorithms, quantum vulnerabilities, and official versioned NIST PQC standards.
                         </p>
                     </div>
                     <div>
-                        <input type="text" id="dbSearch" class="db-search-input" placeholder="Search algorithms, types, replacements...">
+                        <input type="text" id="dbSearch" class="db-search-input" placeholder="Search algorithms, standards, types...">
                     </div>
                 </div>
 
+                <!-- ============================================================
+                     NIST PQC STANDARDS TRACKER BOARD (Live Ecosystem Layer)
+                     ============================================================ -->
+                <section class="standards-board">
+                    <div class="standards-header">
+                        <div class="standards-title">
+                            <span>🏛️</span>
+                            <span>NIST PQC STATUS & STANDARDS TRACKER</span>
+                        </div>
+                        <span class="mono" style="font-size: 0.76rem; color: #38BDF8;">Last Synchronized: 2026 Standards Release</span>
+                    </div>
+
+                    <div class="standards-grid">
+                        {% for std in nist_standards %}
+                        <div class="standard-card">
+                            <div>
+                                <div class="std-top">
+                                    <span class="std-code">{{ std.standard }}</span>
+                                    <span class="std-status status-{{ std.status_badge }}">{{ std.status }}</span>
+                                </div>
+                                <div class="std-algo">{{ std.algorithm }}</div>
+                                <div style="font-size: 0.72rem; color: var(--accent); margin-bottom: 0.4rem; font-weight: 600;">{{ std.name }}</div>
+                                <p class="std-desc">{{ std.nist_guidance }}</p>
+                            </div>
+                            <div class="std-footer">
+                                <strong>Hardness:</strong> {{ std.hardness }} &bull; {{ std.date }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="nist-callout">
+                        <strong>NIST Migration Mandate:</strong> NIST explicitly recommends that organizations begin applying finalized PQC standards (FIPS 203, 204, 205) today, while tracking Round 4 code-based alternatives (HQC) for defense-in-depth cryptographic agility.
+                    </div>
+                </section>
+
+                <!-- Filter Controls -->
                 <div class="filter-pills">
-                    <button class="filter-pill active" data-filter="all">All Algorithms ({{ algorithm_db|length }})</button>
+                    <button class="filter-pill active" data-filter="all">All Primitives ({{ algorithm_db|length }})</button>
+                    <button class="filter-pill" data-filter="pqc">PQC Native Standards</button>
                     <button class="filter-pill" data-filter="quantum">Quantum-Vulnerable</button>
                     <button class="filter-pill" data-filter="deprecated">Deprecated</button>
-                    <button class="filter-pill" data-filter="safe">Quantum Safe</button>
+                    <button class="filter-pill" data-filter="safe">Symmetric / Classical Safe</button>
                 </div>
 
+                <!-- Algorithm Catalog Grid -->
                 <div class="algo-grid" id="algoGrid">
                     {% for name, data in algorithm_db.items() %}
                     <div class="algo-card" 
                          data-name="{{ name|lower }}" 
                          data-type="{{ data.type|lower }}"
-                         data-category="{% if data.deprecated %}deprecated{% elif data.quantum_vulnerable %}quantum{% else %}safe{% endif %}">
+                         data-category="{% if data.is_pqc_native %}pqc{% elif data.deprecated %}deprecated{% elif data.quantum_vulnerable %}quantum{% else %}safe{% endif %}">
                         <div>
                             <div class="algo-card-top">
                                 <div>
                                     <div class="algo-title">{{ name }}</div>
                                     <div class="algo-type">{{ data.type }}</div>
                                 </div>
-                                {% if data.deprecated %}
+                                {% if data.is_pqc_native %}
+                                    <span class="badge" style="background: rgba(163, 230, 53, 0.18); color: #A3E635; border: 1px solid rgba(163, 230, 53, 0.3);">PQC STANDARD</span>
+                                {% elif data.deprecated %}
                                     <span class="badge badge-deprecated">DEPRECATED</span>
                                 {% elif data.quantum_vulnerable %}
                                     <span class="badge badge-critical">QUANTUM-VULNERABLE</span>
@@ -210,7 +364,7 @@
                             <p class="algo-reason">{{ data.reason }}</p>
 
                             <div class="algo-meta-block">
-                                <div class="algo-meta-label">Recommended PQC Replacement</div>
+                                <div class="algo-meta-label">{% if data.is_pqc_native %}Standard Specification{% else %}Recommended PQC Replacement{% endif %}</div>
                                 <div class="algo-meta-val" style="color: var(--status-safe);">
                                     {{ data.pqc_replacement }}
                                 </div>
@@ -227,7 +381,7 @@
 
                         <div class="algo-card-footer">
                             <span style="font-size: 0.75rem; color: var(--text-muted);">
-                                {% if data.quantum_vulnerable %}Shor's Algorithm Threat{% elif data.deprecated %}Classical Break{% else %}Grover's 2x Factor{% endif %}
+                                {% if data.is_pqc_native %}NIST PQC Suite{% elif data.quantum_vulnerable %}Shor's Threat{% elif data.deprecated %}Classical Break{% else %}Grover's 2x Factor{% endif %}
                             </span>
                             <a href="{{ url_for('manual') }}" class="btn-test-algo">
                                 Test in Manual Lookup &rarr;

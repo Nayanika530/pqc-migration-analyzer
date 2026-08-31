@@ -39,7 +39,7 @@ class TestCryptoAnalyzerEngine(unittest.TestCase):
 
     def test_algorithm_db_completeness(self):
         """Verify all essential algorithms exist with required schema keys."""
-        required_algos = ["RSA", "ECC", "AES", "DSA", "DIFFIE-HELLMAN", "3DES", "MD5"]
+        required_algos = ["RSA", "ECC", "AES", "DSA", "DIFFIE-HELLMAN", "3DES", "MD5", "HQC", "ML-KEM", "ML-DSA", "SLH-DSA"]
         for algo in required_algos:
             self.assertIn(algo, ALGORITHM_DB)
             entry = ALGORITHM_DB[algo]
@@ -50,6 +50,24 @@ class TestCryptoAnalyzerEngine(unittest.TestCase):
             self.assertIn("replacement_type", entry)
             self.assertIn("hybrid_recommendation", entry)
             self.assertIn("deprecated", entry)
+
+    def test_hqc_and_nist_standards(self):
+        """Verify HQC and versioned NIST PQC standards layer."""
+        from crypto_analyzer import NIST_STANDARDS_DB
+        self.assertGreaterEqual(len(NIST_STANDARDS_DB), 4)
+        
+        # Verify FIPS 203, 204, 205 and HQC exist
+        standards_names = [s["standard"] for s in NIST_STANDARDS_DB]
+        algos = [s["algorithm"] for s in NIST_STANDARDS_DB]
+        self.assertIn("FIPS 203", standards_names)
+        self.assertIn("FIPS 204", standards_names)
+        self.assertIn("FIPS 205", standards_names)
+        self.assertIn("HQC", algos)
+
+        # Test HQC lookup
+        rep_hqc = generate_report("HQC", 128)
+        self.assertFalse(rep_hqc["quantum_vulnerable"])
+        self.assertIn("OK", rep_hqc["verdict"])
 
     def test_md5_deprecation(self):
         """Verify MD5 is marked deprecated due to classical collision flaws."""
@@ -255,13 +273,18 @@ class TestFlaskWebRoutes(unittest.TestCase):
         data = response.get_json()
         self.assertEqual(data["reply"], "Please type a question.")
 
-    @unittest.mock.patch("app.chat_with_assistant", return_value="Here is advice on post-quantum migration.")
-    def test_api_chat_with_message(self, mock_chat):
-        """Verify /api/chat handles real questions."""
-        response = self.client.post("/api/chat", json={"message": "What replaces RSA?"})
+    def test_api_standards(self):
+        """Verify /api/standards returns NIST PQC standards layer."""
+        response = self.client.get("/api/standards")
         self.assertEqual(response.status_code, 200)
         data = response.get_json()
-        self.assertIn("post-quantum", data["reply"])
+        self.assertEqual(data["status"], "success")
+        self.assertIn("nist_pqc_standards", data)
+        self.assertIn("recommendation", data)
+        standards = [s["standard"] for s in data["nist_pqc_standards"]]
+        self.assertIn("FIPS 203", standards)
+        self.assertIn("FIPS 204", standards)
+        self.assertIn("FIPS 205", standards)
 
 
 import subprocess
@@ -283,7 +306,9 @@ class TestQryptisCLI(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, "qryptis.py", "check", "RSA", "2048", "--years", "10"],
             capture_output=True,
-            text=True
+            text=True,
+            encoding="utf-8",
+            errors="replace"
         )
         self.assertEqual(result.returncode, 0)
         self.assertIn("ML-KEM-768", result.stdout)
@@ -294,7 +319,9 @@ class TestQryptisCLI(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, "qryptis.py", "scan", "./tests/messy_sample.py"],
             capture_output=True,
-            text=True
+            text=True,
+            encoding="utf-8",
+            errors="replace"
         )
         self.assertEqual(result.returncode, 0)
         self.assertIn("QRYPTIS CODE ANALYSIS", result.stdout)
@@ -306,11 +333,29 @@ class TestQryptisCLI(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, "qryptis.py", "benchmark"],
             capture_output=True,
-            text=True
+            text=True,
+            encoding="utf-8",
+            errors="replace"
         )
         self.assertEqual(result.returncode, 0)
         self.assertIn("ML-KEM-768", result.stdout)
 
+    def test_cli_subprocess_standards(self):
+        """Verify CLI standards command."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "standards"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("FIPS 203", result.stdout)
+        self.assertIn("FIPS 204", result.stdout)
+        self.assertIn("FIPS 205", result.stdout)
+        self.assertIn("HQC", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
+

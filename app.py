@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify, session, Response, redirect, url_for
 from crypto_analyzer import (
-    generate_report, ALGORITHM_DB, calculate_harvest_risk,
+    generate_report, ALGORITHM_DB, NIST_STANDARDS_DB, calculate_harvest_risk,
     get_ai_explanation, chat_with_assistant, scan_live_website
 )
 from scanner import (
@@ -124,7 +124,16 @@ def analyze():
 
 @app.route("/database")
 def database():
-    return render_template("database.html", algorithm_db=ALGORITHM_DB)
+    return render_template("database.html", algorithm_db=ALGORITHM_DB, nist_standards=NIST_STANDARDS_DB)
+
+
+@app.route("/api/standards")
+def api_standards():
+    return jsonify({
+        "status": "success",
+        "nist_pqc_standards": NIST_STANDARDS_DB,
+        "recommendation": "NIST explicitly recommends organizations begin applying standardized PQC algorithms (FIPS 203, 204, 205) and preparing for Round 4 alternatives (HQC) now."
+    })
 
 
 @app.route("/live-scan", methods=["GET", "POST"])

@@ -33,7 +33,11 @@ MIN_SECURE_KEY_SIZE = {
     "DSA": 2048,
     "DIFFIE-HELLMAN": 2048,
     "3DES": 168,
-    "MD5": 256  # MD5 is 128-bit digest; minimum secure hash digest today is 256-bit (e.g. SHA-256)
+    "MD5": 256,  # MD5 is 128-bit digest; minimum secure hash digest today is 256-bit (e.g. SHA-256)
+    "HQC": 128,
+    "ML-KEM": 512,
+    "ML-DSA": 44,
+    "SLH-DSA": 128
 }
 
 
@@ -60,6 +64,86 @@ def check_key_size(name: str, key_size: int) -> dict:
             f"{key_size}-bit {key} is BELOW the classical security minimum ({minimum}-bit) -- vulnerable even without a quantum computer."
         )
     }
+
+
+# ============================================================
+# OFFICIAL NIST POST-QUANTUM CRYPTOGRAPHY STANDARDS LAYER
+# Live ecosystem tracking (FIPS 203, 204, 205 + Round 4 HQC Selection)
+# ============================================================
+NIST_STANDARDS_DB = [
+    {
+        "standard": "FIPS 203",
+        "algorithm": "ML-KEM",
+        "name": "Module-Lattice Key Encapsulation Mechanism",
+        "type": "Key Encapsulation (KEM)",
+        "status": "✓ Final",
+        "status_badge": "final",
+        "date": "August 2024",
+        "hardness": "Module-LWE (Lattice)",
+        "security_category": "General Purpose / Primary KEM",
+        "nist_guidance": "NIST recommends immediate migration for general encryption and key establishment (TLS, VPNs, data-in-transit)."
+    },
+    {
+        "standard": "FIPS 204",
+        "algorithm": "ML-DSA",
+        "name": "Module-Lattice Digital Signature Algorithm",
+        "type": "Digital Signature",
+        "status": "✓ Final",
+        "status_badge": "final",
+        "date": "August 2024",
+        "hardness": "Module-SIS (Lattice)",
+        "security_category": "General Purpose / Primary Signature",
+        "nist_guidance": "NIST recommends ML-DSA as the primary digital signature standard for certificates, PKI, and code signing."
+    },
+    {
+        "standard": "FIPS 205",
+        "algorithm": "SLH-DSA",
+        "name": "Stateless Hash-Based Digital Signature Algorithm",
+        "type": "Digital Signature",
+        "status": "✓ Final",
+        "status_badge": "final",
+        "date": "August 2024",
+        "hardness": "Cryptographic Hash (SPHINCS+)",
+        "security_category": "Stateless Hash / Zero Lattice Dependency",
+        "nist_guidance": "Recommended as a conservative, non-lattice backup signature scheme with established hash-based security proofs."
+    },
+    {
+        "standard": "NIST Round 4 Selection",
+        "algorithm": "HQC",
+        "name": "Hamming Quasi-Cyclic",
+        "type": "Key Encapsulation (KEM)",
+        "status": "◐ Selected for Standardization",
+        "status_badge": "selected",
+        "date": "March 2025",
+        "hardness": "Quasi-Cyclic Syndrome Decoding (Code-Based)",
+        "security_category": "Code-Based / Non-Lattice KEM Alternative",
+        "nist_guidance": "Selected by NIST in Round 4 as the official non-lattice general KEM alternative to ML-KEM for cryptographic diversification."
+    },
+    {
+        "standard": "FIPS 206 (Draft)",
+        "algorithm": "FN-DSA (FALCON)",
+        "name": "Fast-Fourier Lattice-based Digital Signature",
+        "type": "Digital Signature",
+        "status": "◐ In Progress",
+        "status_badge": "draft",
+        "date": "Draft 2025/2026",
+        "hardness": "NTRU Lattice",
+        "security_category": "Compact High-Performance Signature",
+        "nist_guidance": "Selected for compact signature size requirements in bandwidth-constrained environments."
+    },
+    {
+        "standard": "Round 4 Evaluation",
+        "algorithm": "Classic McEliece",
+        "name": "Classic McEliece",
+        "type": "Key Encapsulation (KEM)",
+        "status": "○ Under Evaluation",
+        "status_badge": "evaluation",
+        "date": "Active Round 4",
+        "hardness": "Goppa Codes (Code-Based)",
+        "security_category": "Conservative Code-Based KEM",
+        "nist_guidance": "Evaluated for ultra-compact ciphertexts (large public key footprint suited for static hardware)."
+    }
+]
 
 
 ALGORITHM_DB = {
@@ -125,6 +209,46 @@ ALGORITHM_DB = {
         "replacement_type": "Cryptographic hash / collision-resistant digest",
         "hybrid_recommendation": "SHA-256 or SHA-512 with HMAC, or combine with ML-DSA for quantum-secure signatures",
         "deprecated": True
+    },
+    "HQC": {
+        "type": "asymmetric encryption / key encapsulation (code-based)",
+        "quantum_vulnerable": False,
+        "reason": "HQC is a quantum-secure Key Encapsulation Mechanism based on quasi-cyclic syndrome decoding. Selected by NIST in March 2025 as the official non-lattice KEM standard alternative to ML-KEM.",
+        "pqc_replacement": "HQC-128 / HQC-192 / HQC-256 (Native PQC Standard)",
+        "replacement_type": "Code-Based KEM (NIST Standardized Alternative)",
+        "hybrid_recommendation": "X25519 + HQC-128 or hybrid with ML-KEM for multi-family algorithm diversification",
+        "deprecated": False,
+        "is_pqc_native": True
+    },
+    "ML-KEM": {
+        "type": "asymmetric encryption / key encapsulation (module lattice)",
+        "quantum_vulnerable": False,
+        "reason": "ML-KEM (FIPS 203) is the primary finalized NIST standard for general key encapsulation and public-key encryption.",
+        "pqc_replacement": "ML-KEM-768 (Native NIST FIPS 203 Standard)",
+        "replacement_type": "Module-Lattice KEM (FIPS 203)",
+        "hybrid_recommendation": "X25519 + ML-KEM-768 for defense-in-depth transition",
+        "deprecated": False,
+        "is_pqc_native": True
+    },
+    "ML-DSA": {
+        "type": "digital signature (module lattice)",
+        "quantum_vulnerable": False,
+        "reason": "ML-DSA (FIPS 204) is the primary finalized NIST standard for general digital signatures and PKI authentication.",
+        "pqc_replacement": "ML-DSA-65 (Native NIST FIPS 204 Standard)",
+        "replacement_type": "Module-Lattice Digital Signature (FIPS 204)",
+        "hybrid_recommendation": "ECDSA + ML-DSA-65 for backward-compatible verification",
+        "deprecated": False,
+        "is_pqc_native": True
+    },
+    "SLH-DSA": {
+        "type": "digital signature (stateless hash-based)",
+        "quantum_vulnerable": False,
+        "reason": "SLH-DSA (FIPS 205) is standardized by NIST as a stateless hash-based signature scheme with zero lattice dependencies.",
+        "pqc_replacement": "SLH-DSA-128 (Native NIST FIPS 205 Standard)",
+        "replacement_type": "Stateless Hash-Based Digital Signature (FIPS 205)",
+        "hybrid_recommendation": "ECDSA + SLH-DSA-128 for high-assurance long-term code signing",
+        "deprecated": False,
+        "is_pqc_native": True
     }
 }
 

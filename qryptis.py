@@ -38,6 +38,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from crypto_analyzer import (
     ALGORITHM_DB,
+    NIST_STANDARDS_DB,
     generate_report,
     calculate_harvest_risk,
     scan_live_website,
@@ -294,6 +295,30 @@ def cmd_benchmark(args):
     print(f"{Colors.GREEN}{Colors.BOLD}Key Takeaway:{Colors.RESET} ML-KEM-768 achieves ~1,700x faster key generation than RSA-2048.\n")
 
 
+def cmd_standards(args):
+    """Display official versioned NIST PQC standards layer."""
+    print(f"\n{Colors.BOLD}{Colors.WHITE}NIST PQC STATUS & STANDARDS TRACKER{Colors.RESET}")
+    print(f"{Colors.DIM}Official NIST Post-Quantum Standardization Layer (2024–2026){Colors.RESET}")
+    print(f"{Colors.CYAN}{'=' * 75}{Colors.RESET}")
+
+    for item in NIST_STANDARDS_DB:
+        if "✓" in item["status"]:
+            status_color = Colors.GREEN
+        elif "◐" in item["status"]:
+            status_color = Colors.MAGENTA
+        else:
+            status_color = Colors.YELLOW
+
+        print(f"{Colors.BOLD}{item['standard']}{Colors.RESET}")
+        print(f"{item['algorithm']} — {item['name']}")
+        print(f"Status:   {status_color}{item['status']}{Colors.RESET} ({item['date']})")
+        print(f"Type:     {item['type']} • Hardness: {item['hardness']}")
+        print(f"Guidance: {item['nist_guidance']}")
+        print(f"{Colors.DIM}{'-' * 75}{Colors.RESET}")
+
+    print(f"\n{Colors.GREEN}{Colors.BOLD}NIST Recommendation:{Colors.RESET} NIST explicitly recommends organizations begin applying finalized standards (FIPS 203, 204, 205) and preparing for code-based alternatives (HQC) now.\n")
+
+
 def cmd_db(args):
     """List all supported algorithms in knowledge base."""
     print(f"\n{Colors.BOLD}{Colors.WHITE}CRYPTOGRAPHIC ALGORITHM DATABASE{Colors.RESET}")
@@ -340,6 +365,9 @@ def main():
     # Command: benchmark
     subparsers.add_parser("benchmark", help="Display local microsecond benchmark comparisons")
 
+    # Command: standards
+    subparsers.add_parser("standards", help="List official NIST PQC standards")
+
     # Command: db
     subparsers.add_parser("db", help="List algorithm database and PQC recommendations")
 
@@ -360,6 +388,8 @@ def main():
         cmd_live(args)
     elif args.command == "benchmark":
         cmd_benchmark(args)
+    elif args.command == "standards":
+        cmd_standards(args)
     elif args.command == "db":
         cmd_db(args)
 

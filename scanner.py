@@ -48,6 +48,29 @@ FIX_SNIPPETS = {
 }
 
 
+# Affected architectural components mapped by cryptographic algorithm
+AFFECTED_COMPONENTS = {
+    "RSA": ["Authentication", "API Gateway", "JWT Verification", "Key Exchange (PKI)"],
+    "ECC": ["TLS Handshake", "API Gateway", "Digital Signatures", "Mobile Client Auth"],
+    "AES": ["Data-at-Rest Encryption", "Database Vault", "Session Management"],
+    "3DES": ["Legacy Payment Gateway", "Archived Backup Storage", "Hardware Security Module (HSM)"],
+    "MD5": ["File Integrity Verification", "Password Hashing (Insecure)", "ETag / Cache Validation"],
+    "DSA": ["SSH Keypairs", "Code Signing", "PKI Infrastructure"],
+    "DIFFIE-HELLMAN": ["TLS Key Exchange", "VPN Tunnel Negotiation", "Session Forward Secrecy"]
+}
+
+# Migration effort / complexity assessment
+MIGRATION_DIFFICULTY = {
+    "RSA": "MEDIUM",
+    "ECC": "MEDIUM",
+    "DSA": "MEDIUM",
+    "DIFFIE-HELLMAN": "MEDIUM",
+    "AES": "LOW",
+    "3DES": "HIGH",
+    "MD5": "HIGH"
+}
+
+
 def scan_code(code_text: str) -> list:
     """Scan a block of code text for known crypto patterns and return findings."""
     findings = []
@@ -76,25 +99,86 @@ def scan_code(code_text: str) -> list:
 
 
 def scan_and_report(code_text: str) -> list:
-    """Scan code and attach a full vulnerability report + suggested fix to each finding."""
+    """Scan code and attach a full vulnerability report, metadata, and code snippet to each finding."""
     findings = scan_code(code_text)
     results = []
+    lines = code_text.splitlines()
 
     for finding in findings:
         algo = finding["algorithm"]
+        key_size = finding["key_size"]
 
-        if finding["key_size"] is not None:
-            report = generate_report(algo, finding["key_size"])
+        if key_size is not None:
+            report = generate_report(algo, key_size)
         else:
             report = {"error": f"{algo} detected but key size could not be determined."}
 
         suggested_fix = FIX_SNIPPETS.get(algo)
+        line_num = finding["line_number"]
+
+        # Extract surrounding code snippet (2 lines before and after)
+        target_idx = line_num - 1
+        start_idx = max(0, target_idx - 2)
+        end_idx = min(len(lines), target_idx + 3)
+        code_snippet = []
+        for idx in range(start_idx, end_idx):
+            code_snippet.append({
+                "line_num": idx + 1,
+                "code": lines[idx] if idx < len(lines) else "",
+                "is_target": (idx == target_idx)
+            })
+
+        # Calculate granular severity (CRITICAL, HIGH, MEDIUM, LOW)
+        verdict = report.get("verdict", "")
+        if report.get("deprecated") or "CRITICAL" in verdict or "DEPRECATED" in verdict:
+            severity = "CRITICAL"
+        elif report.get("quantum_vulnerable"):
+            severity = "HIGH"
+        elif algo == "AES" and key_size and key_size < 256:
+            severity = "MEDIUM"
+        else:
+            severity = "LOW"
+
+        # Determine readable quantum & classical statuses
+        if report.get("quantum_vulnerable"):
+            quantum_status = "🔴 VULNERABLE"
+        else:
+            quantum_status = "🟢 QUANTUM SECURE"
+
+        if report.get("deprecated"):
+            classical_status = "🟡 DEPRECATED"
+        elif not report.get("classically_secure_today", True):
+            classical_status = "🔴 BROKEN TODAY"
+        else:
+            classical_status = f"🟢 Currently acceptable ({key_size}-bit)"
+
+        # Determine usage description
+        usage = report.get("type", "Cryptographic operation").capitalize()
+        if "asymmetric" in usage.lower() or "kem" in usage.lower():
+            if algo == "DSA":
+                usage = "Digital signature"
+            elif algo in ["RSA", "ECC"]:
+                usage = "Digital signature / Key exchange"
+            elif algo == "DIFFIE-HELLMAN":
+                usage = "Key exchange"
+        elif "symmetric" in usage.lower():
+            usage = "Symmetric encryption"
+        elif "hash" in usage.lower():
+            usage = "Cryptographic hash / integrity digest"
 
         results.append({
-            "line_number": finding["line_number"],
+            "line_number": line_num,
             "matched_text": finding["matched_text"],
             "report": report,
-            "suggested_fix": suggested_fix
+            "suggested_fix": suggested_fix,
+            "code_snippet": code_snippet,
+            "severity": severity,
+            "quantum_status": quantum_status,
+            "classical_status": classical_status,
+            "usage": usage,
+            "migration_target": report.get("recommended_replacement", "ML-KEM-768"),
+            "migration_difficulty": MIGRATION_DIFFICULTY.get(algo, "MEDIUM"),
+            "affected_components": AFFECTED_COMPONENTS.get(algo, ["Authentication", "API Gateway", "Data Security"]),
         })
 
     return results

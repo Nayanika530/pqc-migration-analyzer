@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan Code — Qryptis</title>
+    <title>Code Analysis Scanner — Qryptis</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +21,7 @@
     <div class="page-foreground">
         {% if results is not none and results|length > 0 %}
         {# ============================================================
-           SCAN RESULTS DASHBOARD VIEW (Inspo Match)
+           SCAN RESULTS DASHBOARD VIEW (Enterprise Security Inspector)
            ============================================================ #}
         <div class="dashboard">
             <!-- ===== HEADER BAR ===== -->
@@ -39,7 +39,7 @@
                     <span class="bc-sep">&rsaquo;</span>
                     <a href="{{ url_for('analyze') }}" class="bc-link">Analyze</a>
                     <span class="bc-sep">&rsaquo;</span>
-                    <span class="bc-current">Scan Code</span>
+                    <span class="bc-current">Code Scanner</span>
                 </div>
                 <div class="dash-actions">
                     <a href="{{ url_for('download_cbom') }}" class="btn btn-outline btn-sm" download="cbom.json">
@@ -53,90 +53,180 @@
                 </div>
             </header>
 
+            <!-- ===== QRYPTIS CODE ANALYSIS BANNER ===== -->
+            <div class="analysis-banner">
+                <div class="analysis-banner-header">
+                    <div class="banner-title-wrap">
+                        <span class="banner-pre">QRYPTIS CODE ANALYSIS</span>
+                    </div>
+                    <div class="banner-repo-info">
+                        <div class="repo-meta-item">
+                            <span class="repo-meta-label">Target / Source:</span>
+                            <strong class="repo-meta-val mono" style="color: #60A5FA;">{{ filename }}</strong>
+                        </div>
+                        <div class="repo-meta-item">
+                            <span class="repo-meta-label">Files scanned:</span>
+                            <strong class="repo-meta-val mono">{% if filename and filename != 'pasted_code.py' %}1 (Active Module){% else %}1 (Source Buffer){% endif %}</strong>
+                        </div>
+                        <div class="repo-meta-item">
+                            <span class="repo-meta-label">Crypto findings:</span>
+                            <strong class="repo-meta-val mono" style="color: var(--accent); font-size: 1.05rem;">{{ results|length }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Severity Breakdown -->
+                {% if summary %}
+                <div class="severity-matrix">
+                    <div class="sev-badge sev-critical">
+                        <span class="sev-label">CRITICAL</span>
+                        <span class="sev-count">{{ summary.critical }}</span>
+                    </div>
+                    <div class="sev-badge sev-high">
+                        <span class="sev-label">HIGH</span>
+                        <span class="sev-count">{{ summary.high }}</span>
+                    </div>
+                    <div class="sev-badge sev-medium">
+                        <span class="sev-label">MEDIUM</span>
+                        <span class="sev-count">{{ summary.medium }}</span>
+                    </div>
+                    <div class="sev-badge sev-low">
+                        <span class="sev-label">LOW</span>
+                        <span class="sev-count">{{ summary.low }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
             <!-- ===== BODY: 2-COLUMN ===== -->
             <div class="dash-body">
-                <!-- ========== LEFT COLUMN ========== -->
+                <!-- ========== LEFT COLUMN: FINDINGS ========== -->
                 <div class="dash-left">
-                    <!-- Title Row -->
-                    <div class="scan-header-row">
-                        <h1 class="scan-title">Scan Results</h1>
-                        <span class="badge badge-safe">Scan Complete</span>
-                    </div>
-                    <div class="scan-meta">
-                        <span>File: <strong class="mono">{{ filename }}</strong></span>
-                        <span>Scan Time: <strong class="mono">2.34s</strong></span>
-                        <span>Findings: <strong class="mono">{{ results|length }}</strong></span>
-                    </div>
-
-                    <!-- Summary Cards -->
-                    {% if summary %}
-                    <div class="summary-cards">
-                        <div class="summary-card sc-critical">
-                            <div class="sc-count">{{ summary.critical }}</div>
-                            <div class="sc-label">Critical</div>
-                        </div>
-                        <div class="summary-card sc-deprecated">
-                            <div class="sc-count">{{ summary.deprecated }}</div>
-                            <div class="sc-label">Deprecated</div>
-                        </div>
-                        <div class="summary-card sc-at-risk">
-                            <div class="sc-count">{{ summary.at_risk }}</div>
-                            <div class="sc-label">At Risk</div>
-                        </div>
-                        <div class="summary-card sc-safe">
-                            <div class="sc-count">{{ summary.safe }}</div>
-                            <div class="sc-label">Safe</div>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Findings List (timeline) -->
-                    <h3 class="findings-title">Findings</h3>
-                    <div class="findings-timeline">
+                    <div class="findings-container">
                         {% for r in results %}
-                        <div class="finding-item">
-                            <div class="finding-tl">
-                                {% if 'DEPRECATED' in r.report.get('verdict','') %}
-                                <span class="finding-dot" style="background: var(--status-deprecated);"></span>
-                                {% elif 'CRITICAL' in r.report.get('verdict','') %}
-                                <span class="finding-dot" style="background: var(--status-critical);"></span>
-                                {% elif 'AT RISK' in r.report.get('verdict','') %}
-                                <span class="finding-dot" style="background: var(--status-at-risk);"></span>
-                                {% else %}
-                                <span class="finding-dot" style="background: var(--status-safe);"></span>
-                                {% endif %}
-                                {% if not loop.last %}<span class="finding-line"></span>{% endif %}
-                            </div>
-                            <div class="finding-details">
-                                <div class="finding-name">
-                                    {% if r.report.get('algorithm') %}
-                                        {{ r.report.algorithm }}{% if r.report.get('key_size') %} ({{ r.report.key_size }}){% endif %}
+                        <div class="crypto-finding-card sev-border-{{ r.severity|lower }}">
+                            <!-- Top Header -->
+                            <div class="finding-card-top">
+                                <div class="finding-tag-group">
+                                    <span class="finding-kicker">CRYPTOGRAPHIC FINDING</span>
+                                    <h2 class="finding-algo-title">
+                                        {{ r.report.get('algorithm', 'UNKNOWN') }}{% if r.report.get('key_size') %}-{{ r.report.key_size }}{% endif %}
+                                    </h2>
+                                </div>
+                                <div class="finding-badge-group">
+                                    <span class="sev-tag sev-tag-{{ r.severity|lower }}">{{ r.severity }}</span>
+                                    {% if r.report.get('quantum_vulnerable') %}
+                                        <span class="badge badge-critical">Quantum Vulnerable</span>
+                                    {% elif 'DEPRECATED' in r.report.get('verdict','') %}
+                                        <span class="badge badge-deprecated">Deprecated</span>
                                     {% else %}
-                                        {{ r.matched_text }}
+                                        <span class="badge badge-safe">Quantum Secure</span>
                                     {% endif %}
                                 </div>
-                                {% if 'DEPRECATED' in r.report.get('verdict','') %}
-                                <span class="badge badge-deprecated sm">DEPRECATED</span>
-                                {% elif 'CRITICAL' in r.report.get('verdict','') %}
-                                <span class="badge badge-critical sm">CRITICAL</span>
-                                {% elif 'AT RISK' in r.report.get('verdict','') %}
-                                <span class="badge badge-at-risk sm">AT RISK</span>
-                                {% else %}
-                                <span class="badge badge-safe sm">SAFE</span>
-                                {% endif %}
                             </div>
-                            <div class="finding-location">
-                                <div>Location: <span class="mono">line {{ r.line_number }}</span></div>
-                                <div>Usage: {{ r.report.get('type', 'Cryptographic') }}</div>
+
+                            <!-- Metadata Grid -->
+                            <div class="finding-grid-meta">
+                                <div class="f-meta-cell">
+                                    <span class="f-meta-label">Location</span>
+                                    <span class="f-meta-val mono" style="color: #93C5FD;">{{ filename }}:{{ r.line_number }}</span>
+                                </div>
+
+                                <div class="f-meta-cell">
+                                    <span class="f-meta-label">Usage</span>
+                                    <span class="f-meta-val">{{ r.usage }}</span>
+                                </div>
+
+                                <div class="f-meta-cell">
+                                    <span class="f-meta-label">Quantum Status</span>
+                                    <span class="f-meta-val" style="color: {% if r.report.get('quantum_vulnerable') %}#FF5470{% else %}#3DDC97{% endif %}; font-weight: 700;">
+                                        {{ r.quantum_status }}
+                                    </span>
+                                </div>
+
+                                <div class="f-meta-cell">
+                                    <span class="f-meta-label">Classical Status</span>
+                                    <span class="f-meta-val" style="color: {% if 'Currently' in r.classical_status %}#3DDC97{% elif 'DEPRECATED' in r.classical_status %}#FF9F43{% else %}#FF5470{% endif %};">
+                                        {{ r.classical_status }}
+                                    </span>
+                                </div>
+
+                                <div class="f-meta-cell">
+                                    <span class="f-meta-label">Migration Target</span>
+                                    <span class="f-meta-val mono" style="color: #3DDC97; font-weight: 700;">{{ r.migration_target }}</span>
+                                </div>
+
+                                <div class="f-meta-cell">
+                                    <span class="f-meta-label">Migration Difficulty</span>
+                                    <span class="diff-badge diff-{{ r.migration_difficulty|lower }}">{{ r.migration_difficulty }}</span>
+                                </div>
                             </div>
+
+                            <!-- Affected Components -->
+                            {% if r.affected_components %}
+                            <div class="f-components-row">
+                                <span class="f-meta-label">Affected Components:</span>
+                                <div class="f-component-tags">
+                                    {% for comp in r.affected_components %}
+                                        <span class="f-component-tag">{{ comp }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Attached Code Snippet Context -->
+                            {% if r.code_snippet and r.code_snippet|length > 0 %}
+                            <div class="code-viewer-block">
+                                <div class="code-viewer-header">
+                                    <span class="code-viewer-file mono">
+                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                        {{ filename }} &bull; line {{ r.line_number }}
+                                    </span>
+                                    <span class="code-viewer-lang">Python</span>
+                                </div>
+                                <div class="code-viewer-body">
+                                    {% for snip in r.code_snippet %}
+                                    <div class="code-line-row {% if snip.is_target %}code-line-target{% endif %}">
+                                        <span class="code-ln mono">{{ snip.line_num }}</span>
+                                        <pre class="code-text mono"><code>{{ snip.code }}</code></pre>
+                                        {% if snip.is_target %}
+                                        <div class="code-target-badge">
+                                            <span class="target-arrow">&larr;</span>
+                                            <span>Finding: {{ r.report.get('algorithm') }}-{{ r.report.get('key_size') }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Suggested PQC / Hybrid Fix Snippet -->
+                            {% if r.suggested_fix %}
+                            <div class="remediation-block">
+                                <div class="remediation-header">
+                                    <span style="color: var(--status-safe); font-weight: 600; font-size: 0.8rem; font-family: var(--font-title);">
+                                        &check; Recommended Migration Fix (NIST PQC / Hybrid)
+                                    </span>
+                                    <span style="color: var(--text-dim); font-size: 0.72rem; font-family: var(--font-mono);">
+                                        Target: {{ r.migration_target }}
+                                    </span>
+                                </div>
+                                <div class="rec-code-block rec-code--recommended" style="margin: 0;">
+                                    <pre style="padding: 0.75rem 0.9rem; font-size: 0.78rem;"><code>{{ r.suggested_fix }}</code></pre>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
 
-                    <a href="{{ url_for('scan') }}" class="btn btn-outline btn-findings">Scan Another Code &nbsp;→</a>
+                    <a href="{{ url_for('scan') }}" class="btn btn-outline btn-findings" style="margin-bottom: 2rem;">
+                        &larr; Scan Another Code / File
+                    </a>
                 </div>
 
-                <!-- ========== RIGHT COLUMN ========== -->
+                <!-- ========== RIGHT COLUMN: AGILITY, RISK & ROADMAP ========== -->
                 <div class="dash-right">
                     <!-- Top Row: Agility + Forecast side-by-side -->
                     <div class="dash-right-row">
@@ -160,7 +250,7 @@
                         <!-- Risk Forecast -->
                         {% if forecast %}
                         <div class="dcard forecast-card">
-                            <div class="dcard-title">Risk Forecast (If No Action Taken)</div>
+                            <div class="dcard-title">Risk Forecast (If Unmigrated)</div>
                             <div class="forecast-chart">
                                 <svg class="forecast-line" viewBox="0 0 200 80" preserveAspectRatio="none">
                                     <polyline points="20,70 55,58 100,42 145,18 180,5"
@@ -189,41 +279,6 @@
                         </div>
                         {% endif %}
                     </div>
-
-                    <!-- Recommendation (full width) -->
-                    {% if results|length > 0 %}
-                    {% set first_vuln = namespace(found=false, report=none, fix=none, orig=none) %}
-                    {% for r in results %}
-                        {% if not first_vuln.found and r.report.get('recommended_replacement') and r.suggested_fix %}
-                            {% set first_vuln.found = true %}
-                            {% set first_vuln.report = r.report %}
-                            {% set first_vuln.fix = r.suggested_fix %}
-                            {% set first_vuln.orig = r.matched_text %}
-                        {% endif %}
-                    {% endfor %}
-                    {% if first_vuln.found %}
-                    <div class="dcard rec-card">
-                        <div class="dcard-title">Recommendation</div>
-                        <p class="rec-action">Replace {{ first_vuln.report.algorithm }} with {{ first_vuln.report.recommended_replacement }}</p>
-                        <div class="rec-tabs">
-                            <button class="rec-tab active" type="button">Current (Vulnerable)</button>
-                            <button class="rec-tab" type="button">Recommended (PQC)</button>
-                        </div>
-                        <div class="rec-code-panels">
-                            <div class="rec-code-block rec-code--vulnerable">
-                                <pre><code>{{ first_vuln.orig }}</code></pre>
-                            </div>
-                            <div class="rec-code-block rec-code--recommended">
-                                <div class="rec-code-label">RecommendedCode</div>
-                                <pre><code>{{ first_vuln.fix }}</code></pre>
-                            </div>
-                        </div>
-                        <div class="rec-footer">
-                            <a href="{{ url_for('analyze') }}" class="view-all-link">View All Recommendations &nbsp;→</a>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endif %}
 
                     <!-- Bottom Row: Roadmap + CBOM side-by-side -->
                     <div class="dash-right-row">
@@ -259,19 +314,19 @@
                         {% if summary %}
                         <div class="dcard cbom-card">
                             <div class="dcard-title">CBOM Summary</div>
-                            {% set total = summary.critical + summary.deprecated + summary.at_risk + summary.safe %}
+                            {% set total = summary.critical + summary.high + summary.medium + summary.low %}
                             {% if total > 0 %}
                             {% set d_crit = (summary.critical / total * 360)|round|int %}
-                            {% set d_dep  = (summary.deprecated / total * 360)|round|int %}
-                            {% set d_risk = (summary.at_risk / total * 360)|round|int %}
-                            {% set d_safe = 360 - d_crit - d_dep - d_risk %}
+                            {% set d_high = (summary.high / total * 360)|round|int %}
+                            {% set d_med  = (summary.medium / total * 360)|round|int %}
+                            {% set d_low  = 360 - d_crit - d_high - d_med %}
                             <div class="cbom-layout">
                                 <div class="cbom-donut-wrap">
                                     <div class="cbom-donut" style="background: conic-gradient(
                                         #FF5470 0deg {{ d_crit }}deg,
-                                        #FF9F43 {{ d_crit }}deg {{ d_crit + d_dep }}deg,
-                                        #FFD23F {{ d_crit + d_dep }}deg {{ d_crit + d_dep + d_risk }}deg,
-                                        #3DDC97 {{ d_crit + d_dep + d_risk }}deg 360deg
+                                        #FF9F43 {{ d_crit }}deg {{ d_crit + d_high }}deg,
+                                        #FFD23F {{ d_crit + d_high }}deg {{ d_crit + d_high + d_med }}deg,
+                                        #3DDC97 {{ d_crit + d_high + d_med }}deg 360deg
                                     );">
                                         <div class="cbom-center">
                                             <span class="cbom-label">Total Assets</span>
@@ -280,10 +335,10 @@
                                     </div>
                                 </div>
                                 <div class="cbom-legend">
-                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-critical);"></span> <span class="cbom-legend-text">Critical</span> <span class="cbom-legend-val">{{ summary.critical }} ({{ (summary.critical / total * 100)|round|int }}%)</span></div>
-                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-deprecated);"></span> <span class="cbom-legend-text">Deprecated</span> <span class="cbom-legend-val">{{ summary.deprecated }} ({{ (summary.deprecated / total * 100)|round|int }}%)</span></div>
-                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-at-risk);"></span> <span class="cbom-legend-text">At Risk</span> <span class="cbom-legend-val">{{ summary.at_risk }} ({{ (summary.at_risk / total * 100)|round|int }}%)</span></div>
-                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-safe);"></span> <span class="cbom-legend-text">Safe</span> <span class="cbom-legend-val">{{ summary.safe }} ({{ (summary.safe / total * 100)|round|int }}%)</span></div>
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-critical);"></span> <span class="cbom-legend-text">Critical</span> <span class="cbom-legend-val">{{ summary.critical }}</span></div>
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-deprecated);"></span> <span class="cbom-legend-text">High</span> <span class="cbom-legend-val">{{ summary.high }}</span></div>
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-at-risk);"></span> <span class="cbom-legend-text">Medium</span> <span class="cbom-legend-val">{{ summary.medium }}</span></div>
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-safe);"></span> <span class="cbom-legend-text">Low / Safe</span> <span class="cbom-legend-val">{{ summary.low }}</span></div>
                                 </div>
                             </div>
                             {% endif %}
@@ -313,7 +368,7 @@
             </div>
 
             <h1>Scan Your Code</h1>
-            <p class="form-subtitle">Upload a source file or paste code below to detect cryptographic usage and inspect quantum vulnerabilities.</p>
+            <p class="form-subtitle">Upload a source file or paste code below to detect cryptographic usage, inspect line numbers, and generate CBOM reports.</p>
 
             <form method="POST" enctype="multipart/form-data" class="qryptis-form">
                 <div class="form-group">
@@ -332,12 +387,12 @@
                 </div>
 
                 <div class="form-group">
-                    <textarea name="code_text" rows="6" class="code-textarea" placeholder="from Crypto.PublicKey import RSA&#10;key = RSA.generate(2048)&#10;cipher = DES3.new(key, DES3.MODE_CBC)">{{ code_text }}</textarea>
+                    <textarea name="code_text" rows="6" class="code-textarea" placeholder="from Crypto.PublicKey import RSA&#10;private_key = RSA.generate(2048)&#10;cipher = DES3.new(key, DES3.MODE_CBC)">{{ code_text }}</textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.6rem;">
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                    <span>Run Scan &nbsp;&rarr;</span>
+                    <span>Run Security Scan &nbsp;&rarr;</span>
                 </button>
             </form>
 

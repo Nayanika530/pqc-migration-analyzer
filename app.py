@@ -247,25 +247,32 @@ def scan():
 
         if code_text.strip():
             results = scan_and_report(code_text)
-            session["last_scan_results"] = results
+            # Store compact findings in session to keep cookie payload tiny (<400 bytes)
+            session["last_scan_results"] = [
+                {
+                    "line_number": r["line_number"],
+                    "matched_text": r["matched_text"],
+                    "report": r["report"],
+                    "suggested_fix": r.get("suggested_fix", "")
+                }
+                for r in results
+            ]
             agility = calculate_agility_score(results)
             roadmap = generate_migration_roadmap(results)
             forecast = generate_risk_forecast(results)
             session["last_agility"] = agility
             session["last_roadmap"] = roadmap
 
-            # Compute verdict summary counts for the dashboard cards
-            counts = {"critical": 0, "deprecated": 0, "at_risk": 0, "safe": 0}
-            for r in results:
-                v = r.get("report", {}).get("verdict", "")
-                if "DEPRECATED" in v:
-                    counts["deprecated"] += 1
-                elif "CRITICAL" in v:
-                    counts["critical"] += 1
-                elif "AT RISK" in v:
-                    counts["at_risk"] += 1
-                else:
-                    counts["safe"] += 1
+            # Compute severity and verdict counts for dashboard & findings
+            counts = {
+                "critical": sum(1 for r in results if r.get("severity") == "CRITICAL"),
+                "high": sum(1 for r in results if r.get("severity") == "HIGH"),
+                "medium": sum(1 for r in results if r.get("severity") == "MEDIUM"),
+                "low": sum(1 for r in results if r.get("severity") == "LOW"),
+                "deprecated": sum(1 for r in results if "DEPRECATED" in r.get("report", {}).get("verdict", "")),
+                "at_risk": sum(1 for r in results if "AT RISK" in r.get("report", {}).get("verdict", "")),
+                "safe": sum(1 for r in results if "OK" in r.get("report", {}).get("verdict", "") or "SAFE" in r.get("report", {}).get("verdict", ""))
+            }
             summary = counts
 
     return render_template(
@@ -328,24 +335,30 @@ def api_scan():
         return jsonify({"error": "No code provided to scan."}), 400
 
     results = scan_and_report(code_text)
-    session["last_scan_results"] = results
+    session["last_scan_results"] = [
+        {
+            "line_number": r["line_number"],
+            "matched_text": r["matched_text"],
+            "report": r["report"],
+            "suggested_fix": r.get("suggested_fix", "")
+        }
+        for r in results
+    ]
     agility = calculate_agility_score(results)
     roadmap = generate_migration_roadmap(results)
     forecast = generate_risk_forecast(results)
     session["last_agility"] = agility
     session["last_roadmap"] = roadmap
 
-    counts = {"critical": 0, "deprecated": 0, "at_risk": 0, "safe": 0}
-    for r in results:
-        v = r.get("report", {}).get("verdict", "")
-        if "DEPRECATED" in v:
-            counts["deprecated"] += 1
-        elif "CRITICAL" in v:
-            counts["critical"] += 1
-        elif "AT RISK" in v:
-            counts["at_risk"] += 1
-        else:
-            counts["safe"] += 1
+    counts = {
+        "critical": sum(1 for r in results if r.get("severity") == "CRITICAL"),
+        "high": sum(1 for r in results if r.get("severity") == "HIGH"),
+        "medium": sum(1 for r in results if r.get("severity") == "MEDIUM"),
+        "low": sum(1 for r in results if r.get("severity") == "LOW"),
+        "deprecated": sum(1 for r in results if "DEPRECATED" in r.get("report", {}).get("verdict", "")),
+        "at_risk": sum(1 for r in results if "AT RISK" in r.get("report", {}).get("verdict", "")),
+        "safe": sum(1 for r in results if "OK" in r.get("report", {}).get("verdict", "") or "SAFE" in r.get("report", {}).get("verdict", ""))
+    }
 
     return jsonify({
         "success": True,

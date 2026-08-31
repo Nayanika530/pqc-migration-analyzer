@@ -650,11 +650,409 @@ code, pre, .mono { font-family: var(--font-mono); }
 }
 .file-label:hover { border-color: var(--accent); color: #FFFFFF; }
 
+/* ============================================================
+   ENTERPRISE CODE SCANNER & FINDINGS STYLES
+   ============================================================ */
+.analysis-banner {
+    background: rgba(14, 17, 24, 0.85);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.4rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.analysis-banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 0.9rem;
+}
+
+.banner-title-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.banner-pre {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.banner-pre::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.banner-repo-info {
+    display: flex;
+    align-items: center;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+}
+
+.repo-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.82rem;
+}
+
+.repo-meta-label {
+    color: var(--text-muted);
+    font-family: var(--font-title);
+}
+
+.repo-meta-val {
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+/* Severity Matrix Grid */
+.severity-matrix {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.sev-badge {
+    background: rgba(8, 10, 15, 0.7);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--border-subtle);
+    transition: var(--transition-smooth);
+}
+.sev-badge:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-hover);
+}
+
+.sev-label {
+    font-family: var(--font-heading);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.sev-count {
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.sev-critical { border-left: 3px solid var(--status-critical); }
+.sev-critical .sev-label, .sev-critical .sev-count { color: var(--status-critical); }
+
+.sev-high { border-left: 3px solid var(--status-deprecated); }
+.sev-high .sev-label, .sev-high .sev-count { color: var(--status-deprecated); }
+
+.sev-medium { border-left: 3px solid var(--status-at-risk); }
+.sev-medium .sev-label, .sev-medium .sev-count { color: var(--status-at-risk); }
+
+.sev-low { border-left: 3px solid var(--status-safe); }
+.sev-low .sev-label, .sev-low .sev-count { color: var(--status-safe); }
+
+/* ============================================================
+   CRYPTOGRAPHIC FINDING CARD (Enterprise Inspector Look)
+   ============================================================ */
+.findings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.crypto-finding-card {
+    background: rgba(14, 18, 26, 0.85);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-lg);
+    padding: 1.35rem 1.5rem;
+    backdrop-filter: blur(18px);
+    transition: var(--transition-smooth);
+    position: relative;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+.crypto-finding-card:hover {
+    border-color: rgba(46, 158, 255, 0.4);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+}
+
+.sev-border-critical { border-left: 4px solid var(--status-critical); }
+.sev-border-high     { border-left: 4px solid var(--status-deprecated); }
+.sev-border-medium   { border-left: 4px solid var(--status-at-risk); }
+.sev-border-low      { border-left: 4px solid var(--status-safe); }
+
+.finding-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.finding-tag-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.finding-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+.finding-algo-title {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    letter-spacing: -0.01em;
+}
+
+.finding-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sev-tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+.sev-tag-critical { background: rgba(255, 84, 112, 0.18); color: var(--status-critical); border: 1px solid rgba(255, 84, 112, 0.4); }
+.sev-tag-high     { background: rgba(255, 159, 67, 0.18); color: var(--status-deprecated); border: 1px solid rgba(255, 159, 67, 0.4); }
+.sev-tag-medium   { background: rgba(255, 210, 63, 0.18); color: var(--status-at-risk); border: 1px solid rgba(255, 210, 63, 0.4); }
+.sev-tag-low      { background: rgba(61, 220, 151, 0.18); color: var(--status-safe); border: 1px solid rgba(61, 220, 151, 0.4); }
+
+/* Finding Grid Metadata */
+.finding-grid-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem 1.2rem;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.f-meta-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.f-meta-label {
+    font-family: var(--font-title);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.f-meta-val {
+    font-size: 0.86rem;
+    color: #FFFFFF;
+    line-height: 1.3;
+}
+
+/* Difficulty Badges */
+.diff-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    width: fit-content;
+}
+.diff-low    { background: rgba(61, 220, 151, 0.15); color: #3DDC97; border: 1px solid rgba(61, 220, 151, 0.3); }
+.diff-medium { background: rgba(255, 210, 63, 0.15); color: #FFD23F; border: 1px solid rgba(255, 210, 63, 0.3); }
+.diff-high   { background: rgba(255, 84, 112, 0.15); color: #FF5470; border: 1px solid rgba(255, 84, 112, 0.3); }
+
+/* Affected Components Tag List */
+.f-components-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.1rem;
+    padding: 0 0.2rem;
+}
+
+.f-component-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.f-component-tag {
+    background: rgba(46, 158, 255, 0.1);
+    border: 1px solid rgba(46, 158, 255, 0.25);
+    color: #93C5FD;
+    font-size: 0.74rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-family: var(--font-title);
+}
+
+/* ============================================================
+   CODE SNIPPET VIEWER (With Target Line Highlight & Attached Finding)
+   ============================================================ */
+.code-viewer-block {
+    background: #060709;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.code-viewer-header {
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0.45rem 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+}
+
+.code-viewer-file {
+    color: #93C5FD;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+}
+
+.code-viewer-lang {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+}
+
+.code-viewer-body {
+    padding: 0.5rem 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.code-line-row {
+    display: flex;
+    align-items: center;
+    padding: 0.15rem 0.9rem;
+    position: relative;
+    transition: background 0.15s;
+}
+
+.code-line-row:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.code-line-target {
+    background: rgba(255, 84, 112, 0.12) !important;
+    border-left: 3px solid var(--status-critical);
+}
+
+.code-ln {
+    width: 38px;
+    color: var(--text-dim);
+    font-size: 0.74rem;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.code-line-target .code-ln {
+    color: var(--status-critical);
+    font-weight: 700;
+}
+
+.code-text {
+    flex: 1;
+    overflow-x: auto;
+    color: #E2E8F0;
+    margin: 0;
+}
+
+.code-line-target .code-text {
+    color: #FFF1F2;
+    font-weight: 600;
+}
+
+.code-target-badge {
+    margin-left: 1rem;
+    background: rgba(255, 84, 112, 0.25);
+    border: 1px solid rgba(255, 84, 112, 0.5);
+    border-radius: 4px;
+    padding: 0.1rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: #FFA3B2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+
+.target-arrow {
+    font-weight: 800;
+    color: var(--status-critical);
+}
+
+/* Remediation Code Block */
+.remediation-block {
+    background: rgba(61, 220, 151, 0.04);
+    border: 1px solid rgba(61, 220, 151, 0.2);
+    border-radius: var(--radius-md);
+    padding: 0.8rem 1rem;
+}
+
+.remediation-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
     .dash-body { flex-direction: column; }
     .dash-left, .dash-right { flex: none; width: 100%; }
     .dash-right-row { flex-direction: column; }
+    .severity-matrix { grid-template-columns: repeat(2, 1fr); }
+    .finding-grid-meta { grid-template-columns: 1fr; }
     .rec-code-panels { flex-direction: column; }
     .summary-cards { flex-wrap: wrap; }
     .qryptis-form { padding: 1.5rem; }

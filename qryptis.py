@@ -372,6 +372,46 @@ def cmd_inventory(args):
         print(f"{Colors.GREEN}[✓] Enterprise CBOM exported to {export_path}{Colors.RESET}\n")
 
 
+def cmd_graph(args):
+    """Display cryptographic dependency graph and blast radius impact analysis."""
+    from dependency_graph import get_dependency_graph, format_ascii_graph
+
+    algo = args.algorithm or "RSA-2048"
+    graph = get_dependency_graph(algo)
+
+    # Determine terminal encoding support
+    is_utf8 = sys.stdout.encoding and "utf" in sys.stdout.encoding.lower()
+    tree = format_ascii_graph(algo, unicode_mode=bool(is_utf8))
+
+    print(f"\n{Colors.BOLD}{Colors.WHITE}CRYPTOGRAPHIC DEPENDENCY GRAPH & BLAST RADIUS{Colors.RESET}")
+    print(f"{Colors.CYAN}{'=' * 75}{Colors.RESET}\n")
+    print(tree)
+    print(f"\n{Colors.CYAN}{'=' * 75}{Colors.RESET}")
+    print(f"{Colors.BOLD}Algorithm:{Colors.RESET}           {Colors.WHITE}{graph['algorithm']}{Colors.RESET}")
+    print(f"{Colors.BOLD}Quantum Status:{Colors.RESET}      {Colors.RED if graph['quantum_vulnerable'] else Colors.GREEN}{'VULNERABLE (Broken by Shor)' if graph['quantum_vulnerable'] else 'SECURE'}{Colors.RESET}")
+    print(f"{Colors.BOLD}Migration Target:{Colors.RESET}    {Colors.GREEN}{graph['migration_target']}{Colors.RESET}")
+    print(f"{Colors.BOLD}Migration Complexity:{Colors.RESET}{Colors.YELLOW if graph['complexity'] == 'HIGH' else Colors.WHITE} {graph['complexity']}{Colors.RESET}")
+    print(f"{Colors.BOLD}Total Services:{Colors.RESET}      {Colors.RED if graph['total_services_affected'] > 5 else Colors.YELLOW}{graph['total_services_affected']} downstream services affected{Colors.RESET}\n")
+
+    print(f"{Colors.BOLD}AFFECTED DOMAINS & MICROSERVICES:{Colors.RESET}")
+    for d in graph["domains"]:
+        print(f"  • {Colors.BOLD}{d['name']}{Colors.RESET} ({d['role']}) — {Colors.CYAN}{d['services_count']} services{Colors.RESET}")
+        print(f"    Protocol: {d['protocol']} | Usage: {d['usage']}")
+        for svc in d["services"]:
+            print(f"      └─ {Colors.WHITE}{svc['name']:<24}{Colors.RESET} : {Colors.DIM}{svc['impact']}{Colors.RESET}")
+        print()
+
+    if graph.get("breaking_changes"):
+        print(f"{Colors.BOLD}BREAKING PROTOCOL RISKS:{Colors.RESET}")
+        for b in graph["breaking_changes"]:
+            print(f"  ⚠ {b}")
+        print()
+
+    if graph.get("mitigation_strategy"):
+        print(f"{Colors.BOLD}RECOMMENDED MIGRATION STRATEGY:{Colors.RESET}")
+        print(f"  {Colors.GREEN}✓ {graph['mitigation_strategy']}{Colors.RESET}\n")
+
+
 def cmd_db(args):
     """List all supported algorithms in knowledge base."""
     print(f"\n{Colors.BOLD}{Colors.WHITE}CRYPTOGRAPHIC ALGORITHM DATABASE{Colors.RESET}")
@@ -395,9 +435,13 @@ def cmd_db(args):
 def main():
     parser = argparse.ArgumentParser(
         description="Qryptis — Post-Quantum Cryptography Migration Analyzer & Code Scanner (CLI)",
-        epilog="Examples:\n  python qryptis.py inventory\n  python qryptis.py scan ./src --export cbom.json\n  python qryptis.py check RSA 2048\n  python qryptis.py live google.com\n"
+        epilog="Examples:\n  python qryptis.py graph RSA-2048\n  python qryptis.py inventory\n  python qryptis.py scan ./src --export cbom.json\n  python qryptis.py check RSA 2048\n"
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
+
+    # Command: graph / impact
+    graph_parser = subparsers.add_parser("graph", aliases=["impact"], help="Display cryptographic dependency graph and blast radius impact")
+    graph_parser.add_argument("algorithm", nargs="?", default="RSA-2048", help="Algorithm name (e.g. RSA-2048, ECDSA, 3DES, DH-2048)")
 
     # Command: inventory
     inv_parser = subparsers.add_parser("inventory", help="Display or manage the unified Cryptographic Asset Inventory")
@@ -441,7 +485,9 @@ def main():
 
     print_banner()
 
-    if args.command == "inventory":
+    if args.command in ("graph", "impact"):
+        cmd_graph(args)
+    elif args.command == "inventory":
         cmd_inventory(args)
     elif args.command == "scan":
         cmd_scan(args)

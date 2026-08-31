@@ -311,6 +311,7 @@ class TestFlaskWebRoutes(unittest.TestCase):
 
 
 from inventory import CryptoInventory, parse_certificate_content
+from dependency_graph import get_dependency_graph, get_all_dependency_graphs, format_ascii_graph
 
 class TestCryptoAssetInventory(unittest.TestCase):
     """Test suite for Unified Crypto Asset Inventory."""
@@ -348,6 +349,21 @@ class TestCryptoAssetInventory(unittest.TestCase):
         self.assertGreaterEqual(len(findings), 1)
         self.assertIn("RSA-2048", findings[0]["algorithm"])
         self.assertTrue(findings[0]["quantum_vulnerable"])
+
+    def test_dependency_graph_rsa2048(self):
+        """Verify RSA-2048 dependency graph and blast radius metrics."""
+        graph = get_dependency_graph("RSA-2048")
+        self.assertEqual(graph["algorithm"], "RSA-2048")
+        self.assertEqual(graph["domains_count"], 3)
+        self.assertEqual(graph["total_services_affected"], 7)
+        self.assertIn("Replacing RSA-2048 affects 7 services.", graph["impact_statement"])
+        self.assertEqual(graph["complexity"], "HIGH")
+
+        ascii_tree = format_ascii_graph("RSA-2048", unicode_mode=False)
+        self.assertIn("Auth API", ascii_tree)
+        self.assertIn("Payment", ascii_tree)
+        self.assertIn("VPN", ascii_tree)
+        self.assertIn("Replacing RSA-2048 affects 7 services.", ascii_tree)
 
 
 import subprocess
@@ -435,6 +451,22 @@ class TestQryptisCLI(unittest.TestCase):
         self.assertIn("Quantum Vulnerable: 32", result.stdout)
         self.assertIn("Deprecated:         3", result.stdout)
         self.assertIn("PQC Ready:          0", result.stdout)
+
+    def test_cli_subprocess_graph(self):
+        """Verify CLI graph / impact command."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "graph", "RSA-2048"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("CRYPTOGRAPHIC DEPENDENCY GRAPH", result.stdout)
+        self.assertIn("Auth API", result.stdout)
+        self.assertIn("Payment", result.stdout)
+        self.assertIn("VPN", result.stdout)
+        self.assertIn("Replacing RSA-2048 affects 7 services.", result.stdout)
 
 
 if __name__ == "__main__":

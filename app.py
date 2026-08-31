@@ -11,6 +11,7 @@ from scanner import (
     generate_migration_roadmap, export_roadmap_as_markdown, generate_risk_forecast
 )
 from inventory import GLOBAL_INVENTORY, parse_certificate_content
+from dependency_graph import get_dependency_graph, get_all_dependency_graphs
 import json
 
 load_dotenv()
@@ -244,6 +245,32 @@ def api_inventory_export_cbom():
         mimetype="application/json",
         headers={"Content-Disposition": "attachment; filename=enterprise_cbom.json"}
     )
+
+
+@app.route("/graph")
+@app.route("/graph/<algo>")
+def graph(algo="RSA-2048"):
+    selected_algo = request.args.get("algo") or algo or "RSA-2048"
+    graph_data = get_dependency_graph(selected_algo)
+    all_graphs = get_all_dependency_graphs()
+    return render_template("graph.html", graph=graph_data, all_graphs=all_graphs, selected_algo=selected_algo)
+
+
+@app.route("/api/graph")
+def api_graph_all():
+    return jsonify({
+        "status": "success",
+        "graphs": get_all_dependency_graphs()
+    })
+
+
+@app.route("/api/graph/<algo>")
+def api_graph_single(algo):
+    graph_data = get_dependency_graph(algo)
+    return jsonify({
+        "status": "success",
+        "graph": graph_data
+    })
 
 
 @app.route("/live-scan", methods=["GET", "POST"])

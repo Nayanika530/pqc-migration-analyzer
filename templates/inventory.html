@@ -272,11 +272,19 @@
 
                     <div class="inv-breakdown-grid">
                         {% for algo_name, count in summary.algorithm_breakdown.items() %}
-                        <div class="inv-breakdown-item">
-                            <span class="inv-breakdown-name">{{ algo_name }}</span>
+                        <a href="{{ url_for('graph', algo=algo_name) }}" class="inv-breakdown-item" style="text-decoration: none; transition: all 0.2s;" title="View Dependency Graph for {{ algo_name }}">
+                            <span class="inv-breakdown-name" style="display: flex; align-items: center; gap: 0.4rem;">
+                                <span>{{ algo_name }}</span>
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </span>
                             <span class="inv-breakdown-count">{{ count }}</span>
-                        </div>
+                        </a>
                         {% endfor %}
+                    </div>
+                    <div style="margin-top: 1rem; text-align: right;">
+                        <a href="{{ url_for('graph') }}" class="btn-impact-outline" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">
+                            <span>🕸️ Open Full Dependency Graph & Blast Radius &rarr;</span>
+                        </a>
                     </div>
                 </section>
 
@@ -349,7 +357,10 @@
                             {% for asset in assets %}
                             <tr class="asset-row" data-search="{{ asset.name|lower }} {{ asset.source_target|lower }} {{ asset.usage|lower }} {{ asset.source_type|lower }}">
                                 <td>
-                                    <strong style="color: #FFFFFF; font-family: var(--font-mono);">{{ asset.name }}</strong>
+                                    <a href="{{ url_for('graph', algo=asset.name) }}" style="color: #FFFFFF; font-family: var(--font-mono); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" title="Inspect Dependency Graph">
+                                        <span>{{ asset.name }}</span>
+                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#2E9EFF" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                    </a>
                                     <div style="font-size: 0.72rem; color: var(--text-dim);">{{ asset.algorithm }} &bull; {{ asset.key_size }}-bit</div>
                                 </td>
                                 <td>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research-Grade Benchmark Lab — Qryptis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='analyze.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scan.css') }}">
+    <style>
+        .lab-hero {
+            margin-bottom: 2rem;
+        }
+        .lab-table-card {
+            background: rgba(10, 14, 22, 0.85);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+            margin-bottom: 2.2rem;
+        }
+        .lab-table-header {
+            padding: 1.2rem 1.6rem;
+            background: rgba(14, 20, 32, 0.9);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .lab-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.84rem;
+        }
+        .lab-table th {
+            background: rgba(18, 24, 38, 0.9);
+            padding: 0.9rem 1.1rem;
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .lab-table td {
+            padding: 0.9rem 1.1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+        }
+        .lab-table tr:hover td {
+            background: rgba(46, 158, 255, 0.04);
+        }
+        .speedup-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: rgba(163, 230, 53, 0.15);
+            color: #A3E635;
+            border: 1px solid rgba(163, 230, 53, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        {% include "_sidebar.html" %}
+
+        <main class="main-content">
+            <div class="analyze-page" style="max-width: 1280px;">
+                <div class="chips">Scientific Research Lab</div>
+
+                <!-- Page Header -->
+                <div class="lab-hero">
+                    <h1 style="font-size: 2.1rem; margin-bottom: 0.4rem;">NIST PQC Benchmark Lab</h1>
+                    <p style="color: var(--text-muted); font-size: 0.92rem;">
+                        Empirical microsecond timing, memory allocations, and standardized object byte sizes according to official NIST FIPS 203, 204, and 205 specifications.
+                    </p>
+                </div>
+
+                <!-- Section 1: NIST FIPS 203 Key Encapsulation (ML-KEM) -->
+                <section class="lab-table-card">
+                    <div class="lab-table-header">
+                        <div>
+                            <h3 style="font-size: 1.15rem; color: #FFFFFF; font-family: var(--font-heading);">
+                                NIST FIPS 203 & Round 4: Key Encapsulation Mechanisms (KEMs)
+                            </h3>
+                            <span class="mono" style="font-size: 0.76rem; color: var(--text-muted);">Standardized for General Key Establishment & TLS 1.3</span>
+                        </div>
+                        <a href="{{ url_for('simulator', src='RSA-2048', tgt='ML-KEM-768') }}" class="btn-impact-outline" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">
+                            <span>Simulate ML-KEM Migration &rarr;</span>
+                        </a>
+                    </div>
+                    <table class="lab-table">
+                        <thead>
+                            <tr>
+                                <th>Algorithm / Parameter Set</th>
+                                <th>Standard & Family</th>
+                                <th>Security Level</th>
+                                <th>KeyGen Time</th>
+                                <th>Encap / Decap Time</th>
+                                <th>Public Key</th>
+                                <th>Ciphertext</th>
+                                <th>Memory</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for algo in metrics.pqc_kems %}
+                            <tr>
+                                <td>
+                                    <strong style="color: #FFFFFF; font-family: var(--font-mono);">{{ algo.name }}</strong>
+                                    {% if algo.name == 'ML-KEM-768' %}
+                                    <span class="speedup-badge" style="margin-left: 0.4rem;">Primary Standard</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="mono" style="font-size: 0.78rem; color: #93C5FD;">{{ algo.standard }}</span></td>
+                                <td><span class="badge badge-safe">NIST Level {{ algo.security_category }}</span></td>
+                                <td class="mono" style="color: #A3E635; font-weight: 600;">{{ algo.avg_keygen_ms }} ms</td>
+                                <td class="mono">{{ algo.avg_encap_ms }} / {{ algo.avg_decap_ms }} ms</td>
+                                <td class="mono" style="color: #FFFFFF; font-weight: 600;">{{ algo.public_key_bytes }} B</td>
+                                <td class="mono" style="color: #FFFFFF; font-weight: 600;">{{ algo.ciphertext_bytes }} B</td>
+                                <td class="mono">{{ algo.memory_mb }} MB</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Section 2: NIST FIPS 204 & 205 Digital Signatures (ML-DSA / SLH-DSA) -->
+                <section class="lab-table-card">
+                    <div class="lab-table-header">
+                        <div>
+                            <h3 style="font-size: 1.15rem; color: #FFFFFF; font-family: var(--font-heading);">
+                                NIST FIPS 204 & 205: Digital Signature Standards
+                            </h3>
+                            <span class="mono" style="font-size: 0.76rem; color: var(--text-muted);">Standardized for X.509 PKI, Authentication Tokens, and Code Signing</span>
+                        </div>
+                        <a href="{{ url_for('simulator', src='ECDSA P-256', tgt='ML-DSA-65') }}" class="btn-impact-outline" style="font-size: 0.78rem; padding: 0.4rem 0.8rem;">
+                            <span>Simulate ML-DSA Migration &rarr;</span>
+                        </a>
+                    </div>
+                    <table class="lab-table">
+                        <thead>
+                            <tr>
+                                <th>Algorithm / Parameter Set</th>
+                                <th>Standard & Family</th>
+                                <th>Security Level</th>
+                                <th>KeyGen Time</th>
+                                <th>Sign / Verify Time</th>
+                                <th>Public Key</th>
+                                <th>Signature Size</th>
+                                <th>Memory</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for algo in metrics.pqc_signatures %}
+                            <tr>
+                                <td>
+                                    <strong style="color: #FFFFFF; font-family: var(--font-mono);">{{ algo.name }}</strong>
+                                    {% if algo.name == 'ML-DSA-65' %}
+                                    <span class="speedup-badge" style="margin-left: 0.4rem;">Primary Standard</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="mono" style="font-size: 0.78rem; color: #93C5FD;">{{ algo.standard }}</span></td>
+                                <td><span class="badge badge-safe">NIST Level {{ algo.security_category }}</span></td>
+                                <td class="mono" style="color: #A3E635; font-weight: 600;">{{ algo.avg_keygen_ms }} ms</td>
+                                <td class="mono">{{ algo.avg_sign_ms }} / {{ algo.avg_verify_ms }} ms</td>
+                                <td class="mono" style="color: #FFFFFF; font-weight: 600;">{{ algo.public_key_bytes }} B</td>
+                                <td class="mono" style="color: #FFFFFF; font-weight: 600;">{{ algo.signature_bytes }} B</td>
+                                <td class="mono">{{ algo.memory_mb }} MB</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Section 3: Classical Baseline Algorithms -->
+                <section class="lab-table-card">
+                    <div class="lab-table-header">
+                        <div>
+                            <h3 style="font-size: 1.15rem; color: #FFFFFF; font-family: var(--font-heading);">
+                                Classical Baseline Primitives
+                            </h3>
+                            <span class="mono" style="font-size: 0.76rem; color: var(--text-muted);">Empirical baselines currently deployed in legacy infrastructure</span>
+                        </div>
+                    </div>
+                    <table class="lab-table">
+                        <thead>
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Family</th>
+                                <th>Quantum Status</th>
+                                <th>KeyGen Time</th>
+                                <th>Encrypt / Decrypt</th>
+                                <th>Public Key</th>
+                                <th>Ciphertext / Sig</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for algo in metrics.classical_baselines %}
+                            <tr>
+                                <td><strong style="color: #FFFFFF; font-family: var(--font-mono);">{{ algo.name }}</strong></td>
+                                <td><span class="mono" style="font-size: 0.78rem; color: var(--text-muted);">{{ algo.family }}</span></td>
+                                <td>
+                                    {% if not algo.quantum_safe %}
+                                    <span class="badge badge-critical">VULNERABLE</span>
+                                    {% else %}
+                                    <span class="badge badge-safe">QUANTUM RESILIENT</span>
+                                    {% endif %}
+                                </td>
+                                <td class="mono" style="color: {% if algo.avg_keygen_ms > 10 %}#FF5470{% else %}#FFFFFF{% endif %};">
+                                    {{ algo.avg_keygen_ms }} ms
+                                </td>
+                                <td class="mono">{{ algo.avg_encap_ms }} / {{ algo.avg_decap_ms }} ms</td>
+                                <td class="mono">{{ algo.public_key_bytes }} B</td>
+                                <td class="mono">{{ algo.ciphertext_bytes or algo.signature_bytes }} B</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

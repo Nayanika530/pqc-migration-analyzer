@@ -468,6 +468,95 @@ class TestQryptisCLI(unittest.TestCase):
         self.assertIn("VPN", result.stdout)
         self.assertIn("Replacing RSA-2048 affects 7 services.", result.stdout)
 
+    def test_cli_subprocess_simulate(self):
+        """Verify CLI simulate command."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "simulate", "RSA-2048", "ML-KEM-768"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("SIMULATE MIGRATION", result.stdout)
+        self.assertIn("RSA-2048", result.stdout)
+        self.assertIn("ML-KEM-768", result.stdout)
+        self.assertIn("Affected services", result.stdout)
+        self.assertIn("7", result.stdout)
+
+    def test_cli_subprocess_plan(self):
+        """Verify CLI plan command."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "plan"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("QRYPTIS MIGRATION ENGINE", result.stdout)
+        self.assertIn("MIGRATION PLAN", result.stdout)
+        self.assertIn("Priority 1", result.stdout)
+        self.assertIn("Remove 3DES", result.stdout)
+        self.assertIn("Priority 2", result.stdout)
+        self.assertIn("Migrate RSA-2048", result.stdout)
+
+    def test_cli_subprocess_lab(self):
+        """Verify CLI lab command."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "lab"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("NIST PQC BENCHMARK LAB", result.stdout)
+        self.assertIn("ML-KEM-768", result.stdout)
+        self.assertIn("1184 B", result.stdout)
+
+
+from migration_simulator import MigrationSimulator
+from nist_benchmarks import get_algorithm_metrics, get_all_benchmark_metrics
+from master_migration_engine import MasterMigrationEngine
+
+class TestMigrationSimulatorAndPlan(unittest.TestCase):
+    """Test suite for Migration Simulator, Benchmark Lab, and Master Migration Engine."""
+
+    def test_simulation_rsa2048_to_mlkem768(self):
+        """Verify exact simulation deltas for RSA-2048 to ML-KEM-768."""
+        sim = MigrationSimulator.simulate("RSA-2048", "ML-KEM-768")
+        self.assertEqual(sim["source_algorithm"], "RSA-2048")
+        self.assertEqual(sim["target_algorithm"], "ML-KEM-768")
+        self.assertEqual(sim["affected_services"], 7)
+        self.assertEqual(sim["complexity"], "MEDIUM")
+        self.assertEqual(sim["latency"]["delta_percent"], 8.4)
+        self.assertEqual(sim["cpu"]["delta_percent"], 11.2)
+        self.assertEqual(sim["key_size"]["target_bytes"], 1184)
+        self.assertEqual(sim["handshake_size"]["target_bytes"], 1088)
+
+    def test_nist_benchmark_metrics_accuracy(self):
+        """Verify official NIST parameter sizes."""
+        mlkem768 = get_algorithm_metrics("ML-KEM-768")
+        self.assertEqual(mlkem768["public_key_bytes"], 1184)
+        self.assertEqual(mlkem768["ciphertext_bytes"], 1088)
+        self.assertEqual(mlkem768["security_category"], 3)
+
+        mldsa65 = get_algorithm_metrics("ML-DSA-65")
+        self.assertEqual(mldsa65["public_key_bytes"], 1952)
+        self.assertEqual(mldsa65["signature_bytes"], 3309)
+
+    def test_master_migration_plan_priorities(self):
+        """Verify master migration plan generates the 4 prioritized tiers."""
+        plan = MasterMigrationEngine.generate_plan()
+        self.assertEqual(plan["total_priorities"], 4)
+        ranks = [p["rank"] for p in plan["priorities"]]
+        self.assertEqual(ranks, [1, 2, 3, 4])
+        self.assertIn("3DES", plan["priorities"][0]["primitive"])
+        self.assertIn("RSA", plan["priorities"][1]["primitive"])
+        self.assertIn("ECDSA", plan["priorities"][2]["primitive"])
+        self.assertIn("X25519", plan["priorities"][3]["primitive"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Cryptographic Migration Plan — Qryptis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='analyze.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scan.css') }}">
+    <style>
+        .plan-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* 4 Executive Stat Cards */
+        .plan-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.2rem;
+        }
+        .plan-stat-card {
+            background: rgba(14, 20, 32, 0.75);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 1.2rem 1.4rem;
+        }
+
+        /* Phased Priority Cards */
+        .priority-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .priority-card {
+            background: rgba(10, 14, 22, 0.85);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+        .priority-card-header {
+            padding: 1.2rem 1.6rem;
+            background: rgba(18, 24, 38, 0.9);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .priority-rank-badge {
+            font-family: var(--font-heading);
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 0.25rem 0.7rem;
+            border-radius: 9999px;
+            background: rgba(46, 158, 255, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(46, 158, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .priority-body {
+            padding: 1.6rem;
+        }
+        .priority-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+            background: rgba(18, 24, 38, 0.6);
+            padding: 1rem 1.2rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .priority-meta-item {
+            font-size: 0.8rem;
+        }
+        .priority-meta-label {
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.72rem;
+            margin-bottom: 0.2rem;
+        }
+        .priority-meta-val {
+            font-family: var(--font-mono);
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        {% include "_sidebar.html" %}
+
+        <main class="main-content">
+            <div class="analyze-page" style="max-width: 1280px;">
+                <div class="chips">Master Cryptographic Roadmap</div>
+
+                <!-- Page Hero Header -->
+                <div class="plan-hero">
+                    <div>
+                        <h1 style="font-size: 2.1rem; margin-bottom: 0.4rem;">🧠 Qryptis Migration Engine</h1>
+                        <p style="color: var(--text-muted); font-size: 0.92rem;">
+                            Master post-quantum migration plan synthesized from Code Scans, SSL Handshakes, Crypto Inventory, Dependency Blast Radius, and NIST Benchmarks.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <a href="{{ url_for('simulator') }}" class="btn-impact-outline" style="font-size: 0.82rem; padding: 0.5rem 1rem;">
+                            <span>⚡ Open Simulator</span>
+                        </a>
+                        <a href="{{ url_for('api_migration_plan') }}" class="btn-impact" style="font-size: 0.82rem; padding: 0.5rem 1.1rem;">
+                            <span>📥 Export Plan JSON</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Executive Posture Overview Bar -->
+                <div class="plan-stat-grid">
+                    <div class="plan-stat-card" style="border-color: rgba(46,158,255,0.3);">
+                        <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Roadmap Priorities</div>
+                        <div style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; color: #FFFFFF; margin-top: 0.2rem;">{{ plan.total_priorities }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.2rem;">Sequential Execution Phases</div>
+                    </div>
+
+                    <div class="plan-stat-card" style="border-color: rgba(255,84,112,0.3);">
+                        <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Total Affected Systems</div>
+                        <div style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; color: #FF5470; margin-top: 0.2rem;">{{ plan.total_affected_systems }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.2rem;">Across Enterprise Gateways & Mesh</div>
+                    </div>
+
+                    <div class="plan-stat-card" style="border-color: rgba(255,159,67,0.3);">
+                        <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Quantum Vulnerable</div>
+                        <div style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; color: #FF9F43; margin-top: 0.2rem;">{{ plan.quantum_vulnerable_count }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.2rem;">Broken by Shor's algorithm</div>
+                    </div>
+
+                    <div class="plan-stat-card" style="border-color: rgba(163,230,53,0.3);">
+                        <div style="font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Cryptographic Agility</div>
+                        <div style="font-family: var(--font-mono); font-size: 2.2rem; font-weight: 700; color: #A3E635; margin-top: 0.2rem;">{{ plan.overall_agility_score }}/100</div>
+                        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.2rem;">Posture Grade: {{ plan.overall_agility_grade }}</div>
+                    </div>
+                </div>
+
+                <!-- Phased Migration Priorities -->
+                <div class="priority-list">
+                    {% for p in plan.priorities %}
+                    <section class="priority-card">
+                        <div class="priority-card-header">
+                            <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+                                <span class="priority-rank-badge">Priority {{ p.rank }}</span>
+                                <h3 style="font-size: 1.15rem; color: #FFFFFF; font-family: var(--font-heading); margin: 0;">
+                                    {{ p.title }}
+                                </h3>
+                            </div>
+                            <span class="badge {% if 'CRITICAL' in p.urgency %}badge-deprecated{% else %}badge-critical{% endif %}">
+                                {{ p.urgency }}
+                            </span>
+                        </div>
+
+                        <div class="priority-body">
+                            <!-- Meta stats -->
+                            <div class="priority-meta-grid">
+                                <div class="priority-meta-item">
+                                    <div class="priority-meta-label">Affected Systems</div>
+                                    <div class="priority-meta-val" style="color: #FF5470;">{{ p.affected_systems }} services / nodes</div>
+                                </div>
+                                <div class="priority-meta-item">
+                                    <div class="priority-meta-label">Target / Replacement</div>
+                                    <div class="priority-meta-val" style="color: #A3E635;">{{ p.target or p.replacement }}</div>
+                                </div>
+                                <div class="priority-meta-item">
+                                    <div class="priority-meta-label">Migration Strategy</div>
+                                    <div class="priority-meta-val" style="color: #93C5FD;">{{ p.strategy }}</div>
+                                </div>
+                                <div class="priority-meta-item">
+                                    <div class="priority-meta-label">NIST Standard</div>
+                                    <div class="priority-meta-val">{{ p.nist_standard }}</div>
+                                </div>
+                            </div>
+
+                            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.2rem;">
+                                <strong>Technical Rationale:</strong> {{ p.rationale }}
+                            </p>
+
+                            <!-- Actionable Steps -->
+                            <div style="background: rgba(14, 20, 32, 0.7); padding: 1.1rem 1.4rem; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
+                                <div class="mono" style="font-size: 0.8rem; color: var(--accent); font-weight: 700; margin-bottom: 0.6rem;">
+                                    REQUIRED ENGINEERING ACTIONS:
+                                </div>
+                                <ul style="padding-left: 1.2rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+                                    {% for act in p.actions %}
+                                    <li style="margin-bottom: 0.35rem;">{{ act }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </main>
+    </div>
+</body>
+</html>

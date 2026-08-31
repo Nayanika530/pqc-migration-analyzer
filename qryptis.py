@@ -412,6 +412,58 @@ def cmd_graph(args):
         print(f"  {Colors.GREEN}✓ {graph['mitigation_strategy']}{Colors.RESET}\n")
 
 
+def cmd_simulate(args):
+    """Simulate post-quantum migration deltas (Security, Key Size, Handshake, Latency, CPU, Services, Complexity)."""
+    from migration_simulator import MigrationSimulator, format_simulation_cli
+
+    src = args.source or "RSA-2048"
+    tgt = args.target or "ML-KEM-768"
+    sim = MigrationSimulator.simulate(src, tgt)
+
+    is_utf8 = sys.stdout.encoding and "utf" in sys.stdout.encoding.lower()
+    report = format_simulation_cli(sim, unicode_mode=bool(is_utf8))
+
+    print(f"\n{Colors.BOLD}{Colors.WHITE}POST-QUANTUM MIGRATION SIMULATOR{Colors.RESET}")
+    print(f"{Colors.CYAN}{'=' * 70}{Colors.RESET}\n")
+    print(report)
+    print(f"\n{Colors.CYAN}{'=' * 70}{Colors.RESET}\n")
+
+
+def cmd_lab(args):
+    """Display research-grade NIST PQC benchmark parameter matrix."""
+    from nist_benchmarks import get_all_benchmark_metrics
+
+    metrics = get_all_benchmark_metrics()
+
+    print(f"\n{Colors.BOLD}{Colors.WHITE}NIST PQC BENCHMARK LAB — STANDARDIZED PARAMETERS (FIPS 203 / 204 / 205){Colors.RESET}")
+    print(f"{Colors.CYAN}{'=' * 85}{Colors.RESET}")
+    print(f"{'Algorithm':<14} | {'Standard':<20} | {'Level':<8} | {'KeyGen':<10} | {'Public Key':<12} | {'Ciphertext/Sig'}")
+    print(f"{'-' * 14}-+-{'-' * 20}-+-{'-' * 8}-+-{'-' * 10}-+-{'-' * 12}-+-{'-' * 15}")
+
+    for k in metrics["pqc_kems"] + metrics["pqc_signatures"]:
+        sec_lvl = f"Lvl {k.get('security_category', 1)}"
+        kg = f"{k.get('avg_keygen_ms', 0):.3f}ms"
+        pk = f"{k.get('public_key_bytes', 0)} B"
+        ct = f"{k.get('ciphertext_bytes', k.get('signature_bytes', 0))} B"
+        print(f"{k['name']:<14} | {k['standard'][:20]:<20} | {sec_lvl:<8} | {kg:<10} | {pk:<12} | {ct}")
+
+    print(f"{Colors.CYAN}{'=' * 85}{Colors.RESET}\n")
+
+
+def cmd_plan(args):
+    """Display Master Cryptographic Migration Plan synthesized across all intelligence layers."""
+    from master_migration_engine import MasterMigrationEngine
+
+    plan = MasterMigrationEngine.generate_plan()
+    is_utf8 = sys.stdout.encoding and "utf" in sys.stdout.encoding.lower()
+    report = MasterMigrationEngine.format_plan_cli(plan, unicode_mode=bool(is_utf8))
+
+    print(f"\n{Colors.BOLD}{Colors.WHITE}QRYPTIS MASTER MIGRATION ENGINE{Colors.RESET}")
+    print(f"{Colors.CYAN}{'=' * 70}{Colors.RESET}\n")
+    print(report)
+    print(f"\n{Colors.CYAN}{'=' * 70}{Colors.RESET}\n")
+
+
 def cmd_db(args):
     """List all supported algorithms in knowledge base."""
     print(f"\n{Colors.BOLD}{Colors.WHITE}CRYPTOGRAPHIC ALGORITHM DATABASE{Colors.RESET}")
@@ -435,9 +487,20 @@ def cmd_db(args):
 def main():
     parser = argparse.ArgumentParser(
         description="Qryptis — Post-Quantum Cryptography Migration Analyzer & Code Scanner (CLI)",
-        epilog="Examples:\n  python qryptis.py graph RSA-2048\n  python qryptis.py inventory\n  python qryptis.py scan ./src --export cbom.json\n  python qryptis.py check RSA 2048\n"
+        epilog="Examples:\n  python qryptis.py simulate RSA-2048 ML-KEM-768\n  python qryptis.py plan\n  python qryptis.py lab\n  python qryptis.py graph RSA-2048\n  python qryptis.py inventory\n"
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
+
+    # Command: simulate
+    sim_parser = subparsers.add_parser("simulate", help="Simulate architectural and performance impact of migrating to PQC")
+    sim_parser.add_argument("source", nargs="?", default="RSA-2048", help="Source algorithm (e.g. RSA-2048, ECDSA, 3DES, X25519)")
+    sim_parser.add_argument("target", nargs="?", default="ML-KEM-768", help="Target PQC algorithm (e.g. ML-KEM-768, ML-DSA-65, HQC-128)")
+
+    # Command: plan
+    subparsers.add_parser("plan", help="Generate and display master prioritized post-quantum migration roadmap")
+
+    # Command: lab
+    subparsers.add_parser("lab", help="Display research-grade NIST PQC benchmark parameter matrix")
 
     # Command: graph / impact
     graph_parser = subparsers.add_parser("graph", aliases=["impact"], help="Display cryptographic dependency graph and blast radius impact")
@@ -485,7 +548,13 @@ def main():
 
     print_banner()
 
-    if args.command in ("graph", "impact"):
+    if args.command == "simulate":
+        cmd_simulate(args)
+    elif args.command == "plan":
+        cmd_plan(args)
+    elif args.command == "lab":
+        cmd_lab(args)
+    elif args.command in ("graph", "impact"):
         cmd_graph(args)
     elif args.command == "inventory":
         cmd_inventory(args)

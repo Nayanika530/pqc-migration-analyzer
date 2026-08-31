@@ -12,6 +12,9 @@ from scanner import (
 )
 from inventory import GLOBAL_INVENTORY, parse_certificate_content
 from dependency_graph import get_dependency_graph, get_all_dependency_graphs
+from migration_simulator import MigrationSimulator
+from nist_benchmarks import get_all_benchmark_metrics, get_algorithm_metrics, NIST_ALGORITHM_METRICS
+from master_migration_engine import MasterMigrationEngine
 import json
 
 load_dotenv()
@@ -270,6 +273,56 @@ def api_graph_single(algo):
     return jsonify({
         "status": "success",
         "graph": graph_data
+    })
+
+
+@app.route("/simulator", methods=["GET", "POST"])
+def simulator():
+    src = request.form.get("source", "RSA-2048") if request.method == "POST" else (request.args.get("src") or "RSA-2048")
+    tgt = request.form.get("target", "ML-KEM-768") if request.method == "POST" else (request.args.get("tgt") or "ML-KEM-768")
+    sim_result = MigrationSimulator.simulate(src, tgt)
+    all_metrics = get_all_benchmark_metrics()
+    return render_template("simulator.html", sim=sim_result, all_metrics=all_metrics, selected_src=src, selected_tgt=tgt)
+
+
+@app.route("/api/simulate", methods=["POST"])
+def api_simulate():
+    data = request.get_json(silent=True) or {}
+    src = data.get("source", request.form.get("source", "RSA-2048"))
+    tgt = data.get("target", request.form.get("target", "ML-KEM-768"))
+    sim_result = MigrationSimulator.simulate(src, tgt)
+    return jsonify({
+        "status": "success",
+        "simulation": sim_result
+    })
+
+
+@app.route("/lab")
+def benchmark_lab():
+    metrics = get_all_benchmark_metrics()
+    return render_template("benchmark_lab.html", metrics=metrics)
+
+
+@app.route("/api/benchmarks/matrix")
+def api_benchmarks_matrix():
+    return jsonify({
+        "status": "success",
+        "matrix": get_all_benchmark_metrics()
+    })
+
+
+@app.route("/plan")
+def migration_plan():
+    plan_data = MasterMigrationEngine.generate_plan()
+    return render_template("migration_plan.html", plan=plan_data)
+
+
+@app.route("/api/migration/plan")
+def api_migration_plan():
+    plan_data = MasterMigrationEngine.generate_plan()
+    return jsonify({
+        "status": "success",
+        "plan": plan_data
     })
 
 

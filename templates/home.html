@@ -45,6 +45,9 @@
                             Tools <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                         </span>
                         <div class="sd-dropdown-menu">
+                            <a href="{{ url_for('simulator') }}" class="sd-dropdown-item">Migration Simulator</a>
+                            <a href="{{ url_for('migration_plan') }}" class="sd-dropdown-item">Master Migration Plan</a>
+                            <a href="{{ url_for('benchmark_lab') }}" class="sd-dropdown-item">Benchmark Lab</a>
                             <a href="{{ url_for('inventory') }}" class="sd-dropdown-item">Crypto Inventory</a>
                             <a href="{{ url_for('graph') }}" class="sd-dropdown-item">Dependency Graph</a>
                             <a href="{{ url_for('scan') }}" class="sd-dropdown-item">Code Scanner</a>

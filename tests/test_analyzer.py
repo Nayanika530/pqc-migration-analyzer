@@ -264,5 +264,53 @@ class TestFlaskWebRoutes(unittest.TestCase):
         self.assertIn("post-quantum", data["reply"])
 
 
+import subprocess
+
+class TestQryptisCLI(unittest.TestCase):
+    """Test suite for Qryptis CLI tool."""
+
+    def test_cli_scan_directory(self):
+        """Verify directory scan logic in scanner.py."""
+        from scanner import scan_directory
+        res = scan_directory("./tests")
+        self.assertGreater(res["files_scanned"], 0)
+        self.assertGreater(res["total_findings"], 0)
+        self.assertIn("summary", res)
+        self.assertIn("cbom", res)
+
+    def test_cli_subprocess_check(self):
+        """Verify CLI check command via subprocess."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "check", "RSA", "2048", "--years", "10"],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("ML-KEM-768", result.stdout)
+        self.assertIn("Harvest-Now-Decrypt-Later", result.stdout)
+
+    def test_cli_subprocess_scan(self):
+        """Verify CLI scan command via subprocess."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "scan", "./tests/messy_sample.py"],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("QRYPTIS CODE ANALYSIS", result.stdout)
+        self.assertIn("RSA-1024", result.stdout)
+        self.assertIn("ML-KEM-768", result.stdout)
+
+    def test_cli_subprocess_benchmark(self):
+        """Verify CLI benchmark command."""
+        result = subprocess.run(
+            [sys.executable, "qryptis.py", "benchmark"],
+            capture_output=True,
+            text=True
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("ML-KEM-768", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

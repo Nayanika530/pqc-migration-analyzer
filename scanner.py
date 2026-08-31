@@ -98,7 +98,7 @@ def scan_code(code_text: str) -> list:
     return findings
 
 
-def scan_and_report(code_text: str) -> list:
+def scan_and_report(code_text: str, file_path: str = "pasted_code.py") -> list:
     """Scan code and attach a full vulnerability report, metadata, and code snippet to each finding."""
     findings = scan_code(code_text)
     results = []
@@ -167,7 +167,9 @@ def scan_and_report(code_text: str) -> list:
             usage = "Cryptographic hash / integrity digest"
 
         results.append({
+            "file_path": file_path,
             "line_number": line_num,
+            "location": f"{file_path}:{line_num}",
             "matched_text": finding["matched_text"],
             "report": report,
             "suggested_fix": suggested_fix,
@@ -182,6 +184,86 @@ def scan_and_report(code_text: str) -> list:
         })
 
     return results
+
+
+import os
+
+def scan_directory(target_path: str) -> dict:
+    """
+    Recursively scans a directory or single file for cryptographic usages.
+    Ignores common non-code / dependency directories (.git, venv, node_modules).
+    """
+    supported_extensions = {
+        ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go",
+        ".c", ".cpp", ".cc", ".h", ".hpp", ".cs", ".rb", ".php",
+        ".swift", ".kt", ".rs", ".txt"
+    }
+    ignored_dirs = {
+        ".git", ".svn", ".hg", "venv", "env", "node_modules",
+        "__pycache__", "build", "dist", "target", ".idea", ".vscode",
+        ".pytest_cache", "liboqs"
+    }
+
+    all_findings = []
+    files_scanned = 0
+    files_with_findings = set()
+
+    if os.path.isfile(target_path):
+        try:
+            with open(target_path, "r", encoding="utf-8", errors="ignore") as f:
+                code_text = f.read()
+            findings = scan_and_report(code_text, file_path=target_path)
+            all_findings.extend(findings)
+            files_scanned = 1
+            if findings:
+                files_with_findings.add(target_path)
+        except Exception as e:
+            pass
+    elif os.path.isdir(target_path):
+        for root, dirs, files in os.walk(target_path):
+            # Modify dirs in-place to skip ignored directories
+            dirs[:] = [d for d in dirs if d not in ignored_dirs and not d.startswith(".")]
+
+            for file in files:
+                ext = os.path.splitext(file)[1].lower()
+                if ext in supported_extensions or file.endswith("rc"):
+                    full_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(full_path, target_path)
+                    try:
+                        with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
+                            code_text = f.read()
+                        files_scanned += 1
+                        findings = scan_and_report(code_text, file_path=rel_path)
+                        if findings:
+                            all_findings.extend(findings)
+                            files_with_findings.add(rel_path)
+                    except Exception:
+                        continue
+
+    agility = calculate_agility_score(all_findings)
+    roadmap = generate_migration_roadmap(all_findings)
+    forecast = generate_risk_forecast(all_findings)
+    cbom = generate_cbom(all_findings, source_name=os.path.basename(target_path) or target_path)
+
+    counts = {
+        "critical": sum(1 for r in all_findings if r.get("severity") == "CRITICAL"),
+        "high": sum(1 for r in all_findings if r.get("severity") == "HIGH"),
+        "medium": sum(1 for r in all_findings if r.get("severity") == "MEDIUM"),
+        "low": sum(1 for r in all_findings if r.get("severity") == "LOW"),
+    }
+
+    return {
+        "target_path": target_path,
+        "files_scanned": files_scanned,
+        "files_with_findings_count": len(files_with_findings),
+        "total_findings": len(all_findings),
+        "results": all_findings,
+        "summary": counts,
+        "agility": agility,
+        "roadmap": roadmap,
+        "forecast": forecast,
+        "cbom": cbom
+    }
 
 
 import datetime
@@ -200,13 +282,14 @@ def generate_cbom(scan_results: list, source_name: str = "pasted_code") -> dict:
             "algorithm": report.get("algorithm"),
             "key-size-bits": report.get("key_size"),
             "location": {
-                "source": source_name,
+                "source": finding.get("file_path", source_name),
                 "line": finding.get("line_number")
             },
             "quantum-vulnerable": report.get("quantum_vulnerable"),
             "deprecated": "DEPRECATED" in report.get("verdict", ""),
             "risk-verdict": report.get("verdict"),
             "recommended-replacement": report.get("recommended_replacement"),
+            "hybrid-recommendation": report.get("hybrid_recommendation", "")
         })
 
     return {

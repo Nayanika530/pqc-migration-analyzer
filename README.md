@@ -151,7 +151,30 @@ cp .env.example .env
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
-### 5. Launch the Platform
+### 5. Command-Line Interface (CLI)
+Qryptis includes a standalone CLI tool for security engineers and CI/CD DevSecOps automation:
+
+```bash
+# Scan a directory or file and export CBOM JSON
+python qryptis.py scan ./src --export cbom.json
+
+# Scan with CI/CD build failure on critical/high findings
+python qryptis.py scan ./src --fail-on CRITICAL
+
+# Single algorithm & key size evaluation
+python qryptis.py check RSA 2048 --years 10
+
+# Live HTTPS domain TLS handshake inspector
+python qryptis.py live google.com
+
+# Microsecond cryptographic performance benchmarks
+python qryptis.py benchmark
+
+# Interactive algorithm knowledge base
+python qryptis.py db
+```
+
+### 6. Launch Web Security Console
 ```bash
 python app.py
 ```
@@ -163,6 +186,7 @@ Navigate to `http://127.0.0.1:5000` in your web browser.
 
 ```
 pqc-migration-analyzer/
+├── qryptis.py                 # Standalone CLI security inspection tool & DevSecOps engine
 ├── app.py                     # Flask web server, API endpoints, SSO simulation & routing
 ├── crypto_analyzer.py         # Core vulnerability database, key size checks & HNDL calculator
 ├── scanner.py                 # Static code analyzer, CBOM builder, agility scorer & roadmap generator
@@ -171,7 +195,7 @@ pqc-migration-analyzer/
 ├── requirements.txt           # Clean production dependencies
 ├── .env.example               # Environment variables configuration template
 ├── tests/
-│   ├── test_analyzer.py       # Automated unit & integration test suite (22 tests)
+│   ├── test_analyzer.py       # Automated unit & integration test suite (27 tests)
 │   └── messy_sample.py        # Real-world messy enterprise code for scanner stress-testing
 ├── static/
 │   ├── css/scan.css           # Modern dark glassmorphic dashboard styles

@@ -17,7 +17,7 @@ With NIST finalizing the official Post-Quantum Cryptography standards (**FIPS 20
 
 ## 2. Key Technical Innovations & Achievements
 
-- **Automated Cryptographic Discovery:** Custom static code scanner detects cryptographic primitives (RSA, ECC, AES, 3DES, MD5, DSA) across legacy codebases without requiring manual input.
+- **Automated Cryptographic Discovery & CLI Tool:** Custom static code scanner and standalone CLI tool (`python qryptis.py scan ./src --export cbom.json`) detecting cryptographic primitives (RSA, ECC, AES, 3DES, MD5, DSA) across repositories and single files with CI/CD build-fail options.
 - **Cryptographic Agility Score (0–100):** Developed an objective scoring algorithm that evaluates algorithm obsolescence, key lengths, and cipher monoculture risk to grade codebases from A (Agile) to F (Rigid).
 - **Cryptographic Bill of Materials (CBOM):** Engineered a structured JSON export format detailing all cryptographic assets, bit lengths, vulnerabilities, and NIST PQC replacements for software supply chain compliance.
 - **Phased Migration Roadmap Generator:** Synthesizes scan findings into prioritized, actionable remediation plans (Immediate Classical Deprecations &rarr; Key Size Hardening &rarr; Post-Quantum/Hybrid Migration) exportable as Markdown reports.
@@ -33,9 +33,10 @@ With NIST finalizing the official Post-Quantum Cryptography standards (**FIPS 20
 | Layer | Technologies Used | Key Rationale |
 |---|---|---|
 | **Backend & Core Engine** | Python 3.10+, Flask 3.1, `pycryptodome`, `liboqs-python` | Rapid execution, robust cryptographic library support, and direct NIST PQC C-library bindings. |
+| **CLI & Automation** | Python `argparse`, `colorama`, subprocess | Zero-cost, terminal-first DevSecOps pipeline integration with JSON/MD export and exit code enforcement. |
 | **Frontend & Visualization** | Vanilla CSS, Modern Glassmorphism, Three.js 3D Motion | High-performance, zero-bloat interface with dark theme and dynamic particle visuals. |
-| **Testing & Quality** | Python `unittest`, `unittest.mock` | 22 comprehensive unit and integration tests verifying all edge cases, network probes, and scoring models. |
-| **Packaging & Client** | Progressive Web App (PWA), REST API | Offline support, mobile responsiveness, and easy integration into CI/CD pipelines. |
+| **Testing & Quality** | Python `unittest`, `unittest.mock` | 27 comprehensive unit and integration tests verifying all edge cases, network probes, CLI commands, and scoring models. |
+| **Packaging & Client** | Standalone CLI, Progressive Web App (PWA), REST API | Offline support, mobile responsiveness, and easy integration into CI/CD pipelines. |
 
 ---
 

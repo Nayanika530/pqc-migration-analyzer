@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Qryptis - Analyze</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Console — Qryptis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='analyze.css') }}">
 </head>
@@ -9,24 +11,57 @@
     <div class="app-shell">
         {% include "_sidebar.html" %}
 
-        <div class="main-content">
-            <h1>Analyze</h1>
-            <p style="color:var(--text-muted); margin-bottom:2rem;">Choose how you want to analyze your cryptography.</p>
+        <main class="main-content">
+            <div class="analyze-page">
+                <div class="chips">Security Console</div>
 
-            <div class="option-cards">
-                <a href="{{ url_for('manual') }}" class="option-card">
-                    <h2>Manual Lookup</h2>
-                    <p>Check any algorithm + key size to see its quantum & classical risk and get PQC recommendations.</p>
-                    <span class="option-arrow">→</span>
-                </a>
+                <div class="analyze-header">
+                    <h1>Analyze Cryptography</h1>
+                    <p>Select an analysis method to detect classical vulnerabilities, inspect live endpoints, or assess cryptographic agility.</p>
+                </div>
 
-                <a href="{{ url_for('scan') }}" class="option-card">
-                    <h2>Scan Code</h2>
-                    <p>Scan your code to detect cryptographic usage and get a full security report.</p>
-                    <span class="option-arrow">→</span>
-                </a>
+                <div class="option-cards">
+                    <!-- Option 1: Code Scanner -->
+                    <a href="{{ url_for('scan') }}" class="option-card">
+                        <div class="option-icon-box">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        </div>
+                        <h2>Code Scanner</h2>
+                        <p>Scan source files and repositories to detect RSA, ECC, 3DES, and legacy ciphers. Generates full CBOM JSON exports and migration roadmaps.</p>
+                        <div class="option-footer">
+                            <span class="option-badge">Static Analysis</span>
+                            <span class="option-arrow-btn">&rarr;</span>
+                        </div>
+                    </a>
+
+                    <!-- Option 2: Manual Lookup -->
+                    <a href="{{ url_for('manual') }}" class="option-card">
+                        <div class="option-icon-box">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+                        </div>
+                        <h2>Manual Lookup</h2>
+                        <p>Evaluate individual algorithms, key sizes, and data secrecy requirements. Receive instant NIST-standard PQC recommendations and AI explanations.</p>
+                        <div class="option-footer">
+                            <span class="option-badge">Targeted Query</span>
+                            <span class="option-arrow-btn">&rarr;</span>
+                        </div>
+                    </a>
+
+                    <!-- Option 3: Live SSL Scan -->
+                    <a href="{{ url_for('live_scan') }}" class="option-card">
+                        <div class="option-icon-box">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        </div>
+                        <h2>Live SSL Scan</h2>
+                        <p>Analyze public hostnames and certificates in real-time to inspect TLS handshakes, cipher negotiation, and hybrid post-quantum readiness.</p>
+                        <div class="option-footer">
+                            <span class="option-badge">Network Inspector</span>
+                            <span class="option-arrow-btn">&rarr;</span>
+                        </div>
+                    </a>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 </body>
 </html>

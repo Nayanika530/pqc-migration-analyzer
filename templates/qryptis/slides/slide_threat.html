@@ -1,0 +1,100 @@
+<div class="threat-slide">
+    <!-- ===== WHY QUANTUM THREAT MATTERS ===== -->
+    <div class="threat-section">
+        <h2 class="section-title">Why Quantum Threat Matters</h2>
+        <p class="section-subtitle">
+            Quantum computers can break today's public-key cryptography.<br>
+            Harvest Now, Decrypt Later is not theory — it's already happening.
+        </p>
+
+        <div class="algo-grid">
+            <div class="algo-card">
+                <div class="algo-icon algo-icon--critical">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/>
+                    </svg>
+                </div>
+                <div class="algo-name">RSA</div>
+                <span class="status-badge badge-critical">CRITICAL</span>
+                <p class="algo-desc">Vulnerable to Shor's algorithm. At risk.</p>
+            </div>
+            <div class="algo-card">
+                <div class="algo-icon algo-icon--critical">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <ellipse cx="12" cy="12" rx="10" ry="6"/><ellipse cx="12" cy="12" rx="10" ry="6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="6" transform="rotate(-60 12 12)"/>
+                    </svg>
+                </div>
+                <div class="algo-name">ECC</div>
+                <span class="status-badge badge-critical">CRITICAL</span>
+                <p class="algo-desc">Vulnerable to Shor's algorithm. At risk.</p>
+            </div>
+            <div class="algo-card">
+                <div class="algo-icon algo-icon--critical">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L4 7v5c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V7L12 2z"/>
+                    </svg>
+                </div>
+                <div class="algo-name">DSA</div>
+                <span class="status-badge badge-critical">CRITICAL</span>
+                <p class="algo-desc">Vulnerable to Shor's algorithm. At risk.</p>
+            </div>
+            <div class="algo-card">
+                <div class="algo-icon algo-icon--deprecated">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/><line x1="3" y1="3" x2="21" y2="21" stroke-width="2.5"/>
+                    </svg>
+                </div>
+                <div class="algo-name">3DES</div>
+                <span class="status-badge badge-deprecated">DEPRECATED</span>
+                <p class="algo-desc">Broken by modern computers. Avoid.</p>
+            </div>
+            <div class="algo-card">
+                <div class="algo-icon algo-icon--safe">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L4 7v5c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V7L12 2z"/><polyline points="8.5 12.5 11 15 16 10" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="algo-name">AES</div>
+                <span class="status-badge badge-safe">SAFE</span>
+                <p class="algo-desc">Symmetric. No known quantum threat.</p>
+            </div>
+        </div>
+
+        <div class="threat-cta">
+            <p>Don't wait for quantum. Make your cryptography future-ready.</p>
+            <a href="#" class="btn btn-primary" data-goto="2">Get Started Now</a>
+        </div>
+    </div>
+
+    <!-- ===== BENCHMARKS ===== -->
+    <div class="bench-section">
+        <h2 class="section-title">Real Benchmarks. Real Numbers.</h2>
+        <p class="section-subtitle-sm">Measured on local machine using PyCryptodome & liboqs</p>
+
+        <div class="bench-grid">
+            <div class="bench-card">
+                <div class="bench-algo">RSA-2048</div>
+                <div class="bench-value">1,247</div>
+                <div class="bench-unit">ops/sec</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-algo">AES-256 (GCM)</div>
+                <div class="bench-value">98,721</div>
+                <div class="bench-unit">ops/sec</div>
+            </div>
+            <div class="bench-card">
+                <div class="bench-algo">3DES</div>
+                <div class="bench-value">2,104</div>
+                <div class="bench-unit">ops/sec</div>
+            </div>
+            <div class="bench-card bench-card--pqc">
+                <div class="bench-algo">ML-KEM-768</div>
+                <div class="bench-value">4,392</div>
+                <div class="bench-unit">ops/sec</div>
+                <span class="pqc-badge">PQC</span>
+            </div>
+        </div>
+
+        <a href="#" class="bench-link" data-goto="2">View All Benchmarks →</a>
+    </div>
+</div>

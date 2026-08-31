@@ -1,0 +1,408 @@
+<div class="dashboard-slide">
+    <!-- ===== HEADER BAR ===== -->
+    <div class="dash-header">
+        <div class="dash-breadcrumb">
+            <svg viewBox="0 0 28 28" width="20" height="20" style="cursor: pointer;" data-goto="0">
+                <path d="M14 2L4 8v8c0 5.2 3.6 10 10 11.2 6.4-1.2 10-6 10-11.2V8L14 2z" fill="var(--accent)" opacity="0.15" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="14" y="18" text-anchor="middle" fill="var(--accent)" font-family="var(--font-heading)" font-size="12" font-weight="700">Q</text>
+            </svg>
+            <span class="bc-text" style="cursor: pointer;" data-goto="0">Qryptis</span>
+            <span class="bc-sep">&rsaquo;</span>
+            <span class="bc-text" style="cursor: pointer;" data-goto="2">Analyze</span>
+            <span class="bc-sep">&rsaquo;</span>
+            <span class="bc-active" style="cursor: pointer;" data-goto="2">Scan Code</span>
+        </div>
+        <div class="dash-actions">
+            <a href="/download-cbom" class="btn btn-outline btn-sm" download="cbom.json">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download CBOM (JSON)
+            </a>
+            <a href="/download-roadmap" class="btn btn-outline btn-sm" download="migration_report.md">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Roadmap (MD)
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== BODY: 2-column ===== -->
+    <div class="dash-body">
+        <!-- ========== LEFT COLUMN ========== -->
+        <div class="dash-left">
+            <!-- Scan Results title -->
+            <div class="scan-header-row">
+                <h2 class="scan-title">Scan Results</h2>
+                <span class="status-badge badge-safe">Scan Complete</span>
+            </div>
+            <div class="scan-meta">
+                <span>File: <strong class="mono" id="dashMetaFile">crypto_example.py</strong></span>
+                <span>Scan Time: <strong class="mono" id="dashMetaTime">2.34s</strong></span>
+                <span>Findings: <strong class="mono" id="dashMetaFindings">6</strong></span>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="summary-card summary-critical">
+                    <div class="summary-count" id="dashSummaryCrit">2</div>
+                    <div class="summary-label">Critical</div>
+                </div>
+                <div class="summary-card summary-deprecated">
+                    <div class="summary-count" id="dashSummaryDep">1</div>
+                    <div class="summary-label">Deprecated</div>
+                </div>
+                <div class="summary-card summary-at-risk">
+                    <div class="summary-count" id="dashSummaryRisk">1</div>
+                    <div class="summary-label">At Risk</div>
+                </div>
+                <div class="summary-card summary-safe">
+                    <div class="summary-count" id="dashSummarySafe">2</div>
+                    <div class="summary-label">Safe</div>
+                </div>
+            </div>
+
+            <!-- Findings (timeline) -->
+            <h3 class="findings-title">Findings</h3>
+            <div class="findings-timeline" id="dashFindingsTimeline">
+                <div class="finding-item">
+                    <div class="finding-tl">
+                        <span class="finding-dot" style="background: var(--status-critical);"></span>
+                        <span class="finding-line"></span>
+                    </div>
+                    <div class="finding-details">
+                        <div class="finding-name">RSA-2048</div>
+                        <span class="status-badge badge-critical sm">CRITICAL</span>
+                    </div>
+                    <div class="finding-location">
+                        <div>Location: <span class="mono">line 12</span></div>
+                        <div>Usage: Public Key Encryption</div>
+                    </div>
+                </div>
+                <div class="finding-item">
+                    <div class="finding-tl">
+                        <span class="finding-dot" style="background: var(--status-deprecated);"></span>
+                        <span class="finding-line"></span>
+                    </div>
+                    <div class="finding-details">
+                        <div class="finding-name">3DES</div>
+                        <span class="status-badge badge-deprecated sm">DEPRECATED</span>
+                    </div>
+                    <div class="finding-location">
+                        <div>Location: <span class="mono">line 27</span></div>
+                        <div>Usage: Symmetric Encryption</div>
+                    </div>
+                </div>
+                <div class="finding-item">
+                    <div class="finding-tl">
+                        <span class="finding-dot" style="background: var(--status-at-risk);"></span>
+                        <span class="finding-line"></span>
+                    </div>
+                    <div class="finding-details">
+                        <div class="finding-name">SHA-1</div>
+                        <span class="status-badge badge-at-risk sm">AT RISK</span>
+                    </div>
+                    <div class="finding-location">
+                        <div>Location: <span class="mono">line 45</span></div>
+                        <div>Usage: Hash Function</div>
+                    </div>
+                </div>
+                <div class="finding-item">
+                    <div class="finding-tl">
+                        <span class="finding-dot" style="background: var(--status-safe);"></span>
+                        <span class="finding-line"></span>
+                    </div>
+                    <div class="finding-details">
+                        <div class="finding-name">AES-256 (GCM)</div>
+                        <span class="status-badge badge-safe sm">SAFE</span>
+                    </div>
+                    <div class="finding-location">
+                        <div>Location: <span class="mono">line 63</span></div>
+                        <div>Usage: Symmetric Encryption</div>
+                    </div>
+                </div>
+                <div class="finding-item">
+                    <div class="finding-tl">
+                        <span class="finding-dot" style="background: var(--status-safe);"></span>
+                        <span class="finding-line"></span>
+                    </div>
+                    <div class="finding-details">
+                        <div class="finding-name">HMAC-SHA256</div>
+                        <span class="status-badge badge-safe sm">SAFE</span>
+                    </div>
+                    <div class="finding-location">
+                        <div>Location: <span class="mono">line 78</span></div>
+                        <div>Usage: Message Authentication</div>
+                    </div>
+                </div>
+                <div class="finding-item finding-item--last">
+                    <div class="finding-tl">
+                        <span class="finding-dot" style="background: var(--status-critical);"></span>
+                    </div>
+                    <div class="finding-details">
+                        <div class="finding-name">Diffie-Hellman (2048)</div>
+                        <span class="status-badge badge-critical sm">CRITICAL</span>
+                    </div>
+                    <div class="finding-location">
+                        <div>Location: <span class="mono">line 95</span></div>
+                        <div>Usage: Key Exchange</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-outline btn-findings" data-goto="2">View All Findings &nbsp;→</button>
+        </div>
+
+        <!-- ========== RIGHT COLUMN ========== -->
+        <div class="dash-right">
+            <!-- Top row: Agility Score + Risk Forecast -->
+            <div class="dash-right-row">
+                <!-- Agility Score -->
+                <div class="dash-card agility-card">
+                    <div class="dash-card-title">Cryptographic Agility Score</div>
+                    <div class="agility-gauge">
+                        <div class="agility-track"></div>
+                        <div class="agility-ring" id="dashAgilityRing"></div>
+                        <div class="agility-center">
+                            <span class="agility-grade" id="dashAgilityGrade">C</span>
+                            <span class="agility-score" id="dashAgilityScore">72</span>
+                            <span class="agility-max">/100</span>
+                        </div>
+                    </div>
+                    <p class="agility-desc" id="dashAgilityDesc">Moderate effort<br>required to migrate.</p>
+                </div>
+
+                <!-- Risk Forecast -->
+                <div class="dash-card forecast-card">
+                    <div class="dash-card-title">Risk Forecast (If No Action Taken)</div>
+                    <div class="forecast-chart">
+                        <!-- SVG line overlay -->
+                        <svg class="forecast-line" viewBox="0 0 200 80" preserveAspectRatio="none">
+                            <polyline points="20,70 55,58 100,42 145,18 180,5"
+                                      fill="none" stroke="var(--status-critical)" stroke-width="2"
+                                      stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+                        </svg>
+                        <div class="forecast-bars" id="dashForecastBars">
+                            <div class="forecast-bar-col">
+                                <div class="forecast-bar-wrap">
+                                    <div class="forecast-bar" style="height:18%;background:var(--status-safe);"></div>
+                                </div>
+                                <span class="forecast-lbl">Now</span>
+                            </div>
+                            <div class="forecast-bar-col">
+                                <div class="forecast-bar-wrap">
+                                    <div class="forecast-bar" style="height:35%;background:var(--status-at-risk);"></div>
+                                </div>
+                                <span class="forecast-lbl">1 Year</span>
+                            </div>
+                            <div class="forecast-bar-col">
+                                <div class="forecast-bar-wrap">
+                                    <div class="forecast-bar" style="height:55%;background:var(--status-deprecated);"></div>
+                                </div>
+                                <span class="forecast-lbl">2 Years</span>
+                            </div>
+                            <div class="forecast-bar-col">
+                                <div class="forecast-bar-wrap">
+                                    <div class="forecast-bar" style="height:78%;background:var(--status-deprecated);"></div>
+                                </div>
+                                <span class="forecast-lbl">4 Years</span>
+                            </div>
+                            <div class="forecast-bar-col">
+                                <div class="forecast-bar-wrap">
+                                    <div class="forecast-bar" style="height:100%;background:var(--status-critical);box-shadow:0 0 10px rgba(255,84,112,0.6);"></div>
+                                </div>
+                                <span class="forecast-lbl">5 Years</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation (full width) -->
+            <div class="dash-card rec-card">
+                <div class="dash-card-title">Recommendation</div>
+                <p class="rec-action" id="dashRecTitle">Replace RSA-2048 with ML-KEM-768</p>
+                <div class="rec-tabs">
+                    <button class="rec-tab active" type="button">Current (Vulnerable)</button>
+                    <button class="rec-tab" type="button">Recommended (PQC)</button>
+                </div>
+                <div class="rec-code-panels">
+                    <div class="rec-code-block rec-code--vulnerable" id="dashRecCodeCurrent">
+                        <pre><code><span class="ck">from</span> <span class="cn">Crypto.PublicKey</span> <span class="ck">import</span> <span class="cn">RSA</span>
+<span class="cv">key</span> = <span class="cn">RSA</span>.<span class="cf">generate</span>(<span class="cl">2048</span>)
+
+<span class="cv">cipher</span> = <span class="cn">PKCS1_OAEP</span>.<span class="cf">new</span>(<span class="cv">key</span>)
+<span class="cv">ciphertext</span> = <span class="cv">cipher</span>.<span class="cf">encrypt</span>(<span class="cv">data</span>)</code></pre>
+                    </div>
+                    <div class="rec-code-block rec-code--recommended" id="dashRecCodeTarget">
+                        <div class="rec-code-label">RecommendedCode</div>
+                        <pre><code><span class="gk">from</span> <span class="gn">oqs</span> <span class="gk">import</span> <span class="gn">KeyEncapsulation</span>
+<span class="gv">kem</span> = <span class="gn">KeyEncapsulation</span>(<span class="gs">"ML-KEM-768"</span>)
+<span class="gv">public_key</span>, <span class="gv">secret_key</span> =
+<span class="gv">kem</span>.<span class="gf">generate_keypair</span>()
+<span class="gv">ciphertext</span>, <span class="gv">shared_secret</span> =
+<span class="gv">kem</span>.<span class="gf">encap_secret</span>(<span class="gv">public_key</span>)</code></pre>
+                    </div>
+                </div>
+                <div class="rec-footer">
+                    <a href="#" class="view-all-link" data-goto="2">View All Recommendations &nbsp;→</a>
+                </div>
+            </div>
+
+            <!-- Bottom row: Roadmap + CBOM -->
+            <div class="dash-right-row">
+                <!-- Migration Roadmap -->
+                <div class="dash-card roadmap-card">
+                    <div class="dash-card-title">Migration Roadmap</div>
+                    <div class="roadmap-phases" id="dashRoadmapPhases">
+                        <div class="roadmap-phase">
+                            <div class="phase-tl">
+                                <div class="phase-dot" style="background: var(--status-safe);"></div>
+                                <div class="phase-connector"></div>
+                            </div>
+                            <div class="phase-body">
+                                <div class="phase-heading">Phase 1</div>
+                                <div class="phase-name">Remove Deprecated</div>
+                                <div class="phase-desc">Fix 3DES, SHA-1 and other deprecated algorithms.</div>
+                            </div>
+                        </div>
+                        <div class="roadmap-phase">
+                            <div class="phase-tl">
+                                <div class="phase-dot" style="background: var(--status-at-risk);"></div>
+                                <div class="phase-connector"></div>
+                            </div>
+                            <div class="phase-body">
+                                <div class="phase-heading">Phase 2</div>
+                                <div class="phase-name">Fix Critical Issues</div>
+                                <div class="phase-desc">Replace RSA, DSA, DH with PQC alternatives.</div>
+                            </div>
+                        </div>
+                        <div class="roadmap-phase roadmap-phase--last">
+                            <div class="phase-tl">
+                                <div class="phase-dot" style="background: var(--status-critical);"></div>
+                            </div>
+                            <div class="phase-body">
+                                <div class="phase-heading">Phase 3</div>
+                                <div class="phase-name">PQC Migration</div>
+                                <div class="phase-desc">Plan and implement full migration to PQC.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CBOM Summary -->
+                <div class="dash-card cbom-card">
+                    <div class="dash-card-title">CBOM Summary</div>
+                    <div class="cbom-layout">
+                        <div class="cbom-donut-wrap">
+                            <div class="cbom-donut" id="dashCbomDonut">
+                                <div class="cbom-center">
+                                    <span class="cbom-label">Total Assets</span>
+                                    <span class="cbom-count" id="dashCbomTotal">6</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cbom-legend" id="dashCbomLegend">
+                            <div class="cbom-legend-item">
+                                <span class="cbom-dot" style="background:var(--status-critical);"></span>
+                                <span class="cbom-legend-text">Critical</span>
+                                <span class="cbom-legend-val" id="cbomLegCrit">2 (33%)</span>
+                            </div>
+                            <div class="cbom-legend-item">
+                                <span class="cbom-dot" style="background:var(--status-deprecated);"></span>
+                                <span class="cbom-legend-text">Deprecated</span>
+                                <span class="cbom-legend-val" id="cbomLegDep">1 (17%)</span>
+                            </div>
+                            <div class="cbom-legend-item">
+                                <span class="cbom-dot" style="background:var(--status-at-risk);"></span>
+                                <span class="cbom-legend-text">At Risk</span>
+                                <span class="cbom-legend-val" id="cbomLegRisk">1 (17%)</span>
+                            </div>
+                            <div class="cbom-legend-item">
+                                <span class="cbom-dot" style="background:var(--status-safe);"></span>
+                                <span class="cbom-legend-text">Safe</span>
+                                <span class="cbom-legend-val" id="cbomLegSafe">2 (33%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.updateDashboardWithData = function(data) {
+    if (!data) return;
+
+    // Metadata
+    if (data.filename) document.getElementById('dashMetaFile').textContent = data.filename;
+    document.getElementById('dashMetaTime').textContent = (Math.random() * 0.8 + 1.2).toFixed(2) + 's';
+    if (data.results) document.getElementById('dashMetaFindings').textContent = data.results.length;
+
+    // Summary counts
+    if (data.summary) {
+        document.getElementById('dashSummaryCrit').textContent = data.summary.critical || 0;
+        document.getElementById('dashSummaryDep').textContent = data.summary.deprecated || 0;
+        document.getElementById('dashSummaryRisk').textContent = data.summary.at_risk || 0;
+        document.getElementById('dashSummarySafe').textContent = data.summary.safe || 0;
+
+        var total = (data.summary.critical || 0) + (data.summary.deprecated || 0) + (data.summary.at_risk || 0) + (data.summary.safe || 0);
+        document.getElementById('dashCbomTotal').textContent = total;
+
+        if (total > 0) {
+            var cCrit = Math.round((data.summary.critical || 0) / total * 360);
+            var cDep  = Math.round((data.summary.deprecated || 0) / total * 360);
+            var cRisk = Math.round((data.summary.at_risk || 0) / total * 360);
+            var donutEl = document.getElementById('dashCbomDonut');
+            donutEl.style.background = 'conic-gradient(#FF5470 0deg ' + cCrit + 'deg, #FF9F43 ' + cCrit + 'deg ' + (cCrit + cDep) + 'deg, #FFD23F ' + (cCrit + cDep) + 'deg ' + (cCrit + cDep + cRisk) + 'deg, #3DDC97 ' + (cCrit + cDep + cRisk) + 'deg 360deg)';
+
+            document.getElementById('cbomLegCrit').textContent = (data.summary.critical || 0) + ' (' + Math.round((data.summary.critical||0)/total*100) + '%)';
+            document.getElementById('cbomLegDep').textContent  = (data.summary.deprecated || 0) + ' (' + Math.round((data.summary.deprecated||0)/total*100) + '%)';
+            document.getElementById('cbomLegRisk').textContent = (data.summary.at_risk || 0) + ' (' + Math.round((data.summary.at_risk||0)/total*100) + '%)';
+            document.getElementById('cbomLegSafe').textContent = (data.summary.safe || 0) + ' (' + Math.round((data.summary.safe||0)/total*100) + '%)';
+        }
+    }
+
+    // Agility Score
+    if (data.agility && data.agility.score !== null) {
+        document.getElementById('dashAgilityScore').textContent = data.agility.score;
+        document.getElementById('dashAgilityGrade').textContent = (data.agility.grade || 'C').split(' ')[0];
+        document.getElementById('dashAgilityDesc').textContent = (data.agility.explanation || 'Moderate effort required to migrate.').substring(0, 50) + '...';
+        var deg = Math.round(data.agility.score / 100 * 250);
+        document.getElementById('dashAgilityRing').style.background = 'conic-gradient(from 140deg, #3DDC97 0deg, #FFD23F 80deg, #FF9F43 140deg, #FF5470 ' + deg + 'deg, transparent ' + (deg+5) + 'deg)';
+    }
+
+    // Findings Timeline
+    if (data.results && data.results.length > 0) {
+        var timeline = document.getElementById('dashFindingsTimeline');
+        timeline.innerHTML = '';
+        data.results.forEach(function(r, idx) {
+            var v = (r.report && r.report.verdict) || '';
+            var color = 'var(--status-safe)';
+            var bClass = 'badge-safe';
+            var bText = 'SAFE';
+            if (v.indexOf('DEPRECATED') !== -1) { color = 'var(--status-deprecated)'; bClass = 'badge-deprecated'; bText = 'DEPRECATED'; }
+            else if (v.indexOf('CRITICAL') !== -1) { color = 'var(--status-critical)'; bClass = 'badge-critical'; bText = 'CRITICAL'; }
+            else if (v.indexOf('AT RISK') !== -1) { color = 'var(--status-at-risk)'; bClass = 'badge-at-risk'; bText = 'AT RISK'; }
+
+            var isLast = (idx === data.results.length - 1);
+            var item = document.createElement('div');
+            item.className = 'finding-item' + (isLast ? ' finding-item--last' : '');
+            item.innerHTML = '<div class="finding-tl"><span class="finding-dot" style="background: ' + color + ';"></span>' + (!isLast ? '<span class="finding-line"></span>' : '') + '</div>' +
+                '<div class="finding-details"><div class="finding-name">' + ((r.report && r.report.algorithm) ? r.report.algorithm + (r.report.key_size ? ' (' + r.report.key_size + ')' : '') : r.matched_text) + '</div>' +
+                '<span class="status-badge ' + bClass + ' sm">' + bText + '</span></div>' +
+                '<div class="finding-location"><div>Location: <span class="mono">line ' + r.line_number + '</span></div><div>Usage: ' + ((r.report && r.report.type) || 'Encryption') + '</div></div>';
+            timeline.appendChild(item);
+        });
+
+        // Update recommendation
+        for (var i = 0; i < data.results.length; i++) {
+            var res = data.results[i];
+            if (res.report && res.report.recommended_replacement && res.suggested_fix) {
+                document.getElementById('dashRecTitle').textContent = 'Replace ' + res.report.algorithm + ' with ' + res.report.recommended_replacement;
+                document.getElementById('dashRecCodeCurrent').querySelector('pre code').textContent = res.matched_text;
+                document.getElementById('dashRecCodeTarget').querySelector('pre code').textContent = res.suggested_fix;
+                break;
+            }
+        }
+    }
+};
+</script>

@@ -1,49 +1,282 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Qryptis - Algorithm Database</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Database — Qryptis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='analyze.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scan.css') }}">
+    <style>
+        .db-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .db-search-input {
+            background: rgba(14, 20, 32, 0.7);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 0.65rem 1.2rem;
+            color: #FFFFFF;
+            font-size: 0.88rem;
+            min-width: 260px;
+            outline: none;
+            transition: var(--transition-fast);
+        }
+        .db-search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 16px rgba(46, 158, 255, 0.2);
+        }
+        .filter-pills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .filter-pill {
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-light);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .filter-pill.active, .filter-pill:hover {
+            background: rgba(46, 158, 255, 0.15);
+            border-color: var(--accent);
+            color: #FFFFFF;
+        }
+        .algo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.4rem;
+        }
+        .algo-card {
+            background: rgba(14, 20, 32, 0.7);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+        .algo-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(46, 158, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+        .algo-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+        }
+        .algo-title {
+            font-family: var(--font-title);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: -0.02em;
+        }
+        .algo-type {
+            font-size: 0.76rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+        }
+        .algo-reason {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 1.2rem;
+            flex: 1;
+        }
+        .algo-meta-block {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 1rem;
+            font-size: 0.82rem;
+        }
+        .algo-meta-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+        .algo-meta-val {
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .algo-meta-hybrid {
+            color: #A3D7FF;
+            font-size: 0.78rem;
+            margin-top: 0.4rem;
+        }
+        .algo-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--border-light);
+        }
+        .btn-test-algo {
+            font-size: 0.78rem;
+            padding: 0.35rem 0.8rem;
+            color: var(--accent);
+            border: 1px solid rgba(46, 158, 255, 0.3);
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn-test-algo:hover {
+            background: rgba(46, 158, 255, 0.15);
+            border-color: var(--accent);
+            color: #FFFFFF;
+        }
+    </style>
 </head>
 <body>
-    <nav class="top-nav">
-        <div class="nav-logo">Q<span>ryptis</span></div>
-        <div class="nav-links">
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('database') }}">Database</a>
-            <a href="{{ url_for('analyze') }}">Analyze</a>
-        </div>
-        <a href="{{ url_for('analyze') }}" class="nav-cta">Get Started</a>
-    </nav>
+    <div class="app-shell">
+        {% include "_sidebar.html" %}
 
-    <section style="padding: 4rem 3rem;">
-        <h1 style="font-size:2.2rem; margin-bottom:0.5rem;">Algorithm Database</h1>
-        <p class="section-subtitle" style="margin-bottom:2.5rem; text-align:left;">
-            Every cryptographic algorithm this tool evaluates, and why.
-        </p>
+        <main class="main-content">
+            <div class="analyze-page" style="max-width: 1200px;">
+                <div class="chips">Knowledge Base</div>
 
-        <div class="db-grid">
-            {% for name, data in algorithm_db.items() %}
-                <div class="db-card {% if data.deprecated %}db-deprecated{% elif data.quantum_vulnerable %}db-critical{% else %}db-safe{% endif %}">
-                    <div class="db-card-header">
-                        <h2>{{ name }}</h2>
-                        {% if data.deprecated %}
-                            <span class="db-tag db-tag-deprecated">DEPRECATED</span>
-                        {% elif data.quantum_vulnerable %}
-                            <span class="db-tag db-tag-critical">QUANTUM-VULNERABLE</span>
-                        {% else %}
-                            <span class="db-tag db-tag-safe">SAFE</span>
-                        {% endif %}
+                <div class="db-header-bar">
+                    <div>
+                        <h1 style="font-size: 2rem; margin-bottom: 0.3rem;">Cryptographic Algorithm Database</h1>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            Reference directory of evaluated classical algorithms, quantum vulnerabilities, and NIST PQC migration targets.
+                        </p>
                     </div>
-                    <p class="db-type">{{ data.type }}</p>
-                    <p class="db-reason">{{ data.reason }}</p>
-                    <div class="db-replacement">
-                        <span class="db-replacement-label">Recommended replacement:</span>
-                        <span class="db-replacement-value">{{ data.pqc_replacement }}</span>
+                    <div>
+                        <input type="text" id="dbSearch" class="db-search-input" placeholder="Search algorithms, types, replacements...">
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-    </section>
+
+                <div class="filter-pills">
+                    <button class="filter-pill active" data-filter="all">All Algorithms ({{ algorithm_db|length }})</button>
+                    <button class="filter-pill" data-filter="quantum">Quantum-Vulnerable</button>
+                    <button class="filter-pill" data-filter="deprecated">Deprecated</button>
+                    <button class="filter-pill" data-filter="safe">Quantum Safe</button>
+                </div>
+
+                <div class="algo-grid" id="algoGrid">
+                    {% for name, data in algorithm_db.items() %}
+                    <div class="algo-card" 
+                         data-name="{{ name|lower }}" 
+                         data-type="{{ data.type|lower }}"
+                         data-category="{% if data.deprecated %}deprecated{% elif data.quantum_vulnerable %}quantum{% else %}safe{% endif %}">
+                        <div>
+                            <div class="algo-card-top">
+                                <div>
+                                    <div class="algo-title">{{ name }}</div>
+                                    <div class="algo-type">{{ data.type }}</div>
+                                </div>
+                                {% if data.deprecated %}
+                                    <span class="badge badge-deprecated">DEPRECATED</span>
+                                {% elif data.quantum_vulnerable %}
+                                    <span class="badge badge-critical">QUANTUM-VULNERABLE</span>
+                                {% else %}
+                                    <span class="badge badge-safe">SAFE (AES)</span>
+                                {% endif %}
+                            </div>
+
+                            <p class="algo-reason">{{ data.reason }}</p>
+
+                            <div class="algo-meta-block">
+                                <div class="algo-meta-label">Recommended PQC Replacement</div>
+                                <div class="algo-meta-val" style="color: var(--status-safe);">
+                                    {{ data.pqc_replacement }}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                                    Type: {{ data.replacement_type }}
+                                </div>
+                                {% if data.hybrid_recommendation %}
+                                <div class="algo-meta-hybrid">
+                                    <strong style="color: var(--accent);">Hybrid Transition:</strong> {{ data.hybrid_recommendation }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="algo-card-footer">
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">
+                                {% if data.quantum_vulnerable %}Shor's Algorithm Threat{% elif data.deprecated %}Classical Break{% else %}Grover's 2x Factor{% endif %}
+                            </span>
+                            <a href="{{ url_for('manual') }}" class="btn-test-algo">
+                                Test in Manual Lookup &rarr;
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Live search and filter script
+        const searchInput = document.getElementById('dbSearch');
+        const filterPills = document.querySelectorAll('.filter-pills .filter-pill');
+        const cards = document.querySelectorAll('.algo-card');
+
+        let currentFilter = 'all';
+
+        function updateCards() {
+            const query = searchInput.value.toLowerCase().trim();
+            cards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                const type = card.getAttribute('data-type');
+                const cat = card.getAttribute('data-category');
+                const cardText = card.innerText.toLowerCase();
+
+                const matchesFilter = (currentFilter === 'all') || (cat === currentFilter);
+                const matchesSearch = !query || cardText.includes(query) || name.includes(query) || type.includes(query);
+
+                if (matchesFilter && matchesSearch) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', updateCards);
+
+        filterPills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                filterPills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                currentFilter = pill.getAttribute('data-filter');
+                updateCards();
+            });
+        });
+    </script>
 </body>
 </html>

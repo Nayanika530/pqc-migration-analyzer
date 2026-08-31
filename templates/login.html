@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In & Security Access — Qryptis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #08090B;
+            --bg-surface: rgba(14, 16, 22, 0.82);
+            --border-card: rgba(255, 255, 255, 0.12);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --accent: #2E9EFF;
+            --accent-glow: #4FC3F7;
+            --accent-blue: #0055ff;
+            --text-primary: #FFFFFF;
+            --text-muted: #8E9BAE;
+            --text-dim: #5C6779;
+            --status-safe: #3DDC97;
+            --radius-xl: 22px;
+            --radius-md: 10px;
+            --radius-pill: 9999px;
+            --font-heading: 'Unbounded', -apple-system, sans-serif;
+            --font-title: 'Lexend', -apple-system, sans-serif;
+            --font-body: 'Sora', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after {
+            margin: 0; padding: 0; box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        /* Fixed Background Canvas */
+        #node-cluster-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+            background-color: #000000;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Top Header Bar */
+        .auth-header {
+            width: 100%;
+            padding: 1.5rem 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+            color: #FFFFFF;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+
+        .back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: var(--font-title);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-nav:hover {
+            color: #FFFFFF;
+        }
+
+        /* Main Container with Radial Gradient Vignette */
+        .auth-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Auth Card */
+        .auth-card-wrap {
+            max-width: 460px;
+            width: 100%;
+            background: transparent;
+            padding: 10px;
+            border-radius: 28px;
+        }
+
+        .auth-card {
+            background: rgba(10, 12, 18, 0.72);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-xl);
+            padding: 2.2rem 2.2rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 50px rgba(0, 85, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 15%; right: 15%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.7;
+        }
+
+        /* Pill / Tag */
+        .chips {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.3rem 0.85rem;
+            border-radius: var(--radius-pill);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            font-family: var(--font-title);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--accent-glow);
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+        .chips::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-right: 0.45rem;
+            box-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        /* Tabs Switcher */
+        .auth-tabs {
+            display: flex;
+            background: rgba(8, 9, 11, 0.8);
+            padding: 0.35rem;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border-subtle);
+            margin-bottom: 1.8rem;
+            gap: 0.3rem;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 0.55rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: var(--font-title);
+            font-weight: 600;
+            font-size: 0.82rem;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .auth-tab-btn.active {
+            background: #FFFFFF;
+            color: #08090B;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+        }
+
+        /* Form Titles */
+        .form-heading {
+            font-family: var(--font-heading);
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.4rem;
+            color: #FFFFFF;
+        }
+
+        .form-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* Form Inputs */
+        .form-panel {
+            display: none;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+        .form-panel.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .input-label {
+            font-family: var(--font-title);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            letter-spacing: 0.02em;
+        }
+
+        .input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field {
+            width: 100%;
+            background: #08090B;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            padding-right: 2.5rem;
+            color: #FFFFFF;
+            font-family: var(--font-body);
+            font-size: 0.88rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 16px rgba(46, 158, 255, 0.25);
+            background: #0C0E14;
+        }
+
+        .input-toggle-pw {
+            position: absolute;
+            right: 0.85rem;
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 0.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+        .input-toggle-pw:hover {
+            color: #FFFFFF;
+        }
+
+        /* Extras Row */
+        .extras-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: -0.2rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-label input {
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover {
+            color: var(--accent-glow);
+            text-decoration: underline;
+        }
+
+        /* Action Buttons */
+        .btn-submit {
+            width: 100%;
+            background: #FFFFFF;
+            color: #08090B;
+            border: none;
+            padding: 0.85rem 1.5rem;
+            border-radius: var(--radius-pill);
+            font-family: var(--font-title);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+            transition: all 0.25s ease;
+            margin-top: 0.4rem;
+        }
+
+        .btn-submit:hover {
+            background: #F0F2F5;
+            box-shadow: 0 6px 28px rgba(255, 255, 255, 0.28);
+            transform: translateY(-1px);
+        }
+
+        /* Social / SSO Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-dim);
+            font-size: 0.74rem;
+            margin: 0.4rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+
+        .sso-row {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .btn-sso {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.6rem 0.8rem;
+            color: var(--text-secondary);
+            font-family: var(--font-title);
+            font-size: 0.76rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-sso:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.25);
+            color: #FFFFFF;
+        }
+
+        /* Footer terms */
+        .auth-footer {
+            padding: 1.2rem;
+            text-align: center;
+            font-size: 0.74rem;
+            color: var(--text-dim);
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Toast / Alert */
+        .auth-alert {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+        .auth-alert.success {
+            display: block;
+            background: rgba(61, 220, 151, 0.15);
+            border: 1px solid rgba(61, 220, 151, 0.3);
+            color: var(--status-safe);
+        }
+        .auth-alert.error {
+            display: block;
+            background: rgba(255, 84, 112, 0.15);
+            border: 1px solid rgba(255, 84, 112, 0.3);
+            color: #ff6b81;
+        }
+
+        /* Active Session Card */
+        .auth-active-session {
+            background: rgba(46, 158, 255, 0.08);
+            border: 1px solid rgba(46, 158, 255, 0.28);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            text-align: left;
+        }
+        .active-session-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--status-safe);
+            color: #08090B;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 12px rgba(61, 220, 151, 0.4);
+        }
+        .active-session-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .active-session-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--status-safe);
+            font-weight: 700;
+            font-family: var(--font-title);
+        }
+        .active-session-user {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: var(--font-title);
+        }
+        .active-session-email {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .active-session-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }
+        .btn-continue-session {
+            background: #FFFFFF;
+            color: #08090B;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-pill);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .btn-continue-session:hover {
+            background: #F0F2F5;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.2);
+        }
+        .btn-switch-account {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+        .btn-switch-account:hover {
+            color: var(--status-critical);
+        }
+
+        @media (max-width: 540px) {
+            .auth-header { padding: 1.2rem 1.5rem; }
+            .auth-card { padding: 1.8rem 1.4rem; }
+            .auth-active-session { flex-direction: column; align-items: flex-start; }
+            .active-session-actions { width: 100%; justify-content: space-between; margin-top: 0.4rem; }
+        }
+    </style>
+
+    <!-- Modern Three.js requires ES modules for post-processing addons -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+</head>
+<body>
+
+    <!-- Background 3x3x3 Security Node Cluster -->
+    <div id="node-cluster-bg"></div>
+
+    <!-- Header Navigation -->
+    <header class="auth-header">
+        <a href="{{ url_for('home') }}" class="auth-logo">
+            <svg viewBox="0 0 28 28" width="24" height="24" fill="none">
+                <path d="M14 2L4 8v8c0 5.2 3.6 10 10 11.2 6.4-1.2 10-6 10-11.2V8L14 2z" fill="#2E9EFF" opacity="0.2" stroke="#2E9EFF" stroke-width="1.8"/>
+                <text x="14" y="18" text-anchor="middle" fill="#2E9EFF" font-family="'Unbounded', sans-serif" font-size="12" font-weight="700">Q</text>
+            </svg>
+            <span>Qryptis</span>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 1.2rem;">
+            <a href="{{ url_for('home') }}" class="back-nav">
+                &larr; Main Website
+            </a>
+            <a href="{{ url_for('analyze') }}" class="back-nav" style="color: var(--accent);">
+                Console &rarr;
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Auth Center -->
+    <main class="auth-main">
+        <div class="auth-card-wrap">
+            <div class="auth-card">
+                <div class="chips">Security Node Cluster</div>
+
+                {% if session.user %}
+                <!-- Active Authenticated State -->
+                <div class="auth-active-session">
+                    <div class="active-session-icon">✓</div>
+                    <div class="active-session-info">
+                        <div class="active-session-title">Active Session</div>
+                        <div class="active-session-user">{{ session.user.name or session.user.username }}</div>
+                        <div class="active-session-email">{{ session.user.email }}</div>
+                    </div>
+                    <div class="active-session-actions">
+                        <a href="{{ next_url or url_for('home') }}" class="btn-continue-session">
+                            <span>{% if next_url and next_url != url_for('login') and next_url != '/' %}Continue{% else %}Main Website{% endif %}</span>
+                            &rarr;
+                        </a>
+                        <a href="{{ url_for('analyze') }}" class="btn-continue-session" style="background: rgba(46, 158, 255, 0.15); border: 1px solid rgba(46, 158, 255, 0.3); color: #2E9EFF;">
+                            <span>Console</span>
+                            &rarr;
+                        </a>
+                        <a href="{{ url_for('logout') }}" class="btn-switch-account" title="Sign Out">Sign Out</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Tabs -->
+                <div class="auth-tabs">
+                    <button type="button" class="auth-tab-btn active" id="tabSignIn" onclick="switchAuthTab('signin')">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        <span>Sign In</span>
+                    </button>
+                    <button type="button" class="auth-tab-btn" id="tabSignUp" onclick="switchAuthTab('signup')">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        <span>Sign Up</span>
+                    </button>
+                </div>
+
+                {% if error %}
+                <div class="auth-alert error">{{ error }}</div>
+                {% endif %}
+                {% if message %}
+                <div class="auth-alert success">{{ message }}</div>
+                {% endif %}
+
+                <!-- ================= SIGN IN PANEL ================= -->
+                <form id="signInPanel" class="form-panel active" method="POST" action="{{ url_for('login') }}">
+                    <input type="hidden" name="action_type" value="signin">
+                    <input type="hidden" name="next" value="{{ next_url }}">
+                    
+                    <div>
+                        <h1 class="form-heading">WELCOME BACK</h1>
+                        <p class="form-desc">Sign in to manage cryptographic agility and inspect post-quantum migration pipelines.</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Username / Email ID</label>
+                        <div class="input-wrap">
+                            <input type="text" name="login_identifier" class="input-field" placeholder="username or name@company.com" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <div class="input-wrap">
+                            <input type="password" name="password" id="loginPw" class="input-field" placeholder="••••••••" required>
+                            <button type="button" class="input-toggle-pw" onclick="togglePw('loginPw', this)">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="extras-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <span>Remember session</span>
+                        </label>
+                        <a href="javascript:void(0)" onclick="alert('Password reset link will be dispatched to your registered email.')" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <span>Sign In</span>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+
+                    <div class="divider">or continue with</div>
+
+                    <div class="sso-row">
+                        <button type="button" class="btn-sso" onclick="quickLogin('github')">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                            <span>GitHub</span>
+                        </button>
+                        <button type="button" class="btn-sso" onclick="quickLogin('google')">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.344-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/></svg>
+                            <span>Google SSO</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ================= SIGN UP PANEL ================= -->
+                <form id="signUpPanel" class="form-panel" method="POST" action="{{ url_for('login') }}">
+                    <input type="hidden" name="action_type" value="signup">
+                    <input type="hidden" name="next" value="{{ next_url }}">
+                    
+                    <div>
+                        <h1 class="form-heading">CREATE ACCOUNT</h1>
+                        <p class="form-desc">Join Qryptis to audit cryptography, generate CBOMs, and prepare for quantum transition.</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Full Name</label>
+                        <div class="input-wrap">
+                            <input type="text" name="full_name" class="input-field" placeholder="Dr. Alice Vance" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Username</label>
+                        <div class="input-wrap">
+                            <input type="text" name="username" class="input-field" placeholder="alice_crypto" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Email ID</label>
+                        <div class="input-wrap">
+                            <input type="email" name="email" class="input-field" placeholder="alice@enterprise.org" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <div class="input-wrap">
+                            <input type="password" name="password" id="signupPw" class="input-field" placeholder="Create strong password" required>
+                            <button type="button" class="input-toggle-pw" onclick="togglePw('signupPw', this)">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <span>Create Account</span>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="auth-footer">
+        <span>Protected by NIST Post-Quantum Cryptography standards &bull; Qryptis Migration Analyzer</span>
+    </footer>
+
+    <!-- Form Switching & Helpers Script -->
+    <script>
+        function switchAuthTab(type) {
+            const tabSignIn = document.getElementById('tabSignIn');
+            const tabSignUp = document.getElementById('tabSignUp');
+            const signInPanel = document.getElementById('signInPanel');
+            const signUpPanel = document.getElementById('signUpPanel');
+
+            if (type === 'signin') {
+                tabSignIn.classList.add('active');
+                tabSignUp.classList.remove('active');
+                signInPanel.classList.add('active');
+                signUpPanel.classList.remove('active');
+            } else {
+                tabSignUp.classList.add('active');
+                tabSignIn.classList.remove('active');
+                signUpPanel.classList.add('active');
+                signInPanel.classList.remove('active');
+            }
+        }
+
+        function togglePw(id, btn) {
+            const input = document.getElementById(id);
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.style.color = '#2E9EFF';
+            } else {
+                input.type = 'password';
+                btn.style.color = 'var(--text-dim)';
+            }
+        }
+
+        function quickLogin(provider) {
+            const nextParam = encodeURIComponent("{{ next_url }}");
+            window.location.href = `/login/sso/${provider}?next=${nextParam}`;
+        }
+    </script>
+
+    <!-- ============================================================
+         THREE.JS 3x3x3 SECURITY NODE CLUSTER (FLY-IN ASSEMBLY)
+         ============================================================ -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        const bgContainer = document.getElementById('node-cluster-bg');
+
+        const scene = new THREE.Scene();
+        
+        // Perspective Camera
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 150);
+        camera.position.set(0, 0, 11.5);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // Reinhard tone mapping prevents color clipping on high emissive intensities
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.toneMappingExposure = 1.4;
+        
+        if (bgContainer) {
+            bgContainer.appendChild(renderer.domElement);
+        } else {
+            document.body.appendChild(renderer.domElement);
+        }
+
+        // Setup Post-Processing Pipeline
+        const renderScene = new RenderPass(scene, camera);
+        
+        // Bloom Parameters: resolution, strength, radius, threshold
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight), 
+            2.8,  // Strength
+            0.6,  // Radius
+            0.08  // Threshold
+        );
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        // Lighting to define metallic edges and illuminate cubes
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+        scene.add(ambientLight);
+        
+        const dirLight1 = new THREE.DirectionalLight(0xffffff, 3.0);
+        dirLight1.position.set(8, 8, 8);
+        scene.add(dirLight1);
+
+        const dirLight2 = new THREE.DirectionalLight(0x0088ff, 2.0);
+        dirLight2.position.set(-8, -6, 6);
+        scene.add(dirLight2);
+
+        const pointLight = new THREE.PointLight(0x0066ff, 5.0, 30);
+        pointLight.position.set(0, 0, 4);
+        scene.add(pointLight);
+
+        // Main cluster group
+        const group = new THREE.Group();
+        group.scale.set(1.75, 1.75, 1.75); // Enlarged to frame and surround the login bar
+        scene.add(group);
+
+        // Geometry: Box with bevel-like proportion
+        const boxGeo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+
+        // Material 1: Inactive Metallic Nodes
+        const darkMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0x161822,
+            metalness: 0.88,
+            roughness: 0.15,
+            clearcoat: 0.6,
+            clearcoatRoughness: 0.1,
+            transparent: true,
+            opacity: 0.92
+        });
+
+        // Material 2: Active Emissive Glowing Nodes
+        const glowMaterial = new THREE.MeshStandardMaterial({
+            color: 0x0044ff,
+            emissive: 0x0066ff,
+            emissiveIntensity: 4.8, // High bloom output
+            toneMapped: false
+        });
+
+        const gridSize = 3;
+        const offset = (gridSize - 1) / 2;
+        const step = 1.42; // Distance between cube centers
+        const allCubes = [];
+        const glowingCubes = [];
+
+        // Generate 3x3x3 Grid with Scatter Positions for Fly-In Animation
+        for (let x = 0; x < gridSize; x++) {
+            for (let y = 0; y < gridSize; y++) {
+                for (let z = 0; z < gridSize; z++) {
+                    // Randomly cull 15% for the fragmented futuristic look
+                    if (Math.random() > 0.88) continue;
+
+                    const isGlowing = Math.random() > 0.65;
+                    const mesh = new THREE.Mesh(boxGeo, isGlowing ? glowMaterial.clone() : darkMaterial);
+
+                    // Final Target Position inside the 3x3x3 grid
+                    const targetX = (x - offset) * step;
+                    const targetY = (y - offset) * step;
+                    const targetZ = (z - offset) * step;
+                    const targetPos = new THREE.Vector3(targetX, targetY, targetZ);
+
+                    // Scatter starting position: far outside the screen
+                    const dir = targetPos.lengthSq() > 0.01 
+                        ? targetPos.clone().normalize() 
+                        : new THREE.Vector3((Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2).normalize();
+                    
+                    const distance = 26 + Math.random() * 20;
+                    const scatterPos = new THREE.Vector3(
+                        dir.x * distance + (Math.random() - 0.5) * 14,
+                        dir.y * distance + (Math.random() - 0.5) * 14,
+                        dir.z * distance + (Math.random() - 0.5) * 10
+                    );
+
+                    const scatterRot = new THREE.Euler(
+                        (Math.random() - 0.5) * Math.PI * 6,
+                        (Math.random() - 0.5) * Math.PI * 6,
+                        (Math.random() - 0.5) * Math.PI * 6
+                    );
+
+                    // Initialize mesh at scattered outside position
+                    mesh.position.copy(scatterPos);
+                    mesh.rotation.copy(scatterRot);
+
+                    mesh.userData = {
+                        targetPos: targetPos,
+                        scatterPos: scatterPos,
+                        scatterRot: scatterRot,
+                        delay: Math.random() * 0.45,
+                        duration: 2.3 + Math.random() * 0.5
+                    };
+
+                    group.add(mesh);
+                    allCubes.push(mesh);
+                    if (isGlowing) glowingCubes.push(mesh);
+                }
+            }
+        }
+
+        // Ambient cyber dust particles floating in space
+        const dustCount = 1500;
+        const dustGeo = new THREE.BufferGeometry();
+        const dustPos = new Float32Array(dustCount * 3);
+        for (let i = 0; i < dustCount; i++) {
+            dustPos[i * 3] = (Math.random() - 0.5) * 40;
+            dustPos[i * 3 + 1] = (Math.random() - 0.5) * 30;
+            dustPos[i * 3 + 2] = (Math.random() - 0.5) * 25;
+        }
+        dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+        const dustMat = new THREE.PointsMaterial({
+            color: 0x0099ff,
+            size: 0.05,
+            transparent: true,
+            opacity: 0.6,
+            blending: THREE.AdditiveBlending
+        });
+        const dust = new THREE.Points(dustGeo, dustMat);
+        scene.add(dust);
+
+        // Initial isometric tilt angle
+        group.rotation.x = Math.PI / 6;
+        group.rotation.y = -Math.PI / 4;
+
+        // Easing function for snap-together impact
+        function easeOutBack(t) {
+            const c1 = 1.35;
+            const c3 = c1 + 1;
+            return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // 1. Animate all cube pieces flying in from outside and joining together
+            allCubes.forEach((cube) => {
+                const u = cube.userData;
+                const timeSinceStart = elapsedTime - u.delay;
+
+                if (timeSinceStart <= 0) {
+                    cube.position.copy(u.scatterPos);
+                    cube.rotation.set(u.scatterRot.x, u.scatterRot.y, u.scatterRot.z);
+                    return;
+                }
+
+                const progress = Math.min(Math.max(timeSinceStart / u.duration, 0), 1);
+                const ease = easeOutBack(progress);
+
+                cube.position.lerpVectors(u.scatterPos, u.targetPos, ease);
+                cube.rotation.x = u.scatterRot.x * (1 - Math.min(progress * 1.1, 1));
+                cube.rotation.y = u.scatterRot.y * (1 - Math.min(progress * 1.1, 1));
+                cube.rotation.z = u.scatterRot.z * (1 - Math.min(progress * 1.1, 1));
+            });
+
+            // 2. Continuous majestic cluster rotation
+            group.rotation.y += 0.004;
+            group.rotation.x = Math.PI / 6 + Math.sin(elapsedTime * 0.35) * 0.06;
+            group.rotation.z = Math.cos(elapsedTime * 0.25) * 0.04;
+
+            // 3. Subtle ambient dust drift
+            dust.rotation.y += 0.001;
+
+            // 4. Subtle intensity pulsing for the active glowing bloom nodes
+            glowingCubes.forEach((cube, index) => {
+                cube.material.emissiveIntensity = 3.6 + Math.sin(elapsedTime * 2.2 + index * 1.2) * 1.6;
+            });
+
+            // Render post-processing pipeline
+            composer.render();
+        }
+
+        animate();
+    </script>
+</body>
+</html>

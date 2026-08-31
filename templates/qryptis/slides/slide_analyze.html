@@ -1,0 +1,308 @@
+<div class="analyze-slide">
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="qr-sidebar">
+        <div class="sidebar-logo" style="cursor: pointer;" data-goto="0">
+            <svg viewBox="0 0 28 28" width="24" height="24">
+                <path d="M14 2L4 8v8c0 5.2 3.6 10 10 11.2 6.4-1.2 10-6 10-11.2V8L14 2z" fill="var(--accent)" opacity="0.15" stroke="var(--accent)" stroke-width="1.5"/>
+                <text x="14" y="18" text-anchor="middle" fill="var(--accent)" font-family="var(--font-heading)" font-size="12" font-weight="700">Q</text>
+            </svg>
+            <span>Qryptis</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="sidebar-item" data-goto="0">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10"/></svg>
+                Home
+            </a>
+            <a href="#" class="sidebar-item active" data-goto="2">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Analyze
+            </a>
+            <a href="#" class="sidebar-item" id="navManualBtn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10.5" cy="10.5" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+                Manual Lookup
+            </a>
+            <a href="#" class="sidebar-item" id="navScanBtn">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                Scan Code
+            </a>
+            <a href="#" class="sidebar-item" data-goto="1">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="14" width="4" height="7" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="16" y="4" width="4" height="17" rx="1"/></svg>
+                Benchmarks
+            </a>
+            <a href="#" class="sidebar-item" data-goto="3">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="7" y="5" width="10" height="4" rx="1" fill="currentColor" stroke="none"/><line x1="8" y1="13" x2="12" y2="13"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
+                Risk Calculator
+            </a>
+            <a href="#" class="sidebar-item" data-goto="3">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="3 6 3 20 9 17 15 20 21 17 21 3 15 6 9 3 3 6"/><line x1="9" y1="3" x2="9" y2="17"/><line x1="15" y1="6" x2="15" y2="20"/></svg>
+                Roadmap
+            </a>
+            <a href="#" class="sidebar-item" data-goto="3">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                History
+            </a>
+            <div class="sidebar-spacer"></div>
+            <a href="#" class="sidebar-item" data-goto="0">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                Settings
+            </a>
+            <a href="#" class="sidebar-item" data-goto="0">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><circle cx="12" cy="8" r="1" fill="currentColor" stroke="none"/></svg>
+                About
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="analyze-main">
+        <!-- Choose Method Cards -->
+        <div id="analyzeMethodsView" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+            <h2 class="analyze-title">Analyze</h2>
+            <p class="analyze-subtitle">Choose how you want to analyze your cryptography.</p>
+
+            <div class="method-cards">
+                <div class="method-card" id="cardManual">
+                    <div class="method-icon">
+                        <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="var(--accent)" stroke-width="1.5">
+                            <circle cx="20" cy="20" r="14"/><line x1="30" y1="30" x2="42" y2="42" stroke-width="3"/>
+                        </svg>
+                    </div>
+                    <h3>Manual Lookup</h3>
+                    <p>Check any algorithm + key size to see its quantum & classical risk and get PQC recommendations.</p>
+                    <button class="btn btn-primary btn-sm" id="btnOpenManual">Go to Manual Lookup →</button>
+                </div>
+                <div class="method-card" id="cardScan">
+                    <div class="method-icon">
+                        <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="var(--accent)" stroke-width="1.5">
+                            <polyline points="30 36 42 24 30 12"/><polyline points="18 12 6 24 18 36"/><line x1="26" y1="6" x2="22" y2="42" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <h3>Scan Code</h3>
+                    <p>Scan your code to detect cryptographic usage and get a full security report.</p>
+                    <button class="btn btn-primary btn-sm" id="btnOpenScan">Go to Scan Code →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inline Scan Code Panel (Shown when clicking Scan Code) -->
+        <div id="inlineScanView" style="display: none; width: 100%; max-width: 600px; flex-direction: column; align-items: center;">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 1rem;">
+                <h2 style="font-size: 1.3rem;">Scan Your Code</h2>
+                <button class="btn btn-outline btn-xs" id="btnCloseScan">← Back to Methods</button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem; text-align: center;">
+                Paste code or choose a file to analyze cryptography and generate your migration dashboard.
+            </p>
+
+            <div style="width: 100%; margin-bottom: 0.75rem;">
+                <textarea id="liveCodeInput" rows="8" style="width: 100%; background: rgba(10, 14, 23, 0.85); border: 1px solid var(--border-subtle); border-radius: var(--radius); padding: 0.75rem; font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-primary); outline: none; resize: vertical;" placeholder="from Crypto.PublicKey import RSA&#10;key = RSA.generate(2048)&#10;cipher = DES3.new(key, DES3.MODE_CBC)">from Crypto.PublicKey import RSA
+from Crypto.Cipher import DES3, AES
+import hashlib
+from Crypto.PublicKey import DSA
+
+key = RSA.generate(2048)
+cipher = DES3.new(key, DES3.MODE_CBC)
+aes_cipher = AES.new(key, AES.MODE_CBC)
+hash_val = hashlib.md5(b"test")
+dsa_key = DSA.generate(1024)</textarea>
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; align-items: center; width: 100%;">
+                <input type="file" id="liveFileInput" accept=".py,.js,.java,.txt" style="display: none;">
+                <button class="btn btn-outline btn-sm" id="btnPickFile" type="button">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Upload File
+                </button>
+                <span id="pickedFileName" style="font-size: 0.7rem; color: var(--text-muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                <button class="btn btn-primary btn-sm" id="btnExecuteScan" type="button">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    Run Scan →
+                </button>
+            </div>
+            <div id="scanStatusMsg" style="margin-top: 0.6rem; font-size: 0.75rem; color: var(--accent); min-height: 1.2rem;"></div>
+        </div>
+    </main>
+
+    <!-- ===== AI PANEL ===== -->
+    <aside class="ai-panel">
+        <div class="ai-header">
+            <div class="ai-header-left">
+                <span class="ai-title">Qryptis AI</span>
+                <span class="ai-beta-badge">Beta</span>
+            </div>
+            <button class="ai-close" aria-label="Close">✕</button>
+        </div>
+        <div class="ai-messages" id="aiChatMessages">
+            <div class="ai-message">
+                <div class="ai-avatar">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.5">
+                        <rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="9" cy="12" r="1.5" fill="var(--accent)" stroke="none"/><circle cx="15" cy="12" r="1.5" fill="var(--accent)" stroke="none"/><line x1="12" y1="2" x2="12" y2="6"/>
+                    </svg>
+                </div>
+                <div class="ai-bubble">
+                    Hi! I'm Qryptis AI. I can help you understand results, guide you through fixes, and answer anything about PQC.
+                    <br><br>
+                    How can I help you today?
+                </div>
+            </div>
+        </div>
+        <div class="ai-input-area">
+            <input type="text" class="ai-input" id="aiChatInput" placeholder="Ask anything about PQC...">
+            <button class="ai-send" id="aiChatSend" aria-label="Send">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--accent)" stroke="none">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </aside>
+</div>
+
+<script>
+(function() {
+    // Scan view toggles
+    var methodsView = document.getElementById('analyzeMethodsView');
+    var scanView = document.getElementById('inlineScanView');
+    var btnOpenScan = document.getElementById('btnOpenScan');
+    var btnCloseScan = document.getElementById('btnCloseScan');
+    var navScanBtn = document.getElementById('navScanBtn');
+    var navManualBtn = document.getElementById('navManualBtn');
+    var btnOpenManual = document.getElementById('btnOpenManual');
+
+    function showScan() {
+        methodsView.style.display = 'none';
+        scanView.style.display = 'flex';
+    }
+    function showMethods() {
+        methodsView.style.display = 'flex';
+        scanView.style.display = 'none';
+    }
+
+    if (btnOpenScan) btnOpenScan.addEventListener('click', showScan);
+    if (navScanBtn) navScanBtn.addEventListener('click', function(e){ e.preventDefault(); showScan(); });
+    if (btnCloseScan) btnCloseScan.addEventListener('click', showMethods);
+    if (navManualBtn) navManualBtn.addEventListener('click', function(e){ e.preventDefault(); showMethods(); });
+    if (btnOpenManual) btnOpenManual.addEventListener('click', function(){ window.open('/manual', '_blank'); });
+
+    // File picker
+    var fileInput = document.getElementById('liveFileInput');
+    var pickBtn = document.getElementById('btnPickFile');
+    var fileNameSpan = document.getElementById('pickedFileName');
+    if (pickBtn && fileInput) {
+        pickBtn.addEventListener('click', function(){ fileInput.click(); });
+        fileInput.addEventListener('change', function(){
+            if (fileInput.files.length > 0) {
+                var file = fileInput.files[0];
+                fileNameSpan.textContent = file.name;
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    document.getElementById('liveCodeInput').value = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+        });
+    }
+
+    // Run Scan Execution
+    var btnExecute = document.getElementById('btnExecuteScan');
+    var statusMsg = document.getElementById('scanStatusMsg');
+    if (btnExecute) {
+        btnExecute.addEventListener('click', function() {
+            var code = document.getElementById('liveCodeInput').value.trim();
+            if (!code) {
+                statusMsg.textContent = 'Please paste or upload code to scan.';
+                statusMsg.style.color = 'var(--status-critical)';
+                return;
+            }
+            statusMsg.textContent = 'Analyzing cryptographic algorithms...';
+            statusMsg.style.color = 'var(--accent)';
+            btnExecute.disabled = true;
+
+            fetch('/api/scan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ code: code, filename: fileNameSpan.textContent || 'pasted_code.py' })
+            })
+            .then(function(res){ return res.json(); })
+            .then(function(data) {
+                btnExecute.disabled = false;
+                if (data.error) {
+                    statusMsg.textContent = data.error;
+                    statusMsg.style.color = 'var(--status-critical)';
+                    return;
+                }
+                statusMsg.textContent = 'Scan complete! Transitioning to dashboard...';
+                statusMsg.style.color = 'var(--status-safe)';
+
+                // Update slide 4 dynamically if needed
+                if (window.updateDashboardWithData) {
+                    window.updateDashboardWithData(data);
+                }
+
+                // Smoothly slide to Slide 4 (Dashboard)
+                setTimeout(function() {
+                    if (window.goToSlide) {
+                        window.goToSlide(3); // Slide 4
+                    }
+                }, 400);
+            })
+            .catch(function(err) {
+                btnExecute.disabled = false;
+                statusMsg.textContent = 'Scan error: ' + err.message;
+                statusMsg.style.color = 'var(--status-critical)';
+            });
+        });
+    }
+
+    // AI Chatbox
+    var aiInput = document.getElementById('aiChatInput');
+    var aiSend = document.getElementById('aiChatSend');
+    var aiContainer = document.getElementById('aiChatMessages');
+
+    function sendAiMsg() {
+        var msg = aiInput.value.trim();
+        if (!msg) return;
+        aiInput.value = '';
+
+        // User bubble
+        var uMsg = document.createElement('div');
+        uMsg.className = 'ai-message';
+        uMsg.style.justifyContent = 'flex-end';
+        uMsg.innerHTML = '<div class="ai-bubble" style="background: rgba(46,158,255,0.15); color: #fff; border-color: rgba(46,158,255,0.3);">' + escapeHtml(msg) + '</div>';
+        aiContainer.appendChild(uMsg);
+        aiContainer.scrollTop = aiContainer.scrollHeight;
+
+        // Bot typing placeholder
+        var botMsg = document.createElement('div');
+        botMsg.className = 'ai-message';
+        botMsg.innerHTML = '<div class="ai-avatar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="4" y="6" width="16" height="12" rx="2"/><circle cx="9" cy="12" r="1.5" fill="var(--accent)" stroke="none"/><circle cx="15" cy="12" r="1.5" fill="var(--accent)" stroke="none"/><line x1="12" y1="2" x2="12" y2="6"/></svg></div><div class="ai-bubble" style="color: var(--text-muted);">Thinking...</div>';
+        aiContainer.appendChild(botMsg);
+        aiContainer.scrollTop = aiContainer.scrollHeight;
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ message: msg })
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+            botMsg.querySelector('.ai-bubble').innerHTML = (data.reply || 'No response').replace(/\n/g, '<br>');
+            aiContainer.scrollTop = aiContainer.scrollHeight;
+        })
+        .catch(function(){
+            botMsg.querySelector('.ai-bubble').textContent = 'Sorry, could not connect to AI service.';
+        });
+    }
+
+    function escapeHtml(text) {
+        var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    if (aiSend) aiSend.addEventListener('click', sendAiMsg);
+    if (aiInput) {
+        aiInput.addEventListener('keydown', function(e){
+            if (e.key === 'Enter') sendAiMsg();
+        });
+    }
+})();
+</script>

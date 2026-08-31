@@ -1,5 +1,31 @@
+# Virtual Environment
 venv/
+ENV/
+env/
+
+# Python Cache & Bytecode
 __pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+
+# Post-Quantum C libraries & local build artifacts
 liboqs/
-*.pyc
+build/
+dist/
+*.egg-info/
+
+# Environment variables & secrets
+.env
+.env.local
+
+# IDE configurations
 .vscode/
+.idea/
+*.swp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+*.mp4
+

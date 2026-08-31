@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" class="qryptis-page">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Qryptis</title>
+
+    <!-- Google Fonts: Space Grotesk 700 · Inter 300-700 · JetBrains Mono 400-700 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/qryptis.css') }}">
+</head>
+<body class="qryptis">
+
+    <!-- ============================================================
+         Animated quantum background (loops through 5 frames)
+         ============================================================ -->
+    <div class="bg-animation" aria-hidden="true">
+        <div class="bg-frame bg-frame-1"></div>
+        <div class="bg-frame bg-frame-2"></div>
+        <div class="bg-frame bg-frame-3"></div>
+        <div class="bg-frame bg-frame-4"></div>
+        <div class="bg-frame bg-frame-5"></div>
+        <div class="bg-dim"></div>
+    </div>
+
+    <!-- ============================================================
+         Slider viewport — clips the horizontal track
+         ============================================================ -->
+    <div class="slider-viewport">
+        <div class="slider-track" id="sliderTrack">
+            {% for slide_partial in slides %}
+            <section class="slide">
+                <!-- z-1: dark overlay for readability -->
+                <div class="slide-overlay"></div>
+                <!-- z-2: content -->
+                <div class="slide-content">
+                    {% include slide_partial %}
+                </div>
+            </section>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Navigation dots -->
+    <nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+    <!-- Cursor hint (auto-hides on first interaction) -->
+    <div class="cursor-hint" id="cursorHint">&#x2190; move cursor to navigate &#x2192;</div>
+
+    <script src="{{ url_for('static', filename='js/slider.js') }}"></script>
+</body>
+</html>

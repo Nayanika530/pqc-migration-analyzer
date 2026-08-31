@@ -32,12 +32,16 @@ MIN_SECURE_KEY_SIZE = {
     "AES": 128,
     "DSA": 2048,
     "DIFFIE-HELLMAN": 2048,
-    "3DES": 168
+    "3DES": 168,
+    "MD5": 256  # MD5 is 128-bit digest; minimum secure hash digest today is 256-bit (e.g. SHA-256)
 }
 
 
 def check_key_size(name: str, key_size: int) -> dict:
     """Check if a given key size is classically secure today, on top of quantum vulnerability."""
+    if not isinstance(key_size, int) or key_size <= 0:
+        return {"error": "Key size must be a positive integer greater than 0."}
+
     key = name.strip().upper()
     if key not in MIN_SECURE_KEY_SIZE:
         return {"error": f"'{name}' not found in database."}
@@ -65,6 +69,7 @@ ALGORITHM_DB = {
         "reason": "RSA relies on factoring large numbers, which Shor's Algorithm solves efficiently on a quantum computer.",
         "pqc_replacement": "ML-KEM-768",
         "replacement_type": "Key Encapsulation Mechanism (KEM)",
+        "hybrid_recommendation": "X25519 + ML-KEM-768 hybrid KEM (IETF draft standard) for backward compatibility and defense-in-depth",
         "deprecated": False
     },
     "ECC": {
@@ -73,6 +78,7 @@ ALGORITHM_DB = {
         "reason": "ECC relies on the elliptic curve discrete logarithm problem, also broken efficiently by Shor's Algorithm.",
         "pqc_replacement": "ML-KEM-768",
         "replacement_type": "Key Encapsulation Mechanism (KEM)",
+        "hybrid_recommendation": "X25519 + ML-KEM-768 for key exchange; ECDSA + ML-DSA-65 hybrid for digital signatures",
         "deprecated": False
     },
     "AES": {
@@ -81,6 +87,7 @@ ALGORITHM_DB = {
         "reason": "AES isn't broken by quantum computers, but Grover's Algorithm halves its effective security, so key sizes should be doubled (e.g. AES-128 -> AES-256).",
         "pqc_replacement": "AES-256 (same algorithm, larger key)",
         "replacement_type": "Symmetric encryption (no PQC swap needed, just bigger key)",
+        "hybrid_recommendation": "Use AES-256-GCM for authenticated encryption (no hybrid wrapper needed)",
         "deprecated": False
     },
     "DSA": {
@@ -89,6 +96,7 @@ ALGORITHM_DB = {
         "reason": "DSA relies on the discrete logarithm problem, which Shor's Algorithm solves efficiently on a quantum computer.",
         "pqc_replacement": "ML-DSA-65",
         "replacement_type": "Digital Signature Algorithm",
+        "hybrid_recommendation": "ECDSA + ML-DSA-65 hybrid signature scheme to maintain classical verification while deploying PQC",
         "deprecated": False
     },
     "DIFFIE-HELLMAN": {
@@ -97,6 +105,7 @@ ALGORITHM_DB = {
         "reason": "Diffie-Hellman relies on the discrete logarithm problem, broken efficiently by Shor's Algorithm.",
         "pqc_replacement": "ML-KEM-768",
         "replacement_type": "Key Encapsulation Mechanism (KEM)",
+        "hybrid_recommendation": "X25519 + ML-KEM-768 hybrid key exchange (FIPS 203 compliant)",
         "deprecated": False
     },
     "3DES": {
@@ -105,6 +114,16 @@ ALGORITHM_DB = {
         "reason": "3DES isn't broken by quantum computers the way RSA is, but it's already considered weak by classical standards (small effective key strength) and Grover's Algorithm weakens it further -- it should be retired regardless of quantum risk.",
         "pqc_replacement": "AES-256",
         "replacement_type": "Symmetric encryption (full replacement recommended, not just PQC upgrade)",
+        "hybrid_recommendation": "Direct migration to AES-256-GCM",
+        "deprecated": True
+    },
+    "MD5": {
+        "type": "cryptographic hash function",
+        "quantum_vulnerable": False,
+        "reason": "MD5 has catastrophic classical collision vulnerabilities and was cryptographically broken in 2004. It should be retired immediately for security and integrity verification regardless of quantum risk.",
+        "pqc_replacement": "SHA-256 / SHA-3 for hashing; ML-DSA-65 for integrity signatures",
+        "replacement_type": "Cryptographic hash / collision-resistant digest",
+        "hybrid_recommendation": "SHA-256 or SHA-512 with HMAC, or combine with ML-DSA for quantum-secure signatures",
         "deprecated": True
     }
 }
@@ -114,7 +133,7 @@ def analyze_algorithm(name: str) -> dict:
     """Look up an algorithm and return its quantum vulnerability info."""
     key = name.strip().upper()
     if key not in ALGORITHM_DB:
-        return {"error": f"'{name}' not found in database. Try RSA, ECC, AES, DSA, DIFFIE-HELLMAN, or 3DES."}
+        return {"error": f"'{name}' not found in database. Supported algorithms: {', '.join(ALGORITHM_DB.keys())}."}
     return ALGORITHM_DB[key]
 
 
@@ -168,6 +187,7 @@ def generate_report(name: str, key_size: int) -> dict:
         "key_size_note": size_info["note"],
         "recommended_replacement": algo_info["pqc_replacement"],
         "replacement_type": algo_info["replacement_type"],
+        "hybrid_recommendation": algo_info.get("hybrid_recommendation", ""),
         "verdict": verdict,
         "benchmark": benchmark_info
     }
@@ -177,6 +197,9 @@ def calculate_harvest_risk(algorithm: str, key_size: int, years_secret_needed: i
     Calculate 'harvest now, decrypt later' risk: how urgent is migration
     based on how long this data needs to stay confidential.
     """
+    if not isinstance(years_secret_needed, int) or years_secret_needed < 0:
+        return {"error": "Years secret needed must be a non-negative integer (0 or greater)."}
+
     report = generate_report(algorithm, key_size)
     if "error" in report:
         return report
@@ -247,7 +270,8 @@ Recommended replacement: {report['recommended_replacement']}
 """
 
     try:
-        response = ollama.chat(
+        client = ollama.Client(timeout=2.0)
+        response = client.chat(
             model="mistral",
             messages=[{"role": "user", "content": prompt}]
         )
@@ -262,7 +286,7 @@ def chat_with_assistant(user_message: str) -> str:
     """
     system_context = """You are a helpful assistant embedded in the PQC Migration Analyzer website.
 This tool helps users:
-- Manually check if a cryptographic algorithm (RSA, ECC, AES, DSA, Diffie-Hellman, 3DES) and key size is vulnerable to quantum computers
+- Manually check if a cryptographic algorithm (RSA, ECC, AES, DSA, Diffie-Hellman, 3DES, MD5) and key size is vulnerable to quantum computers
 - Scan real source code to automatically detect vulnerable cryptography
 - Calculate harvest-now-decrypt-later risk based on how long data needs to stay secret
 - Generate a cryptographic agility score and migration roadmap for scanned code
@@ -272,7 +296,8 @@ Guide users to the right page: Manual Lookup is at /manual, Code Scanner is at /
 Keep answers short, friendly, and beginner-appropriate. Under 80 words unless asked for detail."""
 
     try:
-        response = ollama.chat(
+        client = ollama.Client(timeout=2.0)
+        response = client.chat(
             model="mistral",
             messages=[
                 {"role": "system", "content": system_context},

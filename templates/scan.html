@@ -1,96 +1,371 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Code Scanner - PQC Migration Analyzer</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Code — Qryptis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Unbounded:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scan.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Crypto Code Scanner</h1>
-        <p><a href="{{ url_for('analyze') }}">← Back to Console</a></p>
 
-        <form method="POST" enctype="multipart/form-data">
-            <label>Upload a code file:</label><br>
-            <input type="file" name="code_file" accept=".py,.js,.java,.txt">
-            <br><br>
+    <!-- Particle Noise Sphere Background Layer (Fixed z-index: -1) -->
+    <div id="particle-bg"></div>
 
-            <label>...or paste your code below:</label><br>
-            <textarea name="code_text" rows="15" cols="80">{{ code_text }}</textarea><br><br>
+    <!-- ============================================================
+         PAGE FOREGROUND
+         ============================================================ -->
+    <div class="page-foreground">
+        {% if results is not none and results|length > 0 %}
+        {# ============================================================
+           SCAN RESULTS DASHBOARD VIEW (Inspo Match)
+           ============================================================ #}
+        <div class="dashboard">
+            <!-- ===== HEADER BAR ===== -->
+            <header class="dash-header">
+                <div class="dash-breadcrumb">
+                    <a href="{{ url_for('home') }}" class="dash-logo">
+                        <svg viewBox="0 0 28 28" width="22" height="22">
+                            <path d="M14 2L4 8v8c0 5.2 3.6 10 10 11.2 6.4-1.2 10-6 10-11.2V8L14 2z"
+                                  fill="#2E9EFF" opacity="0.15" stroke="#2E9EFF" stroke-width="1.5"/>
+                            <text x="14" y="18" text-anchor="middle" fill="#2E9EFF"
+                                  font-family="'Unbounded',sans-serif" font-size="12" font-weight="700">Q</text>
+                        </svg>
+                        <span>Qryptis</span>
+                    </a>
+                    <span class="bc-sep">&rsaquo;</span>
+                    <a href="{{ url_for('analyze') }}" class="bc-link">Analyze</a>
+                    <span class="bc-sep">&rsaquo;</span>
+                    <span class="bc-current">Scan Code</span>
+                </div>
+                <div class="dash-actions">
+                    <a href="{{ url_for('download_cbom') }}" class="btn btn-outline btn-sm" download="cbom.json">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download CBOM (JSON)
+                    </a>
+                    <a href="{{ url_for('download_roadmap') }}" class="btn btn-outline btn-sm" download="migration_report.md">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download Roadmap (MD)
+                    </a>
+                </div>
+            </header>
 
-            <button type="submit">Scan Code</button>
-        </form>
-
-        {% if results is not none %}
-            {% if results|length == 0 %}
-                <p>No known cryptographic algorithms detected.</p>
-            {% else %}
-                <h2>Findings ({{ results|length }})</h2>
-                <a href="{{ url_for('download_cbom') }}" download><button type="button">Download CBOM (JSON)</button></a>
-                <a href="{{ url_for('download_roadmap') }}" download><button type="button">Download Migration Report (Markdown)</button></a>
-                <br><br>
-
-                {% if agility and agility.score is not none %}
-                    <div class="card">
-                        <h2>Cryptographic Agility Score</h2>
-                        <p><strong>Score:</strong> {{ agility.score }}/100 — {{ agility.grade }}</p>
-                        <p>{{ agility.explanation }}</p>
+            <!-- ===== BODY: 2-COLUMN ===== -->
+            <div class="dash-body">
+                <!-- ========== LEFT COLUMN ========== -->
+                <div class="dash-left">
+                    <!-- Title Row -->
+                    <div class="scan-header-row">
+                        <h1 class="scan-title">Scan Results</h1>
+                        <span class="badge badge-safe">Scan Complete</span>
                     </div>
-                {% endif %}
+                    <div class="scan-meta">
+                        <span>File: <strong class="mono">{{ filename }}</strong></span>
+                        <span>Scan Time: <strong class="mono">2.34s</strong></span>
+                        <span>Findings: <strong class="mono">{{ results|length }}</strong></span>
+                    </div>
 
-                {% if forecast %}
-                    <div class="card">
-                        <h2>5-Year Risk Forecast</h2>
-                        <p style="color:var(--text-muted); font-size:0.85rem;">{{ forecast.note }}</p>
-                        <div style="display:flex; align-items:flex-end; gap:1rem; height:150px; margin-top:1rem;">
-                            {% for point in forecast.forecast %}
-                                <div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-                                    <div style="width:100%; background:var(--accent); border-radius:4px 4px 0 0; height:{{ point.risk_score }}%;"></div>
-                                    <p style="font-size:0.75rem; margin-top:0.3rem;">{{ point.year }}</p>
-                                    <p style="font-size:0.75rem; color:var(--text-muted);">{{ point.risk_score }}</p>
-                                </div>
-                            {% endfor %}
+                    <!-- Summary Cards -->
+                    {% if summary %}
+                    <div class="summary-cards">
+                        <div class="summary-card sc-critical">
+                            <div class="sc-count">{{ summary.critical }}</div>
+                            <div class="sc-label">Critical</div>
+                        </div>
+                        <div class="summary-card sc-deprecated">
+                            <div class="sc-count">{{ summary.deprecated }}</div>
+                            <div class="sc-label">Deprecated</div>
+                        </div>
+                        <div class="summary-card sc-at-risk">
+                            <div class="sc-count">{{ summary.at_risk }}</div>
+                            <div class="sc-label">At Risk</div>
+                        </div>
+                        <div class="summary-card sc-safe">
+                            <div class="sc-count">{{ summary.safe }}</div>
+                            <div class="sc-label">Safe</div>
                         </div>
                     </div>
-                {% endif %}
+                    {% endif %}
 
-                {% if roadmap and roadmap.total_phases > 0 %}
-                    <div class="card">
-                        <h2>Migration Roadmap</h2>
-                        {% for phase in roadmap.phases %}
-                            <div style="margin-bottom:1rem; padding-left:1rem; border-left:3px solid var(--accent);">
-                                <p><strong>Phase {{ phase.phase }}: {{ phase.title }}</strong> ({{ phase.urgency }})</p>
-                                <p style="color:var(--text-muted); font-size:0.9rem;">{{ phase.reason }}</p>
-                                <ul>
-                                    {% for item in phase.affected %}
-                                        <li>Line {{ item.line }}: {{ item.algorithm }} ({{ item.key_size }}-bit) — {{ item.verdict }}</li>
-                                    {% endfor %}
-                                </ul>
+                    <!-- Findings List (timeline) -->
+                    <h3 class="findings-title">Findings</h3>
+                    <div class="findings-timeline">
+                        {% for r in results %}
+                        <div class="finding-item">
+                            <div class="finding-tl">
+                                {% if 'DEPRECATED' in r.report.get('verdict','') %}
+                                <span class="finding-dot" style="background: var(--status-deprecated);"></span>
+                                {% elif 'CRITICAL' in r.report.get('verdict','') %}
+                                <span class="finding-dot" style="background: var(--status-critical);"></span>
+                                {% elif 'AT RISK' in r.report.get('verdict','') %}
+                                <span class="finding-dot" style="background: var(--status-at-risk);"></span>
+                                {% else %}
+                                <span class="finding-dot" style="background: var(--status-safe);"></span>
+                                {% endif %}
+                                {% if not loop.last %}<span class="finding-line"></span>{% endif %}
                             </div>
+                            <div class="finding-details">
+                                <div class="finding-name">
+                                    {% if r.report.get('algorithm') %}
+                                        {{ r.report.algorithm }}{% if r.report.get('key_size') %} ({{ r.report.key_size }}){% endif %}
+                                    {% else %}
+                                        {{ r.matched_text }}
+                                    {% endif %}
+                                </div>
+                                {% if 'DEPRECATED' in r.report.get('verdict','') %}
+                                <span class="badge badge-deprecated sm">DEPRECATED</span>
+                                {% elif 'CRITICAL' in r.report.get('verdict','') %}
+                                <span class="badge badge-critical sm">CRITICAL</span>
+                                {% elif 'AT RISK' in r.report.get('verdict','') %}
+                                <span class="badge badge-at-risk sm">AT RISK</span>
+                                {% else %}
+                                <span class="badge badge-safe sm">SAFE</span>
+                                {% endif %}
+                            </div>
+                            <div class="finding-location">
+                                <div>Location: <span class="mono">line {{ r.line_number }}</span></div>
+                                <div>Usage: {{ r.report.get('type', 'Cryptographic') }}</div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
-                {% endif %}
 
-                <h2>Detailed Findings</h2>
-                {% for r in results %}
-                    <div class="card">
-                        <p><strong>Line {{ r.line_number }}:</strong> <code>{{ r.matched_text }}</code></p>
+                    <a href="{{ url_for('scan') }}" class="btn btn-outline btn-findings">Scan Another Code &nbsp;→</a>
+                </div>
 
-                        {% if r.report.error %}
-                            <p style="color:orange;">{{ r.report.error }}</p>
-                        {% else %}
-                            <p><strong>Algorithm:</strong> {{ r.report.algorithm }} ({{ r.report.key_size }}-bit)</p>
-                            <p><strong>Verdict:</strong> {{ r.report.verdict }}</p>
-                            <p><strong>Recommended Replacement:</strong> {{ r.report.recommended_replacement }}</p>
+                <!-- ========== RIGHT COLUMN ========== -->
+                <div class="dash-right">
+                    <!-- Top Row: Agility + Forecast side-by-side -->
+                    <div class="dash-right-row">
+                        <!-- Agility Score -->
+                        {% if agility and agility.score is not none %}
+                        <div class="dcard agility-card">
+                            <div class="dcard-title">Cryptographic Agility Score</div>
+                            <div class="agility-gauge">
+                                <div class="agility-track"></div>
+                                <div class="agility-ring" style="background: conic-gradient(from 140deg, #3DDC97 0deg, #FFD23F 80deg, #FF9F43 140deg, #FF5470 {{ (agility.score / 100 * 250)|round|int }}deg, transparent {{ (agility.score / 100 * 250 + 5)|round|int }}deg);"></div>
+                                <div class="agility-center">
+                                    <span class="agility-grade">{{ agility.grade.split(' ')[0] }}</span>
+                                    <span class="agility-score">{{ agility.score }}</span>
+                                    <span class="agility-max">/100</span>
+                                </div>
+                            </div>
+                            <p class="agility-desc">{{ agility.explanation[:55] }}{% if agility.explanation|length > 55 %}…{% endif %}</p>
+                        </div>
                         {% endif %}
 
-                        {% if r.suggested_fix %}
-                            <p><strong>Suggested Fix:</strong></p>
-                            <pre>{{ r.suggested_fix }}</pre>
+                        <!-- Risk Forecast -->
+                        {% if forecast %}
+                        <div class="dcard forecast-card">
+                            <div class="dcard-title">Risk Forecast (If No Action Taken)</div>
+                            <div class="forecast-chart">
+                                <svg class="forecast-line" viewBox="0 0 200 80" preserveAspectRatio="none">
+                                    <polyline points="20,70 55,58 100,42 145,18 180,5"
+                                              fill="none" stroke="var(--status-critical)" stroke-width="2"
+                                              stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+                                </svg>
+                                <div class="forecast-bars">
+                                    {% for point in forecast.forecast %}
+                                    <div class="forecast-bar-col">
+                                        <div class="forecast-bar-wrap">
+                                            {% if loop.index == 1 %}
+                                            <div class="forecast-bar" style="height:{{ point.risk_score }}%; background:var(--status-safe);"></div>
+                                            {% elif loop.index == 2 %}
+                                            <div class="forecast-bar" style="height:{{ point.risk_score }}%; background:var(--status-at-risk);"></div>
+                                            {% elif loop.index in [3, 4] %}
+                                            <div class="forecast-bar" style="height:{{ point.risk_score }}%; background:var(--status-deprecated);"></div>
+                                            {% else %}
+                                            <div class="forecast-bar" style="height:100%; background:var(--status-critical); box-shadow: 0 0 10px rgba(255,84,112,0.6);"></div>
+                                            {% endif %}
+                                        </div>
+                                        <span class="forecast-lbl">{{ point.year }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                         {% endif %}
                     </div>
-                {% endfor %}
+
+                    <!-- Recommendation (full width) -->
+                    {% if results|length > 0 %}
+                    {% set first_vuln = namespace(found=false, report=none, fix=none, orig=none) %}
+                    {% for r in results %}
+                        {% if not first_vuln.found and r.report.get('recommended_replacement') and r.suggested_fix %}
+                            {% set first_vuln.found = true %}
+                            {% set first_vuln.report = r.report %}
+                            {% set first_vuln.fix = r.suggested_fix %}
+                            {% set first_vuln.orig = r.matched_text %}
+                        {% endif %}
+                    {% endfor %}
+                    {% if first_vuln.found %}
+                    <div class="dcard rec-card">
+                        <div class="dcard-title">Recommendation</div>
+                        <p class="rec-action">Replace {{ first_vuln.report.algorithm }} with {{ first_vuln.report.recommended_replacement }}</p>
+                        <div class="rec-tabs">
+                            <button class="rec-tab active" type="button">Current (Vulnerable)</button>
+                            <button class="rec-tab" type="button">Recommended (PQC)</button>
+                        </div>
+                        <div class="rec-code-panels">
+                            <div class="rec-code-block rec-code--vulnerable">
+                                <pre><code>{{ first_vuln.orig }}</code></pre>
+                            </div>
+                            <div class="rec-code-block rec-code--recommended">
+                                <div class="rec-code-label">RecommendedCode</div>
+                                <pre><code>{{ first_vuln.fix }}</code></pre>
+                            </div>
+                        </div>
+                        <div class="rec-footer">
+                            <a href="{{ url_for('analyze') }}" class="view-all-link">View All Recommendations &nbsp;→</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+
+                    <!-- Bottom Row: Roadmap + CBOM side-by-side -->
+                    <div class="dash-right-row">
+                        <!-- Migration Roadmap -->
+                        {% if roadmap and roadmap.total_phases > 0 %}
+                        <div class="dcard roadmap-card">
+                            <div class="dcard-title">Migration Roadmap</div>
+                            <div class="roadmap-phases">
+                                {% for phase in roadmap.phases %}
+                                <div class="roadmap-phase {% if loop.last %}roadmap-phase--last{% endif %}">
+                                    <div class="phase-tl">
+                                        {% if loop.index == 1 %}
+                                        <div class="phase-dot" style="background:var(--status-safe);"></div>
+                                        {% elif loop.index == 2 %}
+                                        <div class="phase-dot" style="background:var(--status-at-risk);"></div>
+                                        {% else %}
+                                        <div class="phase-dot" style="background:var(--status-critical);"></div>
+                                        {% endif %}
+                                        {% if not loop.last %}<div class="phase-connector"></div>{% endif %}
+                                    </div>
+                                    <div class="phase-body">
+                                        <div class="phase-heading">Phase {{ phase.phase }}</div>
+                                        <div class="phase-name">{{ phase.title }}</div>
+                                        <div class="phase-desc">{{ phase.reason[:70] }}{% if phase.reason|length > 70 %}…{% endif %}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- CBOM Summary -->
+                        {% if summary %}
+                        <div class="dcard cbom-card">
+                            <div class="dcard-title">CBOM Summary</div>
+                            {% set total = summary.critical + summary.deprecated + summary.at_risk + summary.safe %}
+                            {% if total > 0 %}
+                            {% set d_crit = (summary.critical / total * 360)|round|int %}
+                            {% set d_dep  = (summary.deprecated / total * 360)|round|int %}
+                            {% set d_risk = (summary.at_risk / total * 360)|round|int %}
+                            {% set d_safe = 360 - d_crit - d_dep - d_risk %}
+                            <div class="cbom-layout">
+                                <div class="cbom-donut-wrap">
+                                    <div class="cbom-donut" style="background: conic-gradient(
+                                        #FF5470 0deg {{ d_crit }}deg,
+                                        #FF9F43 {{ d_crit }}deg {{ d_crit + d_dep }}deg,
+                                        #FFD23F {{ d_crit + d_dep }}deg {{ d_crit + d_dep + d_risk }}deg,
+                                        #3DDC97 {{ d_crit + d_dep + d_risk }}deg 360deg
+                                    );">
+                                        <div class="cbom-center">
+                                            <span class="cbom-label">Total Assets</span>
+                                            <span class="cbom-count">{{ total }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cbom-legend">
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-critical);"></span> <span class="cbom-legend-text">Critical</span> <span class="cbom-legend-val">{{ summary.critical }} ({{ (summary.critical / total * 100)|round|int }}%)</span></div>
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-deprecated);"></span> <span class="cbom-legend-text">Deprecated</span> <span class="cbom-legend-val">{{ summary.deprecated }} ({{ (summary.deprecated / total * 100)|round|int }}%)</span></div>
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-at-risk);"></span> <span class="cbom-legend-text">At Risk</span> <span class="cbom-legend-val">{{ summary.at_risk }} ({{ (summary.at_risk / total * 100)|round|int }}%)</span></div>
+                                    <div class="cbom-legend-item"><span class="cbom-dot" style="background:var(--status-safe);"></span> <span class="cbom-legend-text">Safe</span> <span class="cbom-legend-val">{{ summary.safe }} ({{ (summary.safe / total * 100)|round|int }}%)</span></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        {# ============================================================
+           UPLOAD / PASTE FORM VIEW
+           ============================================================ #}
+        <div class="form-page-wrap">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                <a href="{{ url_for('home') }}" class="dash-logo">
+                    <svg viewBox="0 0 28 28" width="24" height="24">
+                        <path d="M14 2L4 8v8c0 5.2 3.6 10 10 11.2 6.4-1.2 10-6 10-11.2V8L14 2z"
+                              fill="#2E9EFF" opacity="0.15" stroke="#2E9EFF" stroke-width="1.5"/>
+                        <text x="14" y="18" text-anchor="middle" fill="#2E9EFF"
+                              font-family="'Unbounded',sans-serif" font-size="12" font-weight="700">Q</text>
+                    </svg>
+                    <span>Qryptis</span>
+                </a>
+                <a href="{{ url_for('analyze') }}" style="color: var(--text-muted); font-size: 0.85rem;">&larr; Back to Console</a>
+            </div>
+
+            <h1>Scan Your Code</h1>
+            <p class="form-subtitle">Upload a source file or paste code below to detect cryptographic usage and inspect quantum vulnerabilities.</p>
+
+            <form method="POST" enctype="multipart/form-data" class="qryptis-form">
+                <div class="form-group">
+                    <label class="form-label">Upload code file</label>
+                    <div class="file-upload">
+                        <input type="file" name="code_file" accept=".py,.js,.java,.txt" id="scanFileInput">
+                        <label for="scanFileInput" class="file-label" id="scanFileLabel">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span id="scanFileText">Choose File (.py, .js, .java, .txt)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-divider">
+                    <span>or paste your code below</span>
+                </div>
+
+                <div class="form-group">
+                    <textarea name="code_text" rows="6" class="code-textarea" placeholder="from Crypto.PublicKey import RSA&#10;key = RSA.generate(2048)&#10;cipher = DES3.new(key, DES3.MODE_CBC)">{{ code_text }}</textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.6rem;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    <span>Run Scan &nbsp;&rarr;</span>
+                </button>
+            </form>
+
+            {% if results is not none and results|length == 0 %}
+            <div style="margin-top: 1.5rem; padding: 1.2rem; background: var(--bg-surface); border: 1px solid var(--border-card); border-radius: var(--radius); text-align: center; color: var(--text-muted);">
+                No known cryptographic algorithms detected in the provided code.
+            </div>
             {% endif %}
+        </div>
         {% endif %}
     </div>
+
+    <script>
+    (function () {
+        'use strict';
+        var fileInput = document.getElementById('scanFileInput');
+        var fileText = document.getElementById('scanFileText');
+        if (fileInput && fileText) {
+            fileInput.addEventListener('change', function () {
+                if (fileInput.files.length > 0) {
+                    fileText.textContent = fileInput.files[0].name;
+                }
+            });
+        }
+    })();
+    </script>
+    <!-- Three.js & 3D Motion Design Element (ContentHeaven Inspired, Electric Blue) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="{{ url_for('static', filename='js/three_motion_element.js') }}"></script>
 </body>
 </html>

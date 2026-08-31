@@ -7,40 +7,43 @@ from crypto_analyzer import generate_report
 
 # Each pattern: (regex to search for, algorithm name, typical key size to assume if not specified)
 DETECTION_PATTERNS = [
-    (r"RSA\.generate\(\s*(\d+)", "RSA", None),
+    (r"RSA\.generate\(\s*(\d+)", "RSA", 2048),
     (r"DES3\.new\(", "3DES", 168),
     (r"AES\.new\(", "AES", 256),
-    (r"hashlib\.md5\(", "MD5", None),
-    (r"DSA\.generate\(\s*(\d+)", "DSA", None),
+    (r"hashlib\.md5\(", "MD5", 128),
+    (r"DSA\.generate\(\s*(\d+)", "DSA", 2048),
 ]
 
 # Suggested replacement code for each vulnerable/deprecated algorithm
 FIX_SNIPPETS = {
     "RSA": (
-        "# Replace RSA with ML-KEM-768 (NIST PQC standard) for key exchange:\n"
+        "# Option A: Direct NIST PQC Replacement (ML-KEM-768 for key exchange):\n"
         "import oqs\n"
         "with oqs.KeyEncapsulation('ML-KEM-768') as kem:\n"
         "    public_key = kem.generate_keypair()\n"
-        "    # Send public_key to the other party, they encapsulate a shared secret back"
+        "    # Send public_key to recipient; recipient encapsulates shared secret\n\n"
+        "# Option B: Hybrid Transition (X25519 + ML-KEM-768 for defense-in-depth):\n"
+        "# Combine classical ECDH (X25519) with ML-KEM-768 and derive shared key via HKDF"
     ),
     "3DES": (
-        "# Replace 3DES with AES-256:\n"
+        "# Replace 3DES with AES-256-GCM:\n"
         "from Crypto.Cipher import AES\n"
         "from Crypto.Random import get_random_bytes\n"
         "key = get_random_bytes(32)  # 256-bit key\n"
-        "cipher = AES.new(key, AES.MODE_CBC)"
+        "cipher = AES.new(key, AES.MODE_GCM)"
     ),
     "DSA": (
-        "# Replace DSA with ML-DSA-65 (NIST PQC standard) for signatures:\n"
+        "# Option A: Direct NIST PQC Signature (ML-DSA-65):\n"
         "import oqs\n"
         "with oqs.Signature('ML-DSA-65') as sig:\n"
         "    public_key = sig.generate_keypair()\n"
-        "    signature = sig.sign(message)"
+        "    signature = sig.sign(message)\n\n"
+        "# Option B: Hybrid Dual-Signature (ECDSA + ML-DSA-65) for backward compatibility"
     ),
     "MD5": (
-        "# Replace MD5 with SHA-256 (MD5 is broken, not even a quantum issue):\n"
+        "# Replace MD5 with SHA-256 / SHA-3 (MD5 is broken by classical collision attacks):\n"
         "import hashlib\n"
-        "hashlib.sha256(data).hexdigest()"
+        "digest = hashlib.sha256(data).hexdigest()"
     ),
 }
 
@@ -52,8 +55,11 @@ def scan_code(code_text: str) -> list:
     for pattern, algo_name, default_key_size in DETECTION_PATTERNS:
         matches = re.finditer(pattern, code_text)
         for match in matches:
-            if match.groups():
-                key_size = int(match.group(1))
+            if match.groups() and match.group(1):
+                try:
+                    key_size = int(match.group(1))
+                except ValueError:
+                    key_size = default_key_size
             else:
                 key_size = default_key_size
 
@@ -77,10 +83,10 @@ def scan_and_report(code_text: str) -> list:
     for finding in findings:
         algo = finding["algorithm"]
 
-        if finding["key_size"] is not None and algo != "MD5":
+        if finding["key_size"] is not None:
             report = generate_report(algo, finding["key_size"])
         else:
-            report = {"error": f"{algo} detected but not in our vulnerability database yet."}
+            report = {"error": f"{algo} detected but key size could not be determined."}
 
         suggested_fix = FIX_SNIPPETS.get(algo)
 

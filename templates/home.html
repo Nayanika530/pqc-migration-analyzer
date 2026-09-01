@@ -45,16 +45,18 @@
                             Tools <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                         </span>
                         <div class="sd-dropdown-menu">
-                            <a href="{{ url_for('simulator') }}" class="sd-dropdown-item">Migration Simulator</a>
-                            <a href="{{ url_for('migration_plan') }}" class="sd-dropdown-item">Master Migration Plan</a>
-                            <a href="{{ url_for('benchmark_lab') }}" class="sd-dropdown-item">Benchmark Lab</a>
-                            <a href="{{ url_for('evaluation') }}" class="sd-dropdown-item">Evaluation Benchmark</a>
-                            <a href="{{ url_for('inventory') }}" class="sd-dropdown-item">Crypto Inventory</a>
-                            <a href="{{ url_for('graph') }}" class="sd-dropdown-item">Dependency Graph</a>
+                            <a href="{{ url_for('analyze') }}" class="sd-dropdown-item">1. Analyze Console</a>
+                            <a href="{{ url_for('inventory') }}" class="sd-dropdown-item">2. Crypto Inventory</a>
+                            <a href="{{ url_for('graph') }}" class="sd-dropdown-item">3. Dependency Graph</a>
+                            <a href="{{ url_for('simulator') }}" class="sd-dropdown-item">4. Migration Simulator</a>
+                            <a href="{{ url_for('benchmark_lab') }}" class="sd-dropdown-item">5. Benchmark Lab</a>
+                            <a href="{{ url_for('migration_plan') }}" class="sd-dropdown-item">6. Master Migration Plan</a>
+                            <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 0.3rem 0;"></div>
                             <a href="{{ url_for('scan') }}" class="sd-dropdown-item">Code Scanner</a>
-                            <a href="{{ url_for('manual') }}" class="sd-dropdown-item">Algorithm Lookup</a>
+                            <a href="{{ url_for('manual') }}" class="sd-dropdown-item">Manual Lookup</a>
                             <a href="{{ url_for('live_scan') }}" class="sd-dropdown-item">Live TLS Probe</a>
                             <a href="{{ url_for('database') }}" class="sd-dropdown-item">Algorithm Database</a>
+                            <a href="{{ url_for('evaluation') }}" class="sd-dropdown-item">Evaluation Benchmark</a>
                             <a href="{{ url_for('health') }}" class="sd-dropdown-item">System Health</a>
                         </div>
                     </div>

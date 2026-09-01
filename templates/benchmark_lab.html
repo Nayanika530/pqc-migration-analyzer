@@ -76,14 +76,43 @@
 
         <main class="main-content">
             <div class="analyze-page" style="max-width: 1280px;">
-                <div class="chips">Scientific Research Lab</div>
+                {% with active_step=6 %}{% include "_pipeline_ribbon.html" %}{% endwith %}
+
+                <div class="chips">Pipeline Stage 6 &bull; Empirical Benchmark Lab</div>
 
                 <!-- Page Header -->
                 <div class="lab-hero">
-                    <h1 style="font-size: 2.1rem; margin-bottom: 0.4rem;">NIST PQC Benchmark Lab</h1>
-                    <p style="color: var(--text-muted); font-size: 0.92rem;">
-                        Empirical microsecond timing, memory allocations, and standardized object byte sizes according to official NIST FIPS 203, 204, and 205 specifications.
-                    </p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h1 style="font-size: 2.1rem; margin-bottom: 0.4rem;">NIST PQC Benchmark Lab</h1>
+                            <p style="color: var(--text-muted); font-size: 0.92rem;">
+                                Empirical microsecond timing, memory allocations, and standardized object byte sizes according to official NIST FIPS 203, 204, and 205 specifications.
+                            </p>
+                        </div>
+                        <div>
+                            <button id="runLiveBenchmarkBtn" class="btn-impact" onclick="runLiveHostBenchmark()" style="font-size: 0.82rem; padding: 0.55rem 1.1rem;">
+                                <span>⚡ Run Live Empirical Benchmark (Host)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Empirical Benchmark Output Container (Dynamic) -->
+                <div id="liveBenchContainer" style="display: none; margin-bottom: 2.2rem;">
+                    <div class="lab-table-card" style="border-color: rgba(46, 158, 255, 0.4); background: rgba(14, 20, 32, 0.95);">
+                        <div class="lab-table-header" style="background: rgba(18, 24, 38, 0.95);">
+                            <div>
+                                <h3 style="font-size: 1.15rem; color: #FFFFFF; font-family: var(--font-heading);">
+                                    ⚡ Live Host Telemetry & Statistical Performance (PyCryptodome & LibOQS)
+                                </h3>
+                                <span id="liveBenchSub" class="mono" style="font-size: 0.76rem; color: var(--accent);">Running 20 iteration benchmark...</span>
+                            </div>
+                            <span id="liveBenchStatus" class="badge badge-safe">Executing</span>
+                        </div>
+                        <div id="liveBenchContent" style="padding: 1.5rem; font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+                            Measuring real execution timings...
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Section 1: NIST FIPS 203 Key Encapsulation (ML-KEM) -->
@@ -228,8 +257,70 @@
                     </table>
                 </section>
 
+                <!-- Next Pipeline Stage Banner -->
+                <div class="pipeline-next-banner">
+                    <div class="pipeline-next-info">
+                        <div class="pipeline-next-kicker">Final Pipeline Stage (7 of 7)</div>
+                        <div class="pipeline-next-title">Master Cryptographic Migration Plan</div>
+                        <div class="pipeline-next-desc">Synthesize all discoveries, blast radius impacts, and NIST benchmarks into an actionable 4-tier prioritized executive roadmap.</div>
+                    </div>
+                    <a href="{{ url_for('migration_plan') }}" class="btn-impact" style="font-size: 0.84rem; padding: 0.6rem 1.2rem;">
+                        <span>Generate Master Plan &rarr;</span>
+                    </a>
+                </div>
+
             </div>
         </main>
     </div>
+
+    <script>
+        async function runLiveHostBenchmark() {
+            const btn = document.getElementById('runLiveBenchmarkBtn');
+            const container = document.getElementById('liveBenchContainer');
+            const content = document.getElementById('liveBenchContent');
+            const sub = document.getElementById('liveBenchSub');
+            const statusBadge = document.getElementById('liveBenchStatus');
+
+            container.style.display = 'block';
+            btn.disabled = true;
+            btn.innerText = 'Executing 20 Iterations...';
+            statusBadge.innerText = 'Measuring';
+            statusBadge.className = 'badge badge-deprecated';
+
+            try {
+                const res = await fetch('/api/benchmark/live?rounds=20');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const bench = data.benchmark;
+                    sub.innerText = `Host: ${bench.system_telemetry.cpu_architecture} (${bench.system_telemetry.os_platform}) • Python ${bench.system_telemetry.python_version} • liboqs: ${bench.system_telemetry.liboqs_available ? 'Active' : 'High-Precision Fallback'}`;
+                    statusBadge.innerText = 'Completed (20 Rounds)';
+                    statusBadge.className = 'badge badge-safe';
+
+                    let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">';
+                    for (const [algoName, m] of Object.entries(bench.results)) {
+                        html += `
+                            <div style="background: rgba(18, 24, 38, 0.8); border: 1px solid rgba(255,255,255,0.06); padding: 1rem; border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <strong style="color: #FFFFFF; font-size: 0.95rem;">${algoName}</strong>
+                                    <span style="color: ${m.quantum_vulnerable ? '#FF5470' : '#A3E635'}; font-size: 0.72rem;">${m.quantum_vulnerable ? 'VULNERABLE' : 'SECURE'}</span>
+                                </div>
+                                <div style="font-size: 0.76rem; color: #93C5FD; margin-bottom: 0.3rem;">KeyGen Mean: <strong>${m.keygen.mean_ms} ms</strong> (Median: ${m.keygen.median_ms}ms)</div>
+                                <div style="font-size: 0.76rem; color: var(--text-dim);">Operation Mean: <strong>${m.operation.mean_ms} ms</strong> (StdDev: ±${m.operation.std_dev_ms}ms)</div>
+                            </div>
+                        `;
+                    }
+                    html += '</div>';
+                    content.innerHTML = html;
+                } else {
+                    content.innerText = 'Failed to execute benchmark.';
+                }
+            } catch (err) {
+                content.innerText = 'Error running benchmark: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>⚡ Re-Run Live Empirical Benchmark</span>';
+            }
+        }
+    </script>
 </body>
 </html>

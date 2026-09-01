@@ -188,7 +188,9 @@
 
         <main class="main-content">
             <div class="analyze-page" style="max-width: 1280px;">
-                <div class="chips">Unified Security Posture</div>
+                {% with active_step=3 %}{% include "_pipeline_ribbon.html" %}{% endwith %}
+
+                <div class="chips">Pipeline Stage 3 &bull; Unified Inventory</div>
 
                 {% if message %}
                 <div style="background: rgba(46, 158, 255, 0.15); border: 1px solid var(--accent); padding: 0.8rem 1.2rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; font-size: 0.88rem; color: #FFFFFF;">
@@ -351,6 +353,7 @@
                                 <th>Quantum Status</th>
                                 <th>PQC Remediation Target</th>
                                 <th>Location / Finding</th>
+                                <th>Pipeline Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -385,11 +388,33 @@
                                 <td style="font-size: 0.76rem; color: var(--text-dim);" class="mono">
                                     {{ asset.location }}
                                 </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                                        <a href="{{ url_for('graph', algo=asset.name) }}" class="btn-impact-outline" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;" title="Analyze Blast Radius for {{ asset.name }}">
+                                            <span>🕸️ Blast Radius</span>
+                                        </a>
+                                        <a href="{{ url_for('simulator', src=asset.name, tgt=asset.recommended_pqc.split(' ')[0]) }}" class="btn-impact" style="font-size: 0.72rem; padding: 0.25rem 0.55rem;" title="Simulate Migration for {{ asset.name }}">
+                                            <span>⚡ Simulate</span>
+                                        </a>
+                                    </div>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </section>
+
+                <!-- Next Pipeline Stage Banner -->
+                <div class="pipeline-next-banner">
+                    <div class="pipeline-next-info">
+                        <div class="pipeline-next-kicker">Next Pipeline Stage (4 of 7)</div>
+                        <div class="pipeline-next-title">Cryptographic Dependency Graph & Blast Radius</div>
+                        <div class="pipeline-next-desc">Inspect how discovered classical primitives permeate throughout your Auth APIs, payment microservices, service mesh, and external VPN ingress gateways.</div>
+                    </div>
+                    <a href="{{ url_for('graph') }}" class="btn-impact" style="font-size: 0.84rem; padding: 0.6rem 1.2rem;">
+                        <span>Explore Dependency Graph &rarr;</span>
+                    </a>
+                </div>
             </div>
         </main>
     </div>

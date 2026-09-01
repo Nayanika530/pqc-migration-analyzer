@@ -33,6 +33,7 @@ class MasterMigrationEngine:
                 "primitive": "3DES",
                 "affected_systems": des_count if des_count > 0 else 3,
                 "replacement": "AES-256-GCM",
+                "target": "AES-256-GCM",
                 "strategy": "Immediate Classical Deprecation",
                 "urgency": "CRITICAL",
                 "nist_standard": "NIST SP 800-67 Rev. 2 Disallowance",

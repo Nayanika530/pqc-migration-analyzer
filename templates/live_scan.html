@@ -13,19 +13,21 @@
         {% include "_sidebar.html" %}
 
         <main class="main-content">
-            <div class="analyze-page" style="max-width: 800px;">
-                <div class="chips">TLS / SSL Inspector</div>
+            <div class="analyze-page" style="max-width: 900px;">
+                {% with active_step=2 %}{% include "_pipeline_ribbon.html" %}{% endwith %}
+
+                <div class="chips">Pipeline Stage 2 &bull; Live TLS Probe</div>
 
                 <div class="analyze-header">
                     <h1>Live Website Scanner</h1>
-                    <p>Enter any domain to inspect its active TLS encryption, certificate parameters, and quantum exposure.</p>
+                    <p>Enter any domain to inspect its active TLS encryption, certificate parameters, and quantum exposure. Verified findings automatically flow into your unified Cryptographic Asset Inventory.</p>
                 </div>
 
                 <form method="POST" class="qryptis-form" style="padding: 1.8rem; margin-bottom: 2rem;">
                     <div class="form-group">
                         <label class="form-label">Target Domain / Hostname</label>
-                        <div style="display: flex; gap: 0.8rem;">
-                            <input type="text" name="domain" placeholder="e.g. google.com or api.github.com" required class="form-input" style="flex: 1;">
+                        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                            <input type="text" name="domain" placeholder="e.g. google.com or api.github.com" required class="form-input" style="flex: 1; min-width: 250px;">
                             <button type="submit" class="btn btn-primary">
                                 <span>Scan Live Site &nbsp;&rarr;</span>
                             </button>
@@ -35,13 +37,28 @@
 
                 {% if result %}
                     {% if result.connection_successful %}
+                        {% if ingested %}
+                        <div style="background: rgba(61, 220, 151, 0.12); border: 1px solid rgba(61, 220, 151, 0.35); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.2rem; font-size: 0.82rem; color: #FFFFFF; display: flex; align-items: center; justify-content: space-between;">
+                            <span>&check; Domain TLS findings successfully ingested into <strong>Cryptographic Asset Inventory (Stage 3)</strong></span>
+                            <a href="{{ url_for('inventory') }}" style="color: #A3E635; text-decoration: underline; font-weight: 600;">View in Inventory &rarr;</a>
+                        </div>
+                        {% endif %}
+
                         <div class="dcard" style="margin-bottom: 1.5rem; padding: 1.8rem; border-color: rgba(61, 220, 151, 0.3);">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-                                <h2 style="font-size: 1.4rem;">{{ result.domain }}</h2>
-                                <span class="badge badge-safe">TLS Handshake Verified</span>
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.8rem;">
+                                <div>
+                                    <h2 style="font-size: 1.4rem;">{{ result.domain }}</h2>
+                                    <span style="font-size: 0.76rem; color: var(--text-dim);">Verified Live Port 443</span>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <span class="badge badge-safe">TLS Handshake Verified</span>
+                                    <a href="{{ url_for('inventory') }}" class="btn btn-primary btn-sm" style="padding: 0.35rem 0.75rem; font-size: 0.76rem;">
+                                        <span>View in Inventory &rarr;</span>
+                                    </a>
+                                </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.85rem;">
                                 <div><span style="color: var(--text-muted);">TLS Version:</span> <strong class="mono" style="color: #FFFFFF;">{{ result.tls_version }}</strong></div>
                                 <div><span style="color: var(--text-muted);">Cipher Suite:</span> <strong class="mono" style="color: #FFFFFF;">{{ result.cipher_suite }}</strong></div>
                                 <div><span style="color: var(--text-muted);">Certificate Issuer:</span> <span style="color: #FFFFFF;">{{ result.certificate_issuer }}</span></div>

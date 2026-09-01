@@ -296,8 +296,11 @@ def analyze_algorithm(name: str) -> dict:
 
 
 
-def generate_report(name: str, key_size: int) -> dict:
-    """Combine algorithm lookup + key size check + benchmark data into one full report."""
+def generate_report(name: str, key_size: int, purpose: str = None) -> dict:
+    """
+    Combine algorithm lookup + key size check + purpose-aware reasoning + benchmark data into one full report.
+    Purpose-aware reasoning distinguishes digital signatures (ML-DSA) from key establishment (ML-KEM).
+    """
     algo_info = analyze_algorithm(name)
     if "error" in algo_info:
         return algo_info
@@ -307,6 +310,40 @@ def generate_report(name: str, key_size: int) -> dict:
         return size_info
 
     key = name.strip().upper()
+    norm_purpose = (purpose or "").lower().strip()
+
+    recommended_replacement = algo_info["pqc_replacement"]
+    replacement_type = algo_info["replacement_type"]
+    hybrid_rec = algo_info.get("hybrid_recommendation", "")
+
+    # Purpose-Aware Cryptographic Reasoning Rules Engine
+    if key == "RSA":
+        if any(sig_term in norm_purpose for sig_term in ("sig", "jwt", "token", "pki", "cert", "verify", "auth")):
+            recommended_replacement = "ML-DSA-65"
+            replacement_type = "Module-Lattice Digital Signature Algorithm (NIST FIPS 204)"
+            hybrid_rec = "RSA + ML-DSA-65 or ECDSA + ML-DSA-65 dual-signing hybrid scheme"
+        else:
+            recommended_replacement = "ML-KEM-768"
+            replacement_type = "Module-Lattice Key Encapsulation Mechanism (NIST FIPS 203)"
+            hybrid_rec = "X25519 + ML-KEM-768 hybrid KEM (IETF draft standard) for backward compatibility and defense-in-depth"
+    elif key in ("ECC", "ECDSA"):
+        if any(kem_term in norm_purpose for kem_term in ("kem", "exchange", "ecdh", "establishment")):
+            recommended_replacement = "ML-KEM-768"
+            replacement_type = "Key Encapsulation Mechanism (NIST FIPS 203)"
+            hybrid_rec = "X25519 + ML-KEM-768 hybrid KEM"
+        else:
+            recommended_replacement = "ML-DSA-65"
+            replacement_type = "Digital Signature Algorithm (NIST FIPS 204)"
+            hybrid_rec = "ECDSA + ML-DSA-65 hybrid signature scheme"
+    elif key == "AES":
+        if key_size >= 256:
+            recommended_replacement = "AES-256-GCM (Retain / Quantum Resilient)"
+            replacement_type = "Symmetric Encryption (No PQC swap needed; Grover's algorithm leaves 128 bits of quantum security)"
+            hybrid_rec = "Use AES-256-GCM for authenticated encryption"
+        else:
+            recommended_replacement = "AES-256-GCM"
+            replacement_type = "Symmetric Encryption (Upgrade key size from 128-bit to 256-bit for Grover resilience)"
+            hybrid_rec = "Direct migration to AES-256-GCM"
 
     # Overall verdict combines classical weakness, deprecation status, AND quantum vulnerability
     if algo_info["deprecated"]:
@@ -315,12 +352,12 @@ def generate_report(name: str, key_size: int) -> dict:
         verdict = "CRITICAL -- broken today, no quantum computer needed."
     elif algo_info["quantum_vulnerable"]:
         verdict = "AT RISK -- safe today, but will be broken once quantum computers mature."
+    elif key == "AES" and key_size >= 256:
+        verdict = "QUANTUM RESILIENT -- Grover's algorithm halves 256-bit strength to 128-bit quantum security; safe to continue using."
     else:
         verdict = "OK -- not significantly threatened by quantum computers."
 
-    # Attach real benchmark data if available for this algorithm.
-    # Only asymmetric algorithms (RSA, Diffie-Hellman) get compared against ML-KEM-768,
-    # since that's their actual PQC replacement. AES and 3DES don't use ML-KEM at all.
+    # Attach benchmark data if available
     benchmark_key = BENCHMARK_LOOKUP.get(key)
     benchmark_info = None
 
@@ -331,22 +368,25 @@ def generate_report(name: str, key_size: int) -> dict:
             "current_algorithm_operation_ms": current["operation"]["avg_time_ms"]
         }
 
-        if key in ("RSA", "DIFFIE-HELLMAN") and "ML-KEM-768" in BENCHMARK_DATA:
-            pqc = BENCHMARK_DATA["ML-KEM-768"]
+        pqc_target = "ML-DSA-65" if "DSA" in recommended_replacement else "ML-KEM-768"
+        if pqc_target in BENCHMARK_DATA:
+            pqc = BENCHMARK_DATA[pqc_target]
             benchmark_info["pqc_replacement_keygen_ms"] = pqc["keygen"]["avg_keygen_time_ms"]
             benchmark_info["pqc_replacement_operation_ms"] = pqc["operation"]["avg_time_ms"]
 
     return {
         "algorithm": key,
         "key_size": key_size,
+        "purpose": purpose,
         "type": algo_info["type"],
         "quantum_vulnerable": algo_info["quantum_vulnerable"],
+        "deprecated": algo_info["deprecated"],
         "reason": algo_info["reason"],
         "classically_secure_today": size_info["classically_secure_today"],
         "key_size_note": size_info["note"],
-        "recommended_replacement": algo_info["pqc_replacement"],
-        "replacement_type": algo_info["replacement_type"],
-        "hybrid_recommendation": algo_info.get("hybrid_recommendation", ""),
+        "recommended_replacement": recommended_replacement,
+        "replacement_type": replacement_type,
+        "hybrid_recommendation": hybrid_rec,
         "verdict": verdict,
         "benchmark": benchmark_info
     }
@@ -408,8 +448,6 @@ def calculate_harvest_risk(algorithm: str, key_size: int, years_secret_needed: i
         "explanation": explanation
     }
 
-import ollama
-
 def get_ai_explanation(report: dict) -> str:
     """
     Ask the local Ollama model to explain a vulnerability report
@@ -429,6 +467,7 @@ Recommended replacement: {report['recommended_replacement']}
 """
 
     try:
+        import ollama
         client = ollama.Client(timeout=2.0)
         response = client.chat(
             model="mistral",
@@ -455,6 +494,7 @@ Guide users to the right page: Manual Lookup is at /manual, Code Scanner is at /
 Keep answers short, friendly, and beginner-appropriate. Under 80 words unless asked for detail."""
 
     try:
+        import ollama
         client = ollama.Client(timeout=2.0)
         response = client.chat(
             model="mistral",

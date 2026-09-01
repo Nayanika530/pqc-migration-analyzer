@@ -411,3 +411,111 @@ code, pre, .mono {
     color: var(--status-critical);
     background: rgba(255, 84, 112, 0.1);
 }
+
+/* ============================================================
+   PIPELINE PROGRESSION TRACKER & NEXT-STAGE CARDS
+   ============================================================ */
+.pipeline-progress-ribbon {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: rgba(14, 16, 22, 0.85);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    padding: 0.35rem 0.6rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.pipeline-progress-ribbon::-webkit-scrollbar {
+    display: none;
+}
+.pipeline-step-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: var(--transition-smooth);
+}
+.pipeline-step-item:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.05);
+}
+.pipeline-step-item.active {
+    background: rgba(46, 158, 255, 0.18);
+    color: #FFFFFF;
+    font-weight: 700;
+    border: 1px solid rgba(46, 158, 255, 0.4);
+    box-shadow: 0 0 14px rgba(46, 158, 255, 0.25);
+}
+.pipeline-step-item.completed {
+    color: var(--status-safe);
+}
+.pipeline-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+.pipeline-step-item.active .pipeline-step-num {
+    background: var(--accent);
+    color: #0E0F12;
+}
+.pipeline-step-item.completed .pipeline-step-num {
+    background: rgba(61, 220, 151, 0.2);
+    color: var(--status-safe);
+}
+.pipeline-step-sep {
+    color: var(--border-subtle);
+    font-size: 0.7rem;
+    user-select: none;
+}
+
+/* Next Pipeline Stage Banner */
+.pipeline-next-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, rgba(46, 158, 255, 0.08) 0%, rgba(14, 20, 32, 0.9) 100%);
+    border: 1px solid rgba(46, 158, 255, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 1.4rem 1.8rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+.pipeline-next-info {
+    max-width: 700px;
+}
+.pipeline-next-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+.pipeline-next-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 0.2rem;
+}
+.pipeline-next-desc {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+}

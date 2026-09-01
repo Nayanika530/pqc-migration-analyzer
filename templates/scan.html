@@ -42,6 +42,10 @@
                     <span class="bc-current">Code Scanner</span>
                 </div>
                 <div class="dash-actions">
+                    <a href="{{ url_for('inventory') }}" class="btn btn-primary btn-sm" style="padding: 0.45rem 0.9rem;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        View in Inventory &rarr;
+                    </a>
                     <a href="{{ url_for('download_cbom') }}" class="btn btn-outline btn-sm" download="cbom.json">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         Download CBOM (JSON)
@@ -115,6 +119,7 @@
                                 </div>
                                 <div class="finding-badge-group">
                                     <span class="sev-tag sev-tag-{{ r.severity|lower }}">{{ r.severity }}</span>
+                                    <span class="badge badge-safe" style="font-size: 0.7rem; font-family: var(--font-mono); text-transform: uppercase;">{{ r.detection_method or 'AST' }} &bull; {{ r.confidence or 'high' }}</span>
                                     {% if r.report.get('quantum_vulnerable') %}
                                         <span class="badge badge-critical">Quantum Vulnerable</span>
                                     {% elif 'DEPRECATED' in r.report.get('verdict','') %}
@@ -128,13 +133,13 @@
                             <!-- Metadata Grid -->
                             <div class="finding-grid-meta">
                                 <div class="f-meta-cell">
-                                    <span class="f-meta-label">Location</span>
-                                    <span class="f-meta-val mono" style="color: #93C5FD;">{{ filename }}:{{ r.line_number }}</span>
+                                    <span class="f-meta-label">Location & Scope</span>
+                                    <span class="f-meta-val mono" style="color: #93C5FD;">{{ filename }}:{{ r.line_number }} {% if r.enclosing_function and r.enclosing_function != 'global' %}({{ r.enclosing_function }}){% endif %}</span>
                                 </div>
 
                                 <div class="f-meta-cell">
-                                    <span class="f-meta-label">Usage</span>
-                                    <span class="f-meta-val">{{ r.usage }}</span>
+                                    <span class="f-meta-label">Purpose / Usage</span>
+                                    <span class="f-meta-val" style="color: #FFFFFF; font-weight: 600;">{{ r.purpose or r.usage }}</span>
                                 </div>
 
                                 <div class="f-meta-cell">

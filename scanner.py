@@ -131,13 +131,23 @@ def scan_and_report(code_text: str, file_path: str = "pasted_code.py") -> list:
     for finding in findings:
         algo = finding["algorithm"]
         key_size = finding["key_size"]
+        purpose = finding.get("purpose")
 
         if key_size is not None:
-            report = generate_report(algo, key_size)
+            report = generate_report(algo, key_size, purpose=purpose)
         else:
             report = {"error": f"{algo} detected but key size could not be determined."}
 
         suggested_fix = FIX_SNIPPETS.get(algo)
+        if algo == "RSA" and purpose and any(s in purpose.lower() for s in ("sig", "jwt", "token", "cert", "auth")):
+            suggested_fix = (
+                "# Direct NIST PQC Digital Signature Replacement (ML-DSA-65 / FIPS 204):\n"
+                "import oqs\n"
+                "with oqs.Signature('ML-DSA-65') as signer:\n"
+                "    public_key = signer.generate_keypair()\n"
+                "    signature = signer.sign(payload_bytes)\n\n"
+                "# Option B: Hybrid Dual-Signature (RSA + ML-DSA-65)"
+            )
         line_num = finding["line_number"]
 
         # Extract surrounding code snippet (2 lines before and after)
@@ -192,17 +202,37 @@ def scan_and_report(code_text: str, file_path: str = "pasted_code.py") -> list:
             elif "hash" in usage.lower():
                 usage = "Cryptographic hash / integrity digest"
 
+        # Determine standardized purpose
+        purpose = finding.get("purpose")
+        if not purpose:
+            if algo in ["RSA", "DSA", "ECC", "Ed25519"]:
+                purpose = "digital_signature"
+            elif algo in ["Diffie-Hellman", "X25519"]:
+                purpose = "key_exchange"
+            elif algo in ["AES", "3DES"]:
+                purpose = "symmetric_encryption"
+            elif algo in ["MD5", "SHA1", "SHA256"]:
+                purpose = "hash"
+            elif "KEM" in algo:
+                purpose = "key_exchange"
+            else:
+                purpose = "cryptographic_operation"
+
         results.append({
             "algorithm": algo,
             "key_size": key_size,
+            "purpose": purpose,
+            "file": file_path,
+            "line": line_num,
+            "detection_method": finding.get("detection_method", "AST"),
+            "confidence": finding.get("confidence", "high").lower(),
             "file_path": file_path,
             "line_number": line_num,
             "location": f"{file_path}:{line_num}",
-            "detection_method": finding.get("detection_method", "AST"),
-            "confidence": finding.get("confidence", "High"),
             "enclosing_function": finding.get("enclosing_function", "global"),
             "enclosing_class": finding.get("enclosing_class", "None"),
             "ast_node": finding.get("ast_node", "AST: Call"),
+            "code_line": finding.get("code_line", finding.get("matched_text", "")),
             "matched_text": finding.get("matched_text", finding.get("code_line", "")),
             "report": report,
             "suggested_fix": suggested_fix,
@@ -314,9 +344,12 @@ def generate_cbom(scan_results: list, source_name: str = "pasted_code") -> dict:
             "type": "cryptographic-asset",
             "algorithm": report.get("algorithm"),
             "key-size-bits": report.get("key_size"),
+            "purpose": finding.get("purpose", "cryptographic_operation"),
+            "detection-method": finding.get("detection_method", "AST"),
+            "confidence": finding.get("confidence", "high"),
             "location": {
-                "source": finding.get("file_path", source_name),
-                "line": finding.get("line_number")
+                "source": finding.get("file", finding.get("file_path", source_name)),
+                "line": finding.get("line", finding.get("line_number"))
             },
             "quantum-vulnerable": report.get("quantum_vulnerable"),
             "deprecated": "DEPRECATED" in report.get("verdict", ""),

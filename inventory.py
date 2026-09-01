@@ -185,6 +185,9 @@ class CryptoInventory:
             algo = f.get("algorithm", "Unknown")
             base_algo = f.get("base_algorithm", algo.split("-")[0] if "-" in algo else algo)
             key_size = f.get("key_size", 0)
+            file_name = f.get("file") or f.get("file_path") or "source"
+            line_num = f.get("line") or f.get("line_number") or 1
+            usage_str = f.get("usage") or (f.get("purpose", "application_cryptography").replace("_", " ").title())
             
             # Format display name (e.g. RSA-2048, AES-256)
             if key_size and str(key_size) not in algo:
@@ -198,15 +201,20 @@ class CryptoInventory:
                 key_size=key_size,
                 source_type="Codebase",
                 source_target=target_name,
-                usage=f.get("usage", "Application Cryptography"),
-                quantum_vulnerable=f.get("quantum_vulnerable", False),
-                deprecated=f.get("deprecated", False),
+                usage=usage_str,
+                quantum_vulnerable=f.get("quantum_vulnerable", False) or f.get("report", {}).get("quantum_vulnerable", False),
+                deprecated=f.get("deprecated", False) or f.get("report", {}).get("deprecated", False),
                 is_pqc_ready=f.get("is_pqc_native", False) or "ML-KEM" in algo or "ML-DSA" in algo,
-                recommended_pqc=f.get("pqc_replacement", "ML-KEM-768"),
-                location=f"{f.get('file_path', 'source')}:{f.get('line_number', 1)}",
-                details=f.get("code_snippet", "")
+                recommended_pqc=f.get("pqc_replacement") or f.get("report", {}).get("recommended_replacement", "ML-KEM-768"),
+                location=f"{file_name}:{line_num}",
+                details=f.get("code_line") or f.get("matched_text") or str(f.get("code_snippet", ""))
             )
             self.add_asset(asset)
+
+    def set_code_findings(self, findings: List[Dict[str, Any]], target_name: str = "Codebase"):
+        """Replace the current inventory dynamically with findings from a fresh codebase scan."""
+        self.clear()
+        self.add_code_findings(findings, target_name=target_name)
 
     def add_live_scan(self, live_result: Dict[str, Any], target_name: str = "Website"):
         """Ingest findings from live TLS scan."""
@@ -299,6 +307,27 @@ class CryptoInventory:
                 location=f["location"],
                 details=f["details"]
             ))
+
+    def add_manual_finding(self, report: Dict[str, Any], target_name: str = "Manual Assessment"):
+        """Ingest finding from manual algorithm lookup."""
+        algo = report.get("algorithm", "Unknown")
+        key_size = report.get("key_size", 0)
+        display_name = f"{algo}-{key_size}" if key_size and str(key_size) not in algo else algo
+        
+        self.add_asset(CryptoAsset(
+            name=display_name,
+            algorithm=algo,
+            key_size=key_size,
+            source_type="Manual",
+            source_target=target_name,
+            usage=report.get("type", "Cryptographic Primitive"),
+            quantum_vulnerable=report.get("quantum_vulnerable", False),
+            deprecated="DEPRECATED" in report.get("verdict", ""),
+            is_pqc_ready="OK" in report.get("verdict", "") and not report.get("quantum_vulnerable", False),
+            recommended_pqc=report.get("recommended_replacement", "ML-KEM-768"),
+            location="Manual Security Query",
+            details=f"Verdict: {report.get('verdict', '')} | Reason: {report.get('reason', '')}"
+        ))
 
     def load_sample_inventory(self):
         """

@@ -42,13 +42,17 @@
                     <span class="bc-current">Manual Lookup</span>
                 </div>
                 <div class="dash-actions">
-                    <a href="{{ url_for('download_cbom') }}" class="btn btn-outline btn-sm" download="cbom.json">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Download CBOM (JSON)
+                    <a href="{{ url_for('inventory') }}" class="btn btn-primary btn-sm" style="padding: 0.45rem 0.9rem;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                        View in Inventory &rarr;
                     </a>
-                    <a href="{{ url_for('download_roadmap') }}" class="btn btn-outline btn-sm" download="migration_report.md">
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        Download Roadmap (MD)
+                    <a href="{{ url_for('graph', algo=report.algorithm) }}" class="btn btn-outline btn-sm">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/></svg>
+                        Blast Radius
+                    </a>
+                    <a href="{{ url_for('simulator', src=report.algorithm, tgt=report.recommended_replacement.split(' ')[0]) }}" class="btn btn-outline btn-sm">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Simulate PQC
                     </a>
                 </div>
             </header>
@@ -57,6 +61,13 @@
             <div class="dash-body">
                 <!-- ========== LEFT COLUMN ========== -->
                 <div class="dash-left">
+                    {% if ingested %}
+                    <div style="background: rgba(61, 220, 151, 0.12); border: 1px solid rgba(61, 220, 151, 0.35); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1.2rem; font-size: 0.82rem; color: #FFFFFF; display: flex; align-items: center; justify-content: space-between;">
+                        <span>&check; Finding successfully ingested into <strong>Cryptographic Asset Inventory (Stage 3)</strong></span>
+                        <a href="{{ url_for('inventory') }}" style="color: #A3E635; text-decoration: underline; font-weight: 600;">View &rarr;</a>
+                    </div>
+                    {% endif %}
+
                     <!-- Title Row -->
                     <div class="scan-header-row">
                         <h1 class="scan-title">Analysis Results</h1>

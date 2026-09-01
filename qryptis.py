@@ -130,10 +130,12 @@ def cmd_scan(args):
             key_size = r["report"].get("key_size", "N/A")
 
             print(f"{Colors.BOLD}{Colors.WHITE}CRYPTOGRAPHIC FINDING #{i}{Colors.RESET} [{sev_color}{Colors.BOLD}{sev}{Colors.RESET}]")
-            print(f"{Colors.BOLD}{Colors.CYAN}{algo}-{key_size}{Colors.RESET}")
+            print(f"{Colors.BOLD}{Colors.CYAN}{algo}-{key_size}{Colors.RESET}  {Colors.DIM}(Detection: {r.get('detection_method', 'AST')} | Confidence: {r.get('confidence', 'high').upper()}){Colors.RESET}")
             print(f"{Colors.DIM}{'-' * 45}{Colors.RESET}")
             print(f"  {Colors.BOLD}Location:{Colors.RESET}             {Colors.CYAN}{r.get('location', 'N/A')}{Colors.RESET}")
-            print(f"  {Colors.BOLD}Usage:{Colors.RESET}                {r.get('usage', 'Cryptographic Primitive')}")
+            print(f"  {Colors.BOLD}Purpose / Usage:{Colors.RESET}      {r.get('purpose', 'N/A')} ({r.get('usage', 'Cryptographic Primitive')})")
+            if r.get('enclosing_function') and r.get('enclosing_function') != 'global':
+                print(f"  {Colors.BOLD}Scope:{Colors.RESET}                class {r.get('enclosing_class', 'None')} -> def {r.get('enclosing_function')}()")
             
             # Clean terminal status symbols
             q_stat = r.get('quantum_status', 'Unknown')
@@ -432,6 +434,15 @@ def cmd_graph(args):
     if graph.get("mitigation_strategy"):
         print(f"{Colors.BOLD}RECOMMENDED MIGRATION STRATEGY:{Colors.RESET}")
         print(f"  {Colors.GREEN}✓ {graph['mitigation_strategy']}{Colors.RESET}\n")
+
+
+def cmd_evaluate(args):
+    """Run academic ground-truth Precision/Recall static analysis evaluation."""
+    from evaluation import StaticAnalysisEvaluator, run_evaluation
+    metrics = run_evaluation()
+    is_utf8 = sys.stdout.encoding and "utf" in sys.stdout.encoding.lower()
+    report = StaticAnalysisEvaluator.format_cli_report(metrics, unicode_mode=bool(is_utf8))
+    print(report)
 
 
 def cmd_simulate(args):

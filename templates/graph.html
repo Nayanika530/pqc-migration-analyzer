@@ -233,7 +233,9 @@
 
         <main class="main-content">
             <div class="analyze-page" style="max-width: 1280px;">
-                <div class="chips">Infrastructure Blast Radius</div>
+                {% with active_step=4 %}{% include "_pipeline_ribbon.html" %}{% endwith %}
+
+                <div class="chips">Pipeline Stage 4 &bull; Blast Radius Engine</div>
 
                 <!-- Page Header -->
                 <div class="graph-page-header">
@@ -255,12 +257,21 @@
 
                 <!-- Impact & Blast Radius Hero Banner -->
                 <div class="impact-banner {% if not graph.quantum_vulnerable %}safe{% endif %}">
-                    <div class="impact-headline">
-                        ⚡ {{ graph.impact_statement }}
-                    </div>
-                    <div class="impact-sub">
-                        Migrating from <strong>{{ graph.algorithm }}</strong> to <strong>{{ graph.migration_target }}</strong> impacts <strong>{{ graph.domains_count }} critical infrastructure domains</strong> and <strong>{{ graph.total_services_affected }} downstream microservices</strong>.
-                        Migration Complexity: <strong style="color: #FF5470;">{{ graph.complexity }}</strong>.
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <div class="impact-headline">
+                                ⚡ {{ graph.impact_statement }}
+                            </div>
+                            <div class="impact-sub">
+                                Migrating from <strong>{{ graph.algorithm }}</strong> to <strong>{{ graph.migration_target }}</strong> impacts <strong>{{ graph.domains_count }} critical infrastructure domains</strong> and <strong>{{ graph.total_services_affected }} downstream microservices</strong>.
+                                Migration Complexity: <strong style="color: #FF5470;">{{ graph.complexity }}</strong>.
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('simulator', src=graph.algorithm, tgt=graph.migration_target.split(' ')[0]) }}" class="btn-impact" style="font-size: 0.84rem; padding: 0.6rem 1.1rem; white-space: nowrap;">
+                                <span>⚡ Simulate {{ graph.algorithm }} Migration &rarr;</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -342,6 +353,18 @@
                             <div class="mono" style="color: #FFFFFF; margin-top: 0.2rem;">python qryptis.py graph {{ graph.algorithm }}</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Next Pipeline Stage Banner -->
+                <div class="pipeline-next-banner">
+                    <div class="pipeline-next-info">
+                        <div class="pipeline-next-kicker">Next Pipeline Stage (5 of 7)</div>
+                        <div class="pipeline-next-title">Post-Quantum Migration Simulator</div>
+                        <div class="pipeline-next-desc">Simulate architectural impact deltas for security, key sizes, wire overhead, latency, CPU cycles, and affected microservices under NIST PQC standards.</div>
+                    </div>
+                    <a href="{{ url_for('simulator', src=graph.algorithm, tgt=graph.migration_target.split(' ')[0]) }}" class="btn-impact" style="font-size: 0.84rem; padding: 0.6rem 1.2rem;">
+                        <span>Simulate Migration &rarr;</span>
+                    </a>
                 </div>
 
             </div>

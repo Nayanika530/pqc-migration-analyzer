@@ -12,12 +12,14 @@
         {% include "_sidebar.html" %}
 
         <main class="main-content">
-            <div class="analyze-page">
-                <div class="chips">Security Console</div>
+            <div class="analyze-page" style="max-width: 1100px;">
+                {% with active_step=2 %}{% include "_pipeline_ribbon.html" %}{% endwith %}
+
+                <div class="chips">Pipeline Stage 2 &bull; Ingress Scanners</div>
 
                 <div class="analyze-header">
-                    <h1>Analyze Cryptography</h1>
-                    <p>Select an analysis method to detect classical vulnerabilities, inspect live endpoints, or assess cryptographic agility.</p>
+                    <h1>Cryptographic Discovery & Ingress</h1>
+                    <p>Select an analysis method to detect classical vulnerabilities across codebases, single algorithms, or live network endpoints. Findings flow directly into your central Cryptographic Asset Inventory.</p>
                 </div>
 
                 <div class="option-cards">
@@ -27,9 +29,9 @@
                             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                         </div>
                         <h2>Code Scanner</h2>
-                        <p>Scan source files and repositories to detect RSA, ECC, 3DES, and legacy ciphers. Generates full CBOM JSON exports and migration roadmaps.</p>
+                        <p>Scan source files and repositories to detect RSA, ECC, 3DES, and legacy ciphers with AST line-level precision. Ingests findings into Inventory and generates CBOM JSON.</p>
                         <div class="option-footer">
-                            <span class="option-badge">Static Analysis</span>
+                            <span class="option-badge">Static AST Analysis</span>
                             <span class="option-arrow-btn">&rarr;</span>
                         </div>
                     </a>
@@ -40,7 +42,7 @@
                             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
                         </div>
                         <h2>Manual Lookup</h2>
-                        <p>Evaluate individual algorithms, key sizes, and data secrecy requirements. Receive instant NIST-standard PQC recommendations and AI explanations.</p>
+                        <p>Evaluate individual algorithms, key sizes, and data secrecy requirements. Receive instant NIST-standard PQC recommendations and save findings to Inventory.</p>
                         <div class="option-footer">
                             <span class="option-badge">Targeted Query</span>
                             <span class="option-arrow-btn">&rarr;</span>
@@ -53,11 +55,23 @@
                             <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                         </div>
                         <h2>Live SSL Scan</h2>
-                        <p>Analyze public hostnames and certificates in real-time to inspect TLS handshakes, cipher negotiation, and hybrid post-quantum readiness.</p>
+                        <p>Inspect public hostnames and certificates in real-time to analyze TLS handshakes, cipher suites, and ingest active certificates into Inventory.</p>
                         <div class="option-footer">
-                            <span class="option-badge">Network Inspector</span>
+                            <span class="option-badge">Live TLS Probe</span>
                             <span class="option-arrow-btn">&rarr;</span>
                         </div>
+                    </a>
+                </div>
+
+                <!-- Next Pipeline Stage Banner -->
+                <div class="pipeline-next-banner">
+                    <div class="pipeline-next-info">
+                        <div class="pipeline-next-kicker">Next Pipeline Stage (3 of 7)</div>
+                        <div class="pipeline-next-title">Unified Cryptographic Asset Inventory</div>
+                        <div class="pipeline-next-desc">Review your aggregated inventory across codebases, live endpoints, and X.509 certificates to evaluate overall posture and export CycloneDX CBOMs.</div>
+                    </div>
+                    <a href="{{ url_for('inventory') }}" class="btn-impact" style="font-size: 0.84rem; padding: 0.6rem 1.2rem;">
+                        <span>Go to Inventory &rarr;</span>
                     </a>
                 </div>
             </div>

@@ -1,0 +1,57 @@
+{# templates/_pipeline_ribbon.html #}
+{# Usage: {% with active_step=3 %}{% include "_pipeline_ribbon.html" %}{% endwith %} #}
+<div class="pipeline-progress-ribbon" role="navigation" aria-label="PQC Migration Pipeline">
+    <!-- Step 1: Authentication -->
+    <a href="{{ url_for('login') }}" class="pipeline-step-item {% if active_step == 1 %}active{% elif active_step > 1 %}completed{% endif %}" title="Stage 1: Analyst Authentication & Session">
+        <span class="pipeline-step-num">{% if active_step > 1 %}&check;{% else %}1{% endif %}</span>
+        <span>Auth</span>
+    </a>
+
+    <span class="pipeline-step-sep">&rarr;</span>
+
+    <!-- Step 2: Analyze Hub -->
+    <a href="{{ url_for('analyze') }}" class="pipeline-step-item {% if active_step == 2 %}active{% elif active_step > 2 %}completed{% endif %}" title="Stage 2: Discovery & Analysis (Code, Manual, SSL)">
+        <span class="pipeline-step-num">{% if active_step > 2 %}&check;{% else %}2{% endif %}</span>
+        <span>Analyze</span>
+    </a>
+
+    <span class="pipeline-step-sep">&rarr;</span>
+
+    <!-- Step 3: Crypto Inventory -->
+    <a href="{{ url_for('inventory') }}" class="pipeline-step-item {% if active_step == 3 %}active{% elif active_step > 3 %}completed{% endif %}" title="Stage 3: Unified Cryptographic Asset Inventory">
+        <span class="pipeline-step-num">{% if active_step > 3 %}&check;{% else %}3{% endif %}</span>
+        <span>Inventory</span>
+    </a>
+
+    <span class="pipeline-step-sep">&rarr;</span>
+
+    <!-- Step 4: Dependency Graph -->
+    <a href="{{ url_for('graph') }}" class="pipeline-step-item {% if active_step == 4 %}active{% elif active_step > 4 %}completed{% endif %}" title="Stage 4: Cryptographic Dependency Graph & Blast Radius">
+        <span class="pipeline-step-num">{% if active_step > 4 %}&check;{% else %}4{% endif %}</span>
+        <span>Dependency Graph</span>
+    </a>
+
+    <span class="pipeline-step-sep">&rarr;</span>
+
+    <!-- Step 5: Migration Simulator -->
+    <a href="{{ url_for('simulator') }}" class="pipeline-step-item {% if active_step == 5 %}active{% elif active_step > 5 %}completed{% endif %}" title="Stage 5: Post-Quantum Migration Simulator">
+        <span class="pipeline-step-num">{% if active_step > 5 %}&check;{% else %}5{% endif %}</span>
+        <span>Simulator</span>
+    </a>
+
+    <span class="pipeline-step-sep">&rarr;</span>
+
+    <!-- Step 6: Benchmark Lab -->
+    <a href="{{ url_for('benchmark_lab') }}" class="pipeline-step-item {% if active_step == 6 %}active{% elif active_step > 6 %}completed{% endif %}" title="Stage 6: NIST Benchmark Lab & Telemetry">
+        <span class="pipeline-step-num">{% if active_step > 6 %}&check;{% else %}6{% endif %}</span>
+        <span>Benchmark Lab</span>
+    </a>
+
+    <span class="pipeline-step-sep">&rarr;</span>
+
+    <!-- Step 7: Migration Plan -->
+    <a href="{{ url_for('migration_plan') }}" class="pipeline-step-item {% if active_step == 7 %}active{% endif %}" title="Stage 7: Prioritized Master Migration Plan">
+        <span class="pipeline-step-num">7</span>
+        <span>Migration Plan</span>
+    </a>
+</div>

@@ -105,7 +105,9 @@
 
         <main class="main-content">
             <div class="analyze-page" style="max-width: 1280px;">
-                <div class="chips">Signature Engine</div>
+                {% with active_step=5 %}{% include "_pipeline_ribbon.html" %}{% endwith %}
+
+                <div class="chips">Pipeline Stage 5 &bull; Migration Simulator</div>
 
                 <!-- Page Header -->
                 <div class="sim-header">
@@ -290,6 +292,18 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Next Pipeline Stage Banner -->
+                <div class="pipeline-next-banner">
+                    <div class="pipeline-next-info">
+                        <div class="pipeline-next-kicker">Next Pipeline Stage (6 of 7)</div>
+                        <div class="pipeline-next-title">NIST PQC Benchmark Lab & Host Telemetry</div>
+                        <div class="pipeline-next-desc">Inspect standardized NIST FIPS 203/204/205/Round 4 parameter tables and run empirical statistical performance measurements on this host.</div>
+                    </div>
+                    <a href="{{ url_for('benchmark_lab') }}" class="btn-impact" style="font-size: 0.84rem; padding: 0.6rem 1.2rem;">
+                        <span>Open Benchmark Lab &rarr;</span>
+                    </a>
                 </div>
 
             </div>

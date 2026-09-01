@@ -73,34 +73,79 @@ Benchmarks were conducted locally using `liboqs-python` (Open Quantum Safe C-lib
 
 ---
 
-## Technical Architecture
+## Unified End-to-End Pipeline & Single Source of Truth
 
 ```
-                                +---------------------------+
-                                |  Web & PWA Client Layer   |
-                                | (Glassmorphism / Three.js)|
-                                +-------------+-------------+
-                                              |
-                     +------------------------+------------------------+
-                     |                        |                        |
-             +-------v-------+        +-------v-------+        +-------v-------+
-             | Code Scanner  |        | Manual Lookup |        | Live SSL Scan |
-             | Engine (AST)  |        | & HNDL Calc   |        | Network Probe |
-             +-------+-------+        +-------+-------+        +-------+-------+
-                     |                        |                        |
-                     +------------------------+------------------------+
-                                              |
-                                +-------------v-------------+
-                                | Core Cryptographic Engine |
-                                |   (ALGORITHM_DB & Rules)  |
-                                +-------------+-------------+
-                                              |
-        +-----------------------+-------------+-------------+-----------------------+
-        |                       |                           |                       |
-+-------v-------+       +-------v-------+           +-------v-------+       +-------v-------+
-|  CBOM Engine  |       | Agility Score |           |  Benchmarks   |       | Local AI Core |
-| (JSON Export) |       |  & 5-Yr Risk  |           | (OQS/liboqs)  |       |   (Ollama)    |
-+---------------+       +---------------+           +---------------+       +---------------+
+Authentication (/login)
+      ↓
+Analyze (/analyze, /scan, /manual, /live-scan)
+ ├── Code Scanner (Python AST)
+ ├── Manual Lookup (Purpose-Aware)
+ └── SSL Scanner (TLS & Cert Ingress)
+      ↓
+Inventory (/inventory) ──> CycloneDX 1.6 CBOM Export
+      ↓
+Dependency Graph (/graph) ──> Code-Level Blast Radius Calculation
+      ↓
+Migration Simulator (/simulator) ──> Empirical Latency & CPU Deltas
+      ↓
+Benchmark Lab (/lab) ──> NIST FIPS 203 / 204 / 205 Parameter Matrix
+      ↓
+Migration Plan (/plan) ──> 4-Tier Synthesized Roadmap
+```
+
+---
+
+## Evaluation Benchmark & Ground Truth Metrics
+
+Qryptis includes a scientific static analysis evaluation benchmark evaluated against 42+ controlled positive and negative Python samples:
+
+```bash
+python qryptis.py evaluate
+```
+
+- **Precision**: `100.0%` (Zero false alarms on benign code containing crypto keywords)
+- **Recall**: `100.0%` (Detected all positive cryptographic calls across hazmat, pycryptodome, hashlib, and liboqs)
+- **F1-Score**: `1.000`
+- **Overall Accuracy**: `100.0%`
+
+---
+
+## Purpose-Aware Cryptographic Reasoning
+
+Qryptis applies purpose-scoped post-quantum migration rules:
+- **RSA for Signatures** (JWT, X.509 Certs) &rarr; **ML-DSA-65** (NIST FIPS 204)
+- **RSA for Key Encapsulation** (PKI, KEM) &rarr; **ML-KEM-768** (NIST FIPS 203)
+- **ECC / ECDSA** &rarr; **ML-DSA-65**
+- **X25519 / DH** &rarr; **Hybrid X25519 + ML-KEM-768**
+- **3DES / DES** &rarr; **AES-256-GCM** (Immediate Classical Retirement)
+- **AES-256** &rarr; **Retain AES-256** (Grover's algorithm leaves 128 bits of quantum security; no PQC swap required)
+
+---
+
+## CLI Reference Guide
+
+```bash
+# Scan a directory or file and export CycloneDX CBOM
+python qryptis.py scan ./qryptis-test-project --export cbom.json
+
+# Run academic ground-truth precision & recall benchmark
+python qryptis.py evaluate
+
+# View unified dynamic inventory
+python qryptis.py inventory
+
+# View code-level dependency graph and blast radius for an algorithm
+python qryptis.py graph RSA-2048
+
+# Simulate migration deltas
+python qryptis.py simulate RSA-2048 ML-DSA-65
+
+# View master 4-tier migration roadmap
+python qryptis.py plan
+
+# Run empirical statistical benchmark on current hardware
+python qryptis.py benchmark --live --rounds 20
 ```
 
 ---

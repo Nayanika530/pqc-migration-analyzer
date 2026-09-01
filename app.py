@@ -241,6 +241,18 @@ def api_inventory_add_cert():
     return jsonify({"status": "success", "filename": filename, "summary": GLOBAL_INVENTORY.get_summary()})
 
 
+@app.route("/api/inventory/add-manual", methods=["POST"])
+def api_inventory_add_manual():
+    data = request.get_json(silent=True) or {}
+    algo = data.get("algorithm") or request.form.get("algorithm", "RSA")
+    key_size = int(data.get("key_size") or request.form.get("key_size", 2048))
+    report = generate_report(algo, key_size)
+    if "error" in report:
+        return jsonify({"error": report["error"]}), 400
+    GLOBAL_INVENTORY.add_manual_finding(report, target_name=f"Manual: {algo}-{key_size}")
+    return jsonify({"status": "success", "algorithm": algo, "key_size": key_size, "summary": GLOBAL_INVENTORY.get_summary()})
+
+
 @app.route("/api/inventory/export/cbom", methods=["GET"])
 def api_inventory_export_cbom():
     cbom_data = GLOBAL_INVENTORY.export_cbom()
@@ -306,6 +318,7 @@ def benchmark_lab():
 
 
 @app.route("/api/benchmarks/matrix")
+@app.route("/api/benchmark/matrix")
 def api_benchmarks_matrix():
     return jsonify({
         "status": "success",
@@ -320,6 +333,7 @@ def migration_plan():
 
 
 @app.route("/api/migration/plan")
+@app.route("/api/migration-plan")
 def api_migration_plan():
     plan_data = MasterMigrationEngine.generate_plan()
     return jsonify({
@@ -356,13 +370,18 @@ def api_benchmark_live():
 @app.route("/live-scan", methods=["GET", "POST"])
 def live_scan():
     result = None
+    ingested = False
 
     if request.method == "POST":
-        domain = request.form.get("domain", "")
-        if domain.strip():
+        domain = request.form.get("domain", "").strip()
+        auto_ingest = request.form.get("auto_ingest", "true") == "true" or "ingest" in request.form
+        if domain:
             result = scan_live_website(domain)
+            if not result.get("error") and auto_ingest:
+                GLOBAL_INVENTORY.add_live_scan(result, target_name=domain)
+                ingested = True
 
-    return render_template("live_scan.html", result=result)
+    return render_template("live_scan.html", result=result, ingested=ingested)
 
 
 @app.route("/manual", methods=["GET", "POST"])
@@ -376,11 +395,13 @@ def manual():
     roadmap = None
     forecast = None
     summary = None
+    ingested = False
 
     if request.method == "POST":
         algo = request.form.get("algorithm", "").strip()
         key_size_raw = request.form.get("key_size", "").strip()
         years_raw = request.form.get("years_secret", "").strip()
+        auto_ingest = request.form.get("auto_ingest", "true") == "true" or "ingest" in request.form
 
         if not algo or not key_size_raw:
             error = "Please specify both algorithm and key size."
@@ -407,6 +428,11 @@ def manual():
                                 error = "Confidentiality requirement must be a valid number of years."
 
                         if not error:
+                            # Ingest into Unified Inventory
+                            if auto_ingest:
+                                GLOBAL_INVENTORY.add_manual_finding(report, target_name=f"Manual: {algo}-{key_size}")
+                                ingested = True
+
                             # Format as scan results so manual can render identical dashboard
                             finding_item = {
                                 "line_number": 1,
@@ -448,7 +474,8 @@ def manual():
         agility=agility,
         roadmap=roadmap,
         forecast=forecast,
-        summary=summary
+        summary=summary,
+        ingested=ingested
     )
 
 
@@ -520,11 +547,7 @@ def scan():
 
 @app.route("/download-cbom")
 def download_cbom():
-    results = session.get("last_scan_results")
-    if not results:
-        return "No scan results available. Please run a scan first.", 400
-
-    cbom = generate_cbom(results, source_name="pasted_code.py")
+    cbom = GLOBAL_INVENTORY.export_cbom()
     response = jsonify(cbom)
     response.headers["Content-Disposition"] = "attachment; filename=cbom.json"
     return response

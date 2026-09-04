@@ -14,107 +14,6 @@
     <meta name="theme-color" content="#000000">
 
     <style>
-        /* Top Banner for Portfolio Reviewers & Guests */
-        .reviewer-banner {
-            width: 100%;
-            background: linear-gradient(90deg, rgba(3, 18, 42, 0.98) 0%, rgba(8, 28, 64, 0.98) 50%, rgba(14, 46, 92, 0.98) 100%);
-            border-bottom: 1px solid rgba(56, 189, 248, 0.4);
-            color: #E2E8F0;
-            font-family: var(--sd-font-body, 'Inter', sans-serif);
-            font-size: 0.82rem;
-            padding: 0.6rem 1.5rem;
-            position: relative;
-            z-index: 100;
-            box-shadow: 0 4px 24px rgba(0, 85, 255, 0.22);
-        }
-        .reviewer-banner-inner {
-            max-width: 1280px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-        .reviewer-banner-left {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            flex-wrap: wrap;
-        }
-        .reviewer-pill {
-            background: rgba(56, 189, 248, 0.2);
-            border: 1px solid rgba(56, 189, 248, 0.55);
-            color: #38BDF8;
-            font-family: var(--sd-font-mono, monospace);
-            font-size: 0.68rem;
-            font-weight: 700;
-            padding: 0.2rem 0.6rem;
-            border-radius: 9999px;
-            letter-spacing: 0.05em;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-        }
-        .demo-pulse-dot {
-            width: 7px;
-            height: 7px;
-            background: #38BDF8;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #38BDF8;
-            animation: demoPulse 1.8s infinite;
-        }
-        @keyframes demoPulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.35; transform: scale(0.8); }
-        }
-        .reviewer-banner-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-        }
-        .btn-reviewer-demo {
-            background: #38BDF8;
-            color: #040D1A;
-            font-family: var(--sd-font-heading, sans-serif);
-            font-size: 0.76rem;
-            font-weight: 700;
-            padding: 0.35rem 0.95rem;
-            border-radius: 9999px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
-        }
-        .btn-reviewer-demo:hover {
-            background: #7DD3FC;
-            color: #000000;
-            transform: translateY(-1px);
-            box-shadow: 0 0 22px rgba(56, 189, 248, 0.7);
-        }
-        .btn-reviewer-video {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #E2E8F0;
-            font-family: var(--sd-font-heading, sans-serif);
-            font-size: 0.74rem;
-            font-weight: 600;
-            padding: 0.35rem 0.85rem;
-            border-radius: 9999px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            transition: all 0.2s ease;
-        }
-        .btn-reviewer-video:hover {
-            background: rgba(255, 255, 255, 0.16);
-            color: #FFFFFF;
-        }
-
         .demo-top-banner {
             width: 100%;
             background: linear-gradient(90deg, rgba(8, 24, 48, 0.95), rgba(15, 38, 76, 0.95));
@@ -183,7 +82,7 @@
 
         .sd-btn-nav-demo {
             background: rgba(56, 189, 248, 0.16);
-            border: 1px solid rgba(56, 189, 248, 0.5);
+            border: 1px solid rgba(56, 189, 248, 0.45);
             color: #38BDF8;
             font-family: var(--sd-font-heading, sans-serif);
             font-size: 0.78rem;
@@ -204,227 +103,46 @@
             transform: translateY(-1px);
         }
 
-        /* Hero Call-To-Action Button Group */
-        .sd-hero-cta-group {
-            margin-top: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .sd-hero-demo-cta-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.85rem;
-            background: linear-gradient(135deg, #0284C7 0%, #0369A1 50%, #0284C7 100%);
-            border: 1px solid #38BDF8;
-            color: #FFFFFF;
-            padding: 0.8rem 1.6rem;
-            border-radius: 9999px;
-            text-decoration: none;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 6px 28px rgba(14, 165, 233, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            text-align: left;
-        }
-        .sd-hero-demo-cta-primary:hover {
-            background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%);
-            color: #040D1A;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 36px rgba(56, 189, 248, 0.7);
-        }
-        .sd-hero-demo-col {
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-        }
-        .sd-hero-demo-title {
-            font-family: var(--sd-font-heading, sans-serif);
-            font-size: 0.95rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-        }
-        .sd-hero-demo-sub {
-            font-family: var(--sd-font-body, sans-serif);
-            font-size: 0.72rem;
-            opacity: 0.9;
-        }
-        .sd-hero-video-cta {
+        .sd-hero-demo-cta {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: #E2E8F0;
-            padding: 0.8rem 1.35rem;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(14, 165, 233, 0.25) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #E0F2FE;
+            padding: 0.65rem 1.25rem;
             border-radius: 9999px;
             font-family: var(--sd-font-heading, sans-serif);
-            font-size: 0.84rem;
+            font-size: 0.85rem;
             font-weight: 600;
             text-decoration: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(56, 189, 248, 0.15);
         }
-        .sd-hero-video-cta:hover {
-            background: rgba(30, 41, 59, 0.95);
-            border-color: rgba(56, 189, 248, 0.5);
-            color: #38BDF8;
-            transform: translateY(-1px);
-        }
-
-        /* 30s Demonstration Video Showcase Wrap */
-        .sd-video-showcase-wrap {
-            width: 100%;
-            margin-top: 3rem;
-            border-radius: 20px;
-            overflow: hidden;
-            background: #060910;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(14, 165, 233, 0.15);
-            position: relative;
-            scroll-margin-top: 100px;
-        }
-        .sd-video-header {
-            background: rgba(15, 23, 42, 0.9);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0.75rem 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .sd-video-dots {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-        .sd-video-dots .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .dot-red { background: #FF5F56; }
-        .dot-yellow { background: #FFBD2E; }
-        .dot-green { background: #27C93F; }
-        .sd-video-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: var(--sd-font-mono, monospace);
-            font-size: 0.72rem;
-            letter-spacing: 0.06em;
-            color: #94A3B8;
-        }
-        .sd-video-badge-link {
-            background: rgba(56, 189, 248, 0.15);
-            border: 1px solid rgba(56, 189, 248, 0.4);
-            color: #38BDF8;
-            font-family: var(--sd-font-heading, sans-serif);
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            transition: all 0.2s ease;
-        }
-        .sd-video-badge-link:hover {
+        .sd-hero-demo-cta:hover {
             background: #38BDF8;
             color: #000000;
-            box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
-        }
-        .sd-video-body {
-            position: relative;
-            width: 100%;
-            background: #000000;
-            aspect-ratio: 16 / 9;
-            max-height: 540px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .sd-showcase-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .sd-video-footer {
-            background: rgba(15, 23, 42, 0.9);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0.75rem 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .sd-video-meta {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .sd-video-tag {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #CBD5E1;
-            font-family: var(--sd-font-mono, monospace);
-            font-size: 0.68rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-        }
-        .sd-video-cta-btn {
-            color: #38BDF8;
-            font-family: var(--sd-font-heading, sans-serif);
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-decoration: none;
-            transition: color 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        .sd-video-cta-btn:hover {
-            color: #7DD3FC;
-            text-decoration: underline;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(56, 189, 248, 0.35);
         }
     </style>
 </head>
 <body>
 
-    {% if not session.user %}
-    <!-- Portfolio Reviewer Top Fast-Track Banner -->
-    <div class="reviewer-banner">
-        <div class="reviewer-banner-inner">
-            <div class="reviewer-banner-left">
-                <span class="reviewer-pill">
-                    <span class="demo-pulse-dot"></span>
-                    PORTFOLIO REVIEWER MODE
-                </span>
-                <span>Evaluate Qryptis in under 10 seconds &mdash; <strong>1-click guest access</strong> with 47 pre-loaded enterprise crypto assets & AST scans. No sign-up required.</span>
-            </div>
-            <div class="reviewer-banner-actions">
-                <a href="{{ url_for('demo_login') }}" class="btn-reviewer-demo" id="topBannerDemoBtn">⚡ Try Demo &rarr;</a>
-                <a href="#demo-video" class="btn-reviewer-video">▶ Watch Video</a>
-            </div>
-        </div>
-    </div>
-    {% elif session.user and session.user.is_guest %}
+    {% if session.user and session.user.is_guest %}
     <!-- Demo Mode Active Banner -->
     <div class="demo-top-banner">
         <div class="demo-top-banner-inner">
             <div class="demo-top-banner-left">
                 <span class="demo-banner-pill">⚡ DEMO MODE ACTIVE</span>
-                <span>Logged in as <strong>Guest Analyst</strong> &bull; 47 canonical enterprise cryptographic assets loaded.</span>
+                <span>Exploring with <strong>Pre-Loaded Enterprise Sample Data</strong> (47 canonical assets).</span>
             </div>
             <div class="demo-top-banner-actions">
                 <a href="{{ url_for('inventory') }}" class="demo-banner-link">View Inventory (47) &rarr;</a>
+                <a href="{{ url_for('scan', view='results') }}" class="demo-banner-link">AST Scan &rarr;</a>
                 <a href="{{ url_for('graph') }}" class="demo-banner-link">Dependency Graph &rarr;</a>
                 <a href="{{ url_for('simulator') }}" class="demo-banner-link">Simulator &rarr;</a>
+                <a href="{{ url_for('login') }}" class="demo-banner-link" style="color: #7DD3FC; font-weight: 700;">Sign In for Own Data &rarr;</a>
                 <a href="{{ url_for('logout') }}" class="demo-banner-exit" title="Exit guest session">&times; Exit Demo</a>
             </div>
         </div>
@@ -480,22 +198,13 @@
             </div>
 
             <div class="sd-nav-right">
-                {% if not session.user %}
-                <a href="{{ url_for('demo_login') }}" class="sd-btn-nav-demo" id="navDemoBtn" title="Instant 1-Click Guest Access">
-                    <span class="demo-pulse-dot"></span>
-                    <span>⚡ Try Live Demo</span>
-                </a>
-                {% elif session.user.is_guest %}
-                <a href="{{ url_for('inventory') }}" class="sd-btn-nav-demo" title="47 Sample Assets Loaded">
-                    <span class="demo-pulse-dot"></span>
-                    <span>⚡ Demo (47 Assets)</span>
-                </a>
-                {% endif %}
+                {% if session.user and session.user.is_guest %}
+                <a href="{{ url_for('inventory') }}" class="sd-btn-nav-demo" title="47 Sample Assets Loaded">⚡ Demo (47 Assets)</a>
                 <a href="{{ url_for('scan') }}" class="sd-btn-nav-dark">Scan Code</a>
-                {% if session.user %}
-                <a href="{{ url_for('analyze') }}" class="sd-btn-nav-white">{{ session.user.name or session.user.username }} &rarr;</a>
+                <a href="{{ url_for('login') }}" class="sd-btn-nav-white">Sign In for Own Data &rarr;</a>
                 {% else %}
-                <a href="{{ url_for('login', next=request.path) }}" class="sd-btn-nav-white">Log In</a>
+                <a href="{{ url_for('scan') }}" class="sd-btn-nav-dark">Scan Code</a>
+                <a href="{{ url_for('analyze') }}" class="sd-btn-nav-white">{{ session.user.name or session.user.username }} &rarr;</a>
                 {% endif %}
             </div>
         </div>
@@ -508,70 +217,32 @@
         <div class="sd-hero-headline">
             Build your post-quantum<br>defense base.
         </div>
-        <p style="color: #94A3B8; font-size: 1.05rem; max-width: 660px; margin: 1.1rem auto 0; line-height: 1.6; text-align: center;">
-            Static Python AST cryptographic discovery, NIST FIPS 203/204 migration simulation, dependency graphs, and automated CBOM compliance.
-        </p>
-        
-        <div class="sd-hero-cta-group">
-            {% if not session.user %}
-            <a href="{{ url_for('demo_login') }}" class="sd-hero-demo-cta-primary" id="heroTryDemoBtn" title="Launch instant demonstration as Guest Analyst">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <div class="sd-hero-demo-col">
-                    <span class="sd-hero-demo-title">⚡ Try Live Demo (Instant Guest Access) &rarr;</span>
-                    <span class="sd-hero-demo-sub">1-Click &bull; Pre-loaded with 47 Enterprise Assets &bull; No Login Required</span>
-                </div>
-            </a>
-            <a href="#demo-video" class="sd-hero-video-cta">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                <span>Watch Working Video (30s)</span>
-            </a>
-            {% elif session.user.is_guest %}
-            <a href="{{ url_for('inventory') }}" class="sd-hero-demo-cta-primary">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <div class="sd-hero-demo-col">
-                    <span class="sd-hero-demo-title">⚡ Explore 47 Pre-loaded Cryptographic Assets &rarr;</span>
-                    <span class="sd-hero-demo-sub">Guest Session Active &bull; Inventory, Dependency Graph & Simulator Ready</span>
-                </div>
-            </a>
-            <a href="{{ url_for('scan', view='results') }}" class="sd-hero-video-cta">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                <span>View Pre-loaded Code Scan</span>
+        <div style="margin-top: 1rem;">
+            {% if session.user and session.user.is_guest %}
+            <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; align-items: center;">
+                <a href="{{ url_for('inventory') }}" class="sd-hero-demo-cta">
+                    ⚡ Explore 47 Pre-loaded Cryptographic Assets &rarr;
+                </a>
+                <a href="{{ url_for('scan', view='results') }}" class="sd-hero-demo-cta" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.35);">
+                    Inspect Sample AST Code Scan &rarr;
+                </a>
+                <a href="{{ url_for('login') }}" class="sd-hero-demo-cta" style="background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.25);">
+                    Sign In to Put Your Own Data &rarr;
+                </a>
+            </div>
+            {% else %}
+            <a href="{{ url_for('analyze') }}" class="sd-hero-demo-cta">
+                Launch Migration Console &rarr;
             </a>
             {% endif %}
         </div>
 
-        <!-- Working Video Demonstration Showcase -->
-        <div id="demo-video" class="sd-video-showcase-wrap">
-            <div class="sd-video-header">
-                <div class="sd-video-dots">
-                    <span class="dot dot-red"></span>
-                    <span class="dot dot-yellow"></span>
-                    <span class="dot dot-green"></span>
-                </div>
-                <div class="sd-video-title">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#38BDF8" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
-                    <span>QRYPTIS LIVE DEMONSTRATION &bull; 30-SECOND PREVIEW</span>
-                </div>
-                <a href="{{ url_for('demo_login') }}" class="sd-video-badge-link" title="Click to test live yourself">
-                    <span class="demo-pulse-dot"></span>
-                    <span>⚡ Try Interactive Demo</span>
-                </a>
-            </div>
-            <div class="sd-video-body">
-                <video id="qryptisDemoVideo" class="sd-showcase-video" autoplay muted loop playsinline controls poster="{{ url_for('static', filename='img/quantum_frame_1.png') }}">
-                    <source src="{{ url_for('static', filename='video/qryptis_demo.mp4') }}" type="video/mp4">
-                    Your browser does not support HTML5 video.
-                </video>
-            </div>
-            <div class="sd-video-footer">
-                <div class="sd-video-meta">
-                    <span class="sd-video-tag">AST Code Scan</span>
-                    <span class="sd-video-tag">NIST FIPS 203/204</span>
-                    <span class="sd-video-tag">Dependency Blast Radius</span>
-                    <span class="sd-video-tag">47 Asset CBOM</span>
-                </div>
-                <a href="{{ url_for('demo_login') }}" class="sd-video-cta-btn">
-                    <span>Open Live Demo With 47 Sample Assets &rarr;</span>
+        <div class="sd-hero-card-wrap">
+            <div class="sd-hero-iridescent-canvas"></div>
+            <div class="sd-hero-card-content">
+                <a href="#canvas" class="sd-scroll-tag">
+                    <span>Keep scrolling</span>
+                    <span class="sd-arrow-down">&darr;</span>
                 </a>
             </div>
         </div>

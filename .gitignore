@@ -28,5 +28,4 @@ dist/
 .DS_Store
 Thumbs.db
 *.mp4
-!static/video/qryptis_demo.mp4
 

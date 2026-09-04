@@ -898,7 +898,7 @@ class TestDemoLogin(unittest.TestCase):
         with self.client as c:
             response = c.get("/demo")
             self.assertEqual(response.status_code, 302)
-            self.assertEqual(response.headers["Location"], "/inventory")
+            self.assertEqual(response.headers["Location"], "/")
 
             # Check session contents
             from flask import session as flask_session
@@ -952,16 +952,24 @@ class TestDemoLogin(unittest.TestCase):
             self.assertIsNone(flask_session.get("user"))
             self.assertIsNone(flask_session.get("is_demo"))
 
-    def test_root_url_renders_home_without_login(self):
-        """Verify / renders the full landing page with Try Demo CTAs and video, without login wall."""
+    def test_root_url_renders_login_with_demo_option(self):
+        """Verify / presents the login gateway when unauthenticated, with the prominent Try Demo option."""
         with self.client as c:
             response = c.get("/")
             self.assertEqual(response.status_code, 200)
-            # Confirm landing page content is returned, not login page
+            self.assertIn(b"WELCOME BACK", response.data)
+            self.assertIn(b"Try Demo", response.data)
+            self.assertIn(b"47 canonical assets", response.data)
+
+    def test_demo_user_can_access_home_website(self):
+        """Verify once in demo mode, / renders the full website with demo banner."""
+        with self.client as c:
+            c.get("/demo")
+            response = c.get("/")
+            self.assertEqual(response.status_code, 200)
             self.assertIn(b"Build your post-quantum", response.data)
-            self.assertIn(b"Try Live Demo", response.data)
-            self.assertIn(b"qryptis_demo.mp4", response.data)
-            self.assertIn(b"PORTFOLIO REVIEWER MODE", response.data)
+            self.assertIn(b"DEMO MODE ACTIVE", response.data)
+            self.assertIn(b"Sign In for Own Data", response.data)
 
     def test_demo_login_with_scan_target(self):
         """Verify /login/demo?target=scan redirects to the scanner results view."""

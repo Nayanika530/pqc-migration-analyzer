@@ -51,10 +51,14 @@ def inject_user():
     return dict(current_user=session.get("user"))
 
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def home():
-    # Render the public showcase landing page directly without blocking unauthenticated visitors
-    return render_template("home.html")
+    # If the user is authenticated (including guest demo), render the main website
+    if session.get("user"):
+        return render_template("home.html")
+    
+    # If unauthenticated, present the login gateway at the root URL
+    return login_handler()
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -177,14 +181,14 @@ def demo_login():
     next_url = request.args.get("next")
     # Avoid redirect loops to login/demo endpoints
     if not next_url or next_url in ["/login", "/login/demo", "/demo"]:
-        target = request.args.get("target", "inventory")
-        if target == "home":
-            return redirect(url_for("home"))
+        target = request.args.get("target", "home")
+        if target == "inventory":
+            return redirect(url_for("inventory"))
         elif target == "analyze":
             return redirect(url_for("analyze"))
         elif target == "scan":
             return redirect(url_for("scan", view="results"))
-        return redirect(url_for("inventory"))
+        return redirect(url_for("home"))
     return redirect(next_url)
 
 

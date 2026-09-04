@@ -405,6 +405,130 @@
             color: #FFFFFF;
         }
 
+        /* Instant Demo Guest Card */
+        .demo-guest-card {
+            background: linear-gradient(135deg, rgba(14, 30, 60, 0.78) 0%, rgba(8, 16, 32, 0.88) 100%);
+            border: 1px solid rgba(46, 158, 255, 0.35);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 8px 30px rgba(0, 85, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .demo-guest-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, #2E9EFF, #4FC3F7, #3DDC97);
+        }
+
+        .demo-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .demo-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(46, 158, 255, 0.18);
+            border: 1px solid rgba(46, 158, 255, 0.4);
+            border-radius: var(--radius-pill);
+            padding: 0.2rem 0.65rem;
+            font-size: 0.68rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: #4FC3F7;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .demo-pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3DDC97;
+            box-shadow: 0 0 8px #3DDC97;
+            animation: pulse-dot 1.8s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .demo-asset-count {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .demo-card-title {
+            font-family: var(--font-title);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .demo-card-desc {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            margin-bottom: 0.85rem;
+        }
+
+        .btn-demo-guest {
+            width: 100%;
+            background: linear-gradient(135deg, #2E9EFF 0%, #0055ff 100%);
+            color: #FFFFFF;
+            border: none;
+            padding: 0.72rem 1.2rem;
+            border-radius: var(--radius-pill);
+            font-family: var(--font-title);
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(46, 158, 255, 0.35);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-demo-guest:hover {
+            background: linear-gradient(135deg, #4FC3F7 0%, #2E9EFF 100%);
+            color: #08090B;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 26px rgba(79, 195, 247, 0.55);
+        }
+
+        .btn-demo-guest:hover svg {
+            stroke: #08090B;
+        }
+
+        .btn-sso-demo {
+            border-color: rgba(46, 158, 255, 0.35);
+            background: rgba(46, 158, 255, 0.08);
+            text-decoration: none;
+        }
+        .btn-sso-demo:hover {
+            background: rgba(46, 158, 255, 0.2);
+            border-color: #2E9EFF;
+        }
+
         /* Footer terms */
         .auth-footer {
             padding: 1.2rem;
@@ -599,6 +723,30 @@
                 </div>
                 {% endif %}
 
+                {% if not session.user %}
+                <!-- ================= INSTANT DEMO CALLOUT ================= -->
+                <div class="demo-guest-card">
+                    <div class="demo-card-header">
+                        <span class="demo-badge-pill">
+                            <span class="demo-pulse-dot"></span>
+                            PORTFOLIO REVIEWER FAST-TRACK
+                        </span>
+                        <span class="demo-asset-count">47 canonical assets</span>
+                    </div>
+                    <div class="demo-card-title">
+                        <span>Skip Sign In &mdash; Launch Instant Guest Demo</span>
+                    </div>
+                    <p class="demo-card-desc">
+                        1-click access with pre-loaded enterprise cryptography data, Python AST scan results, dependency graphs, and NIST PQC migration simulator. No account or password required.
+                    </p>
+                    <a href="{{ url_for('demo_login', next=next_url) }}" class="btn-demo-guest" id="tryDemoBtn" title="Launch instant demonstration as Guest Analyst">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <span>⚡ Try Live Demo (1-Click Guest Access)</span>
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+                {% endif %}
+
                 <!-- Tabs -->
                 <div class="auth-tabs">
                     <button type="button" class="auth-tab-btn active" id="tabSignIn" onclick="switchAuthTab('signin')">
@@ -658,6 +806,12 @@
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
 
+                    <div style="margin-top: 0.65rem; text-align: center;">
+                        <a href="{{ url_for('demo_login', next=next_url) }}" style="color: #38BDF8; font-family: var(--font-heading); font-size: 0.78rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <span>⚡ Skip Login &amp; Try Live Demo (No Account Required) &rarr;</span>
+                        </a>
+                    </div>
+
                     <div class="divider">or continue with</div>
 
                     <div class="sso-row">
@@ -669,6 +823,10 @@
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.344-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/></svg>
                             <span>Google SSO</span>
                         </button>
+                        <a href="{{ url_for('demo_login', next=next_url) }}" class="btn-sso btn-sso-demo" title="1-Click Guest Demo Access">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="color: #2E9EFF;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            <span style="color: #4FC3F7; font-weight: 600;">Try Demo</span>
+                        </a>
                     </div>
                 </form>
 

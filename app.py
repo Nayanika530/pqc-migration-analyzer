@@ -51,14 +51,10 @@ def inject_user():
     return dict(current_user=session.get("user"))
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
 def home():
-    # If the user is authenticated, render the main website
-    if session.get("user"):
-        return render_template("home.html")
-    
-    # If unauthenticated, present the login gateway at the same URL
-    return login_handler()
+    # Render the public showcase landing page directly without blocking unauthenticated visitors
+    return render_template("home.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -119,9 +115,94 @@ def sso_login(provider):
     return redirect(next_url)
 
 
+def setup_demo_session():
+    """Establish guest analyst session and pre-load canonical enterprise sample data."""
+    # 1. Guarantee canonical 47-asset enterprise sample is loaded into unified inventory
+    GLOBAL_INVENTORY.load_sample_inventory()
+
+    # 2. Pre-load sample code scan results
+    sample_file = os.path.join(os.path.dirname(__file__), "tests", "messy_sample.py")
+    sample_code = ""
+    if os.path.exists(sample_file):
+        try:
+            with open(sample_file, "r", encoding="utf-8") as f:
+                sample_code = f.read()
+        except Exception:
+            pass
+
+    if not sample_code:
+        sample_code = (
+            "from Crypto.PublicKey import RSA\n"
+            "from Crypto.Cipher import DES3\n"
+            "import hashlib\n\n"
+            "# Legacy enterprise auth module\n"
+            "key = RSA.generate(2048)\n"
+            "cipher = DES3.new(b'1234567890123456', DES3.MODE_CBC)\n"
+            "token_hash = hashlib.md5(b'session_secret').hexdigest()\n"
+        )
+
+    try:
+        results = scan_and_report(sample_code)
+        session["last_scan_results"] = [
+            {
+                "line_number": r["line_number"],
+                "matched_text": r["matched_text"],
+                "report": r["report"],
+                "suggested_fix": r.get("suggested_fix", "")
+            }
+            for r in results
+        ]
+        session["last_agility"] = calculate_agility_score(results)
+        session["last_roadmap"] = generate_migration_roadmap(results)
+        session["demo_code"] = sample_code
+    except Exception:
+        pass
+
+    # 3. Create guest user profile
+    session["user"] = {
+        "username": "guest_analyst",
+        "email": "guest.analyst@qryptis.demo",
+        "name": "Guest Analyst",
+        "role": "Demo Guest Analyst",
+        "is_guest": True,
+        "provider": "guest_demo"
+    }
+    session["is_demo"] = True
+
+
+@app.route("/demo")
+@app.route("/login/demo")
+def demo_login():
+    setup_demo_session()
+    next_url = request.args.get("next")
+    # Avoid redirect loops to login/demo endpoints
+    if not next_url or next_url in ["/login", "/login/demo", "/demo"]:
+        target = request.args.get("target", "inventory")
+        if target == "home":
+            return redirect(url_for("home"))
+        elif target == "analyze":
+            return redirect(url_for("analyze"))
+        elif target == "scan":
+            return redirect(url_for("scan", view="results"))
+        return redirect(url_for("inventory"))
+    return redirect(next_url)
+
+
+@app.route("/demo/reset")
+def demo_reset():
+    setup_demo_session()
+    next_url = request.args.get("next") or request.referrer or url_for("inventory")
+    return redirect(next_url)
+
+
 @app.route("/logout")
 def logout():
     session.pop("user", None)
+    session.pop("is_demo", None)
+    session.pop("demo_code", None)
+    session.pop("last_scan_results", None)
+    session.pop("last_agility", None)
+    session.pop("last_roadmap", None)
     return redirect(url_for("home"))
 
 
@@ -488,6 +569,25 @@ def scan():
     forecast = None
     summary = None
     filename = "pasted_code.py"
+
+    if request.method == "GET" and session.get("is_demo"):
+        code_text = session.get("demo_code", "")
+        if request.args.get("view") == "results":
+            results = session.get("last_scan_results")
+            agility = session.get("last_agility")
+            roadmap = session.get("last_roadmap")
+            if results:
+                forecast = generate_risk_forecast(results)
+                summary = {
+                    "critical": sum(1 for r in results if r.get("severity") == "CRITICAL"),
+                    "high": sum(1 for r in results if r.get("severity") == "HIGH"),
+                    "medium": sum(1 for r in results if r.get("severity") == "MEDIUM"),
+                    "low": sum(1 for r in results if r.get("severity") == "LOW"),
+                    "deprecated": sum(1 for r in results if "DEPRECATED" in r.get("report", {}).get("verdict", "")),
+                    "at_risk": sum(1 for r in results if "AT RISK" in r.get("report", {}).get("verdict", "")),
+                    "safe": sum(1 for r in results if "OK" in r.get("report", {}).get("verdict", "") or "SAFE" in r.get("report", {}).get("verdict", ""))
+                }
+                filename = "messy_sample.py"
 
     if request.method == "POST":
         uploaded_file = request.files.get("code_file")

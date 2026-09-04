@@ -224,7 +224,7 @@ class TestFlaskWebRoutes(unittest.TestCase):
 
     def test_routes_status_codes(self):
         """Verify all major HTML pages return 200 OK."""
-        routes = ["/login", "/analyze", "/manual", "/scan", "/live-scan", "/database", "/qryptis", "/health"]
+        routes = ["/", "/login", "/analyze", "/manual", "/scan", "/live-scan", "/database", "/qryptis", "/health"]
         for route in routes:
             response = self.client.get(route)
             self.assertEqual(response.status_code, 200, f"Route {route} failed with status {response.status_code}")
@@ -884,7 +884,98 @@ key = RSA.generate(2048)
         self.assertIn("calls", res["formula"])
 
 
+class TestDemoLogin(unittest.TestCase):
+    """Test suite for 'Try Demo' guest login and sample data preloading."""
+
+    def setUp(self):
+        from app import app
+        app.config["TESTING"] = True
+        self.client = app.test_client()
+
+    def test_demo_login_default_redirect_and_data_loading(self):
+        """Verify /demo logs in as guest and pre-loads 47 sample assets and scan results."""
+        from inventory import GLOBAL_INVENTORY
+        with self.client as c:
+            response = c.get("/demo")
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.headers["Location"], "/inventory")
+
+            # Check session contents
+            from flask import session as flask_session
+            user = flask_session.get("user")
+            self.assertIsNotNone(user)
+            self.assertTrue(user.get("is_guest"))
+            self.assertEqual(user.get("username"), "guest_analyst")
+            self.assertEqual(user.get("name"), "Guest Analyst")
+            self.assertTrue(flask_session.get("is_demo"))
+
+            # Check pre-loaded scan findings and agility in session
+            self.assertIsNotNone(flask_session.get("last_scan_results"))
+            self.assertGreater(len(flask_session.get("last_scan_results")), 0)
+            self.assertIsNotNone(flask_session.get("last_agility"))
+            self.assertIsNotNone(flask_session.get("last_roadmap"))
+
+            # Check canonical 47 assets loaded in GLOBAL_INVENTORY
+            self.assertEqual(len(GLOBAL_INVENTORY.assets), 47)
+            summary = GLOBAL_INVENTORY.get_summary()
+            self.assertEqual(summary["total_assets"], 47)
+
+    def test_demo_login_with_custom_next(self):
+        """Verify /login/demo respects the next parameter."""
+        with self.client as c:
+            response = c.get("/login/demo?next=/analyze")
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.headers["Location"], "/analyze")
+
+            from flask import session as flask_session
+            self.assertTrue(flask_session.get("user", {}).get("is_guest"))
+
+    def test_demo_reset_reloads_inventory(self):
+        """Verify /demo/reset restores cleared sample inventory."""
+        from inventory import GLOBAL_INVENTORY
+        with self.client as c:
+            c.get("/demo")
+            GLOBAL_INVENTORY.clear()
+            self.assertEqual(len(GLOBAL_INVENTORY.assets), 0)
+
+            # Hit reset
+            resp = c.get("/demo/reset")
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(len(GLOBAL_INVENTORY.assets), 47)
+
+    def test_logout_clears_demo_state(self):
+        """Verify /logout clears user and demo session keys."""
+        with self.client as c:
+            c.get("/demo")
+            c.get("/logout")
+            from flask import session as flask_session
+            self.assertIsNone(flask_session.get("user"))
+            self.assertIsNone(flask_session.get("is_demo"))
+
+    def test_root_url_renders_home_without_login(self):
+        """Verify / renders the full landing page with Try Demo CTAs and video, without login wall."""
+        with self.client as c:
+            response = c.get("/")
+            self.assertEqual(response.status_code, 200)
+            # Confirm landing page content is returned, not login page
+            self.assertIn(b"Build your post-quantum", response.data)
+            self.assertIn(b"Try Live Demo", response.data)
+            self.assertIn(b"qryptis_demo.mp4", response.data)
+            self.assertIn(b"PORTFOLIO REVIEWER MODE", response.data)
+
+    def test_demo_login_with_scan_target(self):
+        """Verify /login/demo?target=scan redirects to the scanner results view."""
+        with self.client as c:
+            response = c.get("/login/demo?target=scan")
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.headers["Location"], "/scan?view=results")
+            from flask import session as flask_session
+            self.assertTrue(flask_session.get("is_demo"))
+            self.assertIsNotNone(flask_session.get("last_scan_results"))
+
+
 if __name__ == "__main__":
     unittest.main()
+
 
 

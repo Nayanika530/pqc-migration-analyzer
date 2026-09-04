@@ -583,6 +583,7 @@ class CryptoInventory:
 
         return {
             "total_assets": total,
+            "total_findings": total,
             "algorithm_breakdown": sorted_breakdown,
             "source_breakdown": source_breakdown,
             "quantum_vulnerable": quantum_vulnerable_count,
